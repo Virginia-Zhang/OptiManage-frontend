@@ -8,18 +8,18 @@
         <div class="login-right">
             <h2 class="login-title">欢迎登录</h2>
             <div class="login-form">
-                <el-form :model="form" label-width="80px">
-                    <el-form-item label="账号">
-                        <el-input v-model="form.username" />
+                <el-form :model="form" label-width="80px" :rules="rules" ref="ruleFormRef">
+                    <el-form-item label="账号" prop="loginAct">
+                        <el-input v-model="form.loginAct" />
                     </el-form-item>
-                    <el-form-item label="密码">
-                        <el-input v-model="form.password" type="password" />
-                    </el-form-item>
-                    <el-form-item>
-                        <el-button type="primary" @click="onSubmit" class="login-button">登录</el-button>
+                    <el-form-item label="密码" prop="loginPwd">
+                        <el-input v-model="form.loginPwd" type="password" />
                     </el-form-item>
                     <el-form-item>
-                        <el-checkbox v-model="checked">记住我</el-checkbox>
+                        <el-button type="primary" @click="onSubmit(ruleFormRef)" class="login-button">登录</el-button>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-checkbox v-model="form.rememberMe">记住我</el-checkbox>
                     </el-form-item>
                 </el-form>
             </div>
@@ -29,17 +29,36 @@
 
 <script setup>
 import { ref } from 'vue'
+import request from '../http/httpRequest'
 
 const form = ref({
-    username: '',
-    password: ''
+    loginAct: '',
+    loginPwd: '',
+    rememberMe: false
 })
 
-const onSubmit = () => {
-    console.log('submit!')
+const ruleFormRef = ref(null)
+
+const rules = {
+    loginAct: [
+        { required: true, message: '请输入账号', trigger: 'blur' },
+    ],
+    loginPwd: [
+        { required: true, message: '请输入密码', trigger: 'blur' },
+        { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
+    ]
 }
 
-const checked = ref(false)
+// login submit
+const onSubmit = (formEl) => {
+    if (!formEl) return
+    formEl.validate(async valid => {
+        if (valid) {
+            const res = await request.post('/api/login', form.value)
+        }
+    })
+    
+}
 
 
 </script>
