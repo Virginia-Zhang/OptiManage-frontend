@@ -1,5 +1,4 @@
 <template>
-     <!-- 请用element-plus帮我写一个左右布局的登录页面，左侧放图片，右侧放登录表单、按钮、记住我复选框 -->
     <div class="login-container">
         <div class="login-left">
             <img src="../assets/loginBox.svg" alt="OptiManage">
@@ -30,6 +29,7 @@
 <script setup>
 import { ref } from 'vue'
 import request from '../http/httpRequest'
+import { messageTip } from '../utils/utils'
 
 const form = ref({
     loginAct: '',
@@ -50,11 +50,19 @@ const rules = {
 }
 
 // login submit
+
 const onSubmit = (formEl) => {
     if (!formEl) return
     formEl.validate(async valid => {
         if (valid) {
             const res = await request.post('/api/login', form.value)
+            // Login success, a pop-up window shows to tell login is successful.
+            if(res.code === 200){
+                messageTip('success', '登录成功!')
+            }else {
+                // Login failed, a pop-up window shows to tell login is failed.
+                messageTip('error', '登录失败！请重试！')
+            }
         }
     })
     
