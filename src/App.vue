@@ -1,11 +1,9 @@
 <script setup>
-import LoginView from './views/LoginView.vue'
+import LoginView from "./views/LoginView.vue"
 </script>
 
 <template>
-  <LoginView />
+	<LoginView />
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
