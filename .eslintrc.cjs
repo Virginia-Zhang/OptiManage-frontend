@@ -29,7 +29,7 @@ module.exports = {
         "vue"
     ],
     "rules": {
-        // 取消对LF和CRLF的校验
+        // Cancel the verification for lf and crlf
 		'linebreak-style': [0, 'error', 'windows'],
     }
 }
