@@ -13,7 +13,6 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue"
 import { ElSubMenu, ElMenuItem, ElIcon } from "element-plus"
 import MenuItem from "./MenuItem.vue"
 

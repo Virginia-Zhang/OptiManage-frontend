@@ -19,6 +19,7 @@
 							type="primary"
 							@click="onSubmit(ruleFormRef)"
 							class="login-button"
+							:loading="submitBtnLoading"
 							>登录</el-button
 						>
 					</el-form-item>
@@ -33,8 +34,13 @@
 
 <script setup>
 import { ref } from "vue"
-import request from "../http/httpRequest"
+import { useRouter } from "vue-router"
 import { messageTip } from "../utils/utils"
+import api from "@/http/api"
+
+const router = useRouter()
+
+const submitBtnLoading = ref(false)
 
 const form = ref({
 	loginAct: "",
@@ -58,14 +64,22 @@ const onSubmit = formEl => {
 	if (!formEl) return
 	formEl.validate(async valid => {
 		if (valid) {
-			const res = await request.post("/api/login", form.value)
+			// Turn off the lock to prevent users from sending frequent login requests
+			submitBtnLoading.value = true
+			const res = await api.login(form.value)
 			// Login success, a pop-up window shows to tell login is successful.
 			if (res.code === 200) {
 				messageTip("success", "登录成功!")
+				// After 2 seconds, jump to the dashboard page
+				setTimeout(() => {
+					router.push("/dashboard")
+				}, 2000)
 			} else {
 				// Login failed, a pop-up window shows to tell login is failed.
 				messageTip("error", "登录失败！请重试！")
 			}
+			// Request completed, unlock
+			submitBtnLoading.value = false
 		}
 	})
 }

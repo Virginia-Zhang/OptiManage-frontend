@@ -10,7 +10,7 @@
 				background-color="#334157"
 				text-color="#fff"
 				:collapse-transition="false"
-				unique-opened="true"
+				:unique-opened="true"
 			>
 				<MenuItem
 					v-for="item in menuData"
@@ -22,8 +22,9 @@
 		</el-aside>
 		<el-container>
 			<el-header class="header">
+				<!-- 菜单折叠/展开按钮 -->
 				<el-button @click="toggleCollapse">
-          <!-- When the menu is collapsed, the menu icon is displayed, otherwise the left arrow icon is displayed. -->
+					<!-- When the menu is collapsed, the menu icon is displayed, otherwise the left arrow icon is displayed. -->
 					<el-icon v-if="isCollapsed">
 						<MenuIcon />
 					</el-icon>
@@ -31,7 +32,27 @@
 						<ArrowLeftIcon />
 					</el-icon>
 				</el-button>
-				<div>test test test</div>
+				<!-- 用户信息展示，下拉菜单 -->
+				<div class="user-menu">
+					<el-dropdown @command="handleCommand">
+						<span class="el-dropdown-link">
+							<el-icon style="margin-right: 8px"><User /></el-icon>
+							<span>{{ userName }}</span>
+							<el-icon class="arrow-icon"><ArrowLeftIcon /></el-icon>
+						</span>
+						<template #dropdown>
+							<el-dropdown-menu>
+								<el-dropdown-item command="profile">我的资料</el-dropdown-item>
+								<el-dropdown-item command="change-password"
+									>修改密码</el-dropdown-item
+								>
+								<el-dropdown-item command="logout" divided
+									>退出登录</el-dropdown-item
+								>
+							</el-dropdown-menu>
+						</template>
+					</el-dropdown>
+				</div>
 			</el-header>
 			<el-main class="main-content">
 				<div>Main</div>
@@ -46,7 +67,7 @@
 </template>
 
 <script setup>
-import { ref, shallowRef } from "vue"
+import { ref, shallowRef, onMounted } from "vue"
 import {
 	ElMenu,
 	ElButton,
@@ -56,6 +77,9 @@ import {
 	ElHeader,
 	ElMain,
 	ElFooter,
+	ElDropdown,
+	ElDropdownMenu,
+	ElDropdownItem,
 } from "element-plus"
 import {
 	Menu as MenuIcon,
@@ -70,9 +94,11 @@ import {
 	Avatar,
 } from "@element-plus/icons-vue"
 import MenuItem from "@/components/MenuItem.vue"
+import api from "@/http/api"
 
 const isCollapsed = ref(false)
 const activeMenu = ref("1")
+const userName = ref("test")
 
 // Use shallowRef to ensure that menuData is only responsive on the first layer, and will not perform responsiveness on the icon component object in depth to avoid system warnings.
 const menuData = shallowRef([
@@ -129,6 +155,30 @@ const menuData = shallowRef([
 const toggleCollapse = () => {
 	isCollapsed.value = !isCollapsed.value
 }
+
+const handleCommand = command => {
+	if (command === "logout") {
+		console.log("Logging out...")
+		// Handle logout logic here
+	} else if (command === "profile") {
+		console.log("Viewing profile...")
+		// Handle viewing profile
+	} else if (command === "change-password") {
+		console.log("Changing password...")
+		// Handle changing password
+	}
+}
+
+// 获取用户信息
+const fetchUserInfo = async () => {
+	const res = await api.getUserInfo()
+	console.log("userInfo: ", res)
+	// userName.value = res.name
+}
+
+onMounted(() => {
+	fetchUserInfo()
+})
 </script>
 
 <style scoped lang="scss">
@@ -148,7 +198,7 @@ const toggleCollapse = () => {
 		color: #fff;
 		text-align: center;
 	}
-  
+
 	.el-menu {
 		border-right: none;
 	}
@@ -179,6 +229,35 @@ const toggleCollapse = () => {
 
 	.footer-text {
 		font-size: 14px;
+	}
+}
+
+.user-menu {
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+
+	.el-dropdown-link {
+		display: flex;
+		align-items: center;
+		color: #333;
+		text-decoration: none;
+		outline: none;
+
+		.arrow-icon {
+			transition: opacity 0.5s ease;
+			opacity: 0;
+			margin-left: 8px;
+			transform: rotate(-90deg);
+		}
+	}
+
+	.el-dropdown-link:hover {
+		color: #409eff;
+
+		.arrow-icon {
+			opacity: 1;
+		}
 	}
 }
 </style>
