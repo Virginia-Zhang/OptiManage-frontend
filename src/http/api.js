@@ -1,15 +1,15 @@
 /**
- * api接口管理
+ * manage api interface
  */
 
 import request from "@/http/httpRequest"
 
 export default {
-	// 登录
+	// Log in
 	async login(data) {
 		return await request.post("/login", data)
 	},
-	// 获取用户信息
+	// Get user information
 	async getUserInfo() {
 		return await request.get("/user/info")
 	},

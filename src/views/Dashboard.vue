@@ -169,11 +169,12 @@ const handleCommand = command => {
 	}
 }
 
-// 获取用户信息
+// get user info
 const fetchUserInfo = async () => {
 	const res = await api.getUserInfo()
-	console.log("userInfo: ", res)
-	// userName.value = res.name
+	if (res.code === 200) {
+		userName.value = res.data.user.name
+	}
 }
 
 onMounted(() => {

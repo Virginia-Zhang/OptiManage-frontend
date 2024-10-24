@@ -3,8 +3,6 @@ import { createRouter, createWebHistory } from "vue-router"
 import storage from "@/utils/storage"
 import { messageTip } from "../utils/utils"
 
-const token = storage.getItem("token", "local") || storage.getItem("token", "session")
-
 const router = createRouter({
 	history: createWebHistory(),
 	routes: [
@@ -17,6 +15,8 @@ const router = createRouter({
 			},
 			// The route is exclusively guarded. After logging in, you are not allowed to access the login page again.
 			beforeEnter: (to, from) => {
+				const token =
+					storage.getItem("token", "local") || storage.getItem("token", "session")
 				if (token && to.path == "/") {
 					messageTip("warning", "您已登录，请勿重复登录")
 					setTimeout(() => {

@@ -1,6 +1,8 @@
 import axios from "axios"
 import config from "@/config"
 import storage from "@/utils/storage"
+import { messageTip } from "@/utils/utils"
+import router from "@/router"
 
 const AxiosUtil = axios.create({
 	baseURL: config.baseApi,
@@ -37,30 +39,22 @@ const request = {
 // response interceptor
 AxiosUtil.interceptors.response.use(
 	response => {
+		// When token-related problems occur, show the message "Token is invalid. Please log in again", then clear the token, and jump to the login page in 2 seconds.
+		if (response.data.code > 900) {
+			messageTip("error", "Token无效，请重新登录！")
+			storage.removeItem("token", "local")
+			storage.removeItem("token", "session")
+			setTimeout(() => {
+				router.push("/")
+			}, 2000)
+			return
+		}
 		return response.data
 	},
 	error => {
 		if (error.response) {
-			// The server responded, but the status code was not 2xx
-			const { status, data } = error.response
-			switch (status) {
-				case 401:
-					console.error("未授权，请重新登录。")
-					break
-				case 403:
-					console.error("拒绝访问。")
-					break
-				case 404:
-					console.error("请求错误，未找到该资源。")
-					break
-				case 500:
-					console.error("服务器错误，请稍后再试。")
-					break
-				default:
-					console.error(`连接错误${status}`)
-			}
 			// Prompt based on the error information returned by the backend
-			return Promise.reject(data)
+			return Promise.reject(error.response.data)
 		} else {
 			// Handle unresponsive errors, such as network errors
 			console.error("网络连接错误，请稍后再试。")
@@ -69,13 +63,12 @@ AxiosUtil.interceptors.response.use(
 	}
 )
 
-// 从storage中获取token
-const token = storage.getItem("token", "local") || storage.getItem("token", "session")
-
-// 请求拦截器
+// request interceptor
 AxiosUtil.interceptors.request.use(
 	config => {
 		const { headers } = config
+		// Get token from storage
+		const token = storage.getItem("token", "local") || storage.getItem("token", "session")
 		if (token) {
 			if (!headers.Authorization) headers.Authorization = `Bearer ${token}`
 		}
