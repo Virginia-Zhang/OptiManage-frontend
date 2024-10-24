@@ -1,7 +1,9 @@
 import axios from "axios"
+import config from "@/config"
+import storage from "@/utils/storage"
 
 const AxiosUtil = axios.create({
-	baseURL: "http://localhost:8088",
+	baseURL: config.baseApi,
 	timeout: 10000,
 	// withCredentials: true
 })
@@ -64,6 +66,23 @@ AxiosUtil.interceptors.response.use(
 			console.error("网络连接错误，请稍后再试。")
 			return Promise.reject({ message: "网络连接错误，请稍后再试。" })
 		}
+	}
+)
+
+// 从storage中获取token
+const token = storage.getItem("token", "local") || storage.getItem("token", "session")
+
+// 请求拦截器
+AxiosUtil.interceptors.request.use(
+	config => {
+		const { headers } = config
+		if (token) {
+			if (!headers.Authorization) headers.Authorization = `Bearer ${token}`
+		}
+		return config
+	},
+	error => {
+		return Promise.reject(error)
 	}
 )
 

@@ -1,44 +1,44 @@
 {
-  "name": "crm-front",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint src/**/*.{js,ts,jsx,tsx,vue}",
-    "lint:fix": "eslint src/**/*.{js,ts,jsx,tsx,vue} --fix",
-    "format": "prettier --write src/**/*.{js,ts,jsx,tsx,vue}",
-    "prepare": "husky install"
-  },
-  "dependencies": {
-    "@element-plus/icons-vue": "^2.3.1",
-    "axios": "^1.7.7",
-    "crm-front": "file:",
-    "element-plus": "^2.8.5",
-    "vue": "^3.5.10",
-    "vue-router": "^4.4.5"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^5.1.4",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.1.2",
-    "eslint-plugin-vue": "^9.19.2",
-    "husky": "^9.1.6",
-    "lint-staged": "^15.2.10",
-    "prettier": "^3.1.1",
-    "sass-embedded": "^1.80.2",
-    "vite": "^5.4.8"
-  },
-  "lint-staged": {
-    "*.{js,vue}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{css,scss}": [
-      "prettier --write"
-    ]
-  }
+	"name": "crm-front",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite --mode dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"lint": "eslint src/**/*.{js,ts,jsx,tsx,vue}",
+		"lint:fix": "eslint src/**/*.{js,ts,jsx,tsx,vue} --fix",
+		"format": "prettier --write src/**/*.{js,ts,jsx,tsx,vue}",
+		"prepare": "husky install"
+	},
+	"dependencies": {
+		"@element-plus/icons-vue": "^2.3.1",
+		"axios": "^1.7.7",
+		"crm-front": "file:",
+		"element-plus": "^2.8.5",
+		"vue": "^3.5.10",
+		"vue-router": "^4.4.5"
+	},
+	"devDependencies": {
+		"@vitejs/plugin-vue": "^5.1.4",
+		"eslint": "^8.56.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-prettier": "^5.1.2",
+		"eslint-plugin-vue": "^9.19.2",
+		"husky": "^9.1.6",
+		"lint-staged": "^15.2.10",
+		"prettier": "^3.1.1",
+		"sass-embedded": "^1.80.2",
+		"vite": "^5.4.8"
+	},
+	"lint-staged": {
+		"*.{js,vue}": [
+			"eslint --fix",
+			"prettier --write"
+		],
+		"*.{css,scss}": [
+			"prettier --write"
+		]
+	}
 }

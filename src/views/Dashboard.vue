@@ -245,10 +245,10 @@ onMounted(() => {
 		outline: none;
 
 		.arrow-icon {
-			transition: opacity 0.5s ease;
+			transition: all 0.5s ease;
 			opacity: 0;
 			margin-left: 8px;
-			transform: rotate(-90deg);
+			transform: rotate(0deg);
 		}
 	}
 
@@ -257,6 +257,7 @@ onMounted(() => {
 
 		.arrow-icon {
 			opacity: 1;
+			transform: rotate(-90deg);
 		}
 	}
 }

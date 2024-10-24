@@ -37,6 +37,7 @@ import { ref } from "vue"
 import { useRouter } from "vue-router"
 import { messageTip } from "../utils/utils"
 import api from "@/http/api"
+import storage from "@/utils/storage"
 
 const router = useRouter()
 
@@ -70,6 +71,12 @@ const onSubmit = formEl => {
 			// Login success, a pop-up window shows to tell login is successful.
 			if (res.code === 200) {
 				messageTip("success", "登录成功!")
+				// Save the login information(token string) to local storage or session storage
+				if (form.value.rememberMe) {
+					storage.setItem("token", res.data, "local")
+				} else {
+					storage.setItem("token", res.data, "session")
+				}
 				// After 2 seconds, jump to the dashboard page
 				setTimeout(() => {
 					router.push("/dashboard")
