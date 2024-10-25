@@ -13,4 +13,8 @@ export default {
 	async getUserInfo() {
 		return await request.get("/user/info")
 	},
+	// logout
+	async logout() {
+		return await request.post("/logout")
+	},
 }

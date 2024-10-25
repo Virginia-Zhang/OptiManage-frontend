@@ -68,6 +68,7 @@
 
 <script setup>
 import { ref, shallowRef, onMounted } from "vue"
+import { useRouter } from "vue-router"
 import {
 	ElMenu,
 	ElButton,
@@ -80,6 +81,7 @@ import {
 	ElDropdown,
 	ElDropdownMenu,
 	ElDropdownItem,
+	ElMessageBox,
 } from "element-plus"
 import {
 	Menu as MenuIcon,
@@ -95,10 +97,13 @@ import {
 } from "@element-plus/icons-vue"
 import MenuItem from "@/components/MenuItem.vue"
 import api from "@/http/api"
+import { messageTip, removeToken } from "@/utils/utils"
+
+const router = useRouter()
 
 const isCollapsed = ref(false)
 const activeMenu = ref("1")
-const userName = ref("test")
+const userName = ref("")
 
 // Use shallowRef to ensure that menuData is only responsive on the first layer, and will not perform responsiveness on the icon component object in depth to avoid system warnings.
 const menuData = shallowRef([
@@ -156,10 +161,34 @@ const toggleCollapse = () => {
 	isCollapsed.value = !isCollapsed.value
 }
 
-const handleCommand = command => {
+const handleCommand = async command => {
 	if (command === "logout") {
-		console.log("Logging out...")
-		// Handle logout logic here
+		// 向后端发送logout请求，删除redis中的token
+		const res = await api.logout()
+		if (res.code === 200) {
+			// Logout success, a pop-up window shows to tell logout is successful.
+			messageTip("success", "退出成功!")
+			// 清除localStorage或sessionStorage里的token
+			removeToken()
+			// After 2 seconds, jump to the login page
+			setTimeout(() => {
+				router.push("/")
+			}, 2000)
+		} else {
+			// 退出异常，弹框询问用户是否需要强制退出，如果需要，清除localStorage或sessionStorage里的token，并跳转登录页
+			ElMessageBox.confirm("退出异常，是否需要强制退出？", "确认是否要强制退出", {
+				confirmButtonText: "确定",
+				cancelButtonText: "取消",
+				type: "warning",
+			}).then(() => {
+				// 确定强制退出，清除localStorage或sessionStorage里的token，再跳转至登录页
+				removeToken()
+				// After 2 seconds, jump to the login page
+				setTimeout(() => {
+					router.push("/")
+				}, 2000)
+			})
+		}
 	} else if (command === "profile") {
 		console.log("Viewing profile...")
 		// Handle viewing profile

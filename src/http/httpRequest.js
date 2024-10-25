@@ -1,7 +1,7 @@
 import axios from "axios"
 import config from "@/config"
 import storage from "@/utils/storage"
-import { messageTip } from "@/utils/utils"
+import { messageTip, removeToken } from "@/utils/utils"
 import router from "@/router"
 
 const AxiosUtil = axios.create({
@@ -42,8 +42,7 @@ AxiosUtil.interceptors.response.use(
 		// When token-related problems occur, show the message "Token is invalid. Please log in again", then clear the token, and jump to the login page in 2 seconds.
 		if (response.data.code > 900) {
 			messageTip("error", "Token无效，请重新登录！")
-			storage.removeItem("token", "local")
-			storage.removeItem("token", "session")
+			removeToken()
 			setTimeout(() => {
 				router.push("/")
 			}, 2000)
@@ -54,11 +53,11 @@ AxiosUtil.interceptors.response.use(
 	error => {
 		if (error.response) {
 			// Prompt based on the error information returned by the backend
-			return Promise.reject(error.response.data)
+			return Promise.reject(new Error(JSON.stringify(error.response.data)))
 		} else {
 			// Handle unresponsive errors, such as network errors
 			console.error("网络连接错误，请稍后再试。")
-			return Promise.reject({ message: "网络连接错误，请稍后再试。" })
+			return Promise.reject(new Error("网络连接错误，请稍后再试。"))
 		}
 	}
 )

@@ -18,10 +18,15 @@ const router = createRouter({
 				const token =
 					storage.getItem("token", "local") || storage.getItem("token", "session")
 				if (token && to.path == "/") {
-					messageTip("warning", "您已登录，请勿重复登录")
-					setTimeout(() => {
-						router.back()
-					}, 2000)
+					// 有上一页的话，返回上一页，没有上一页的话(刚打开系统)，直接跳转至首页
+					if (window.history.length > 1) {
+						messageTip("warning", "您已登录，请勿重复登录")
+						setTimeout(() => {
+							router.back()
+						}, 2000)
+					} else {
+						router.push("/dashboard")
+					}
 					return false
 				}
 			},
