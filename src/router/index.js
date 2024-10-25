@@ -18,7 +18,7 @@ const router = createRouter({
 				const token =
 					storage.getItem("token", "local") || storage.getItem("token", "session")
 				if (token && to.path == "/") {
-					// 有上一页的话，返回上一页，没有上一页的话(刚打开系统)，直接跳转至首页
+					// If there is a previous page, return to the previous page. If there is no previous page (just open the system), jump directly to the home page.
 					if (window.history.length > 1) {
 						messageTip("warning", "您已登录，请勿重复登录")
 						setTimeout(() => {

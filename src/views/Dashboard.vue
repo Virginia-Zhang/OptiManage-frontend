@@ -22,7 +22,7 @@
 		</el-aside>
 		<el-container>
 			<el-header class="header">
-				<!-- 菜单折叠/展开按钮 -->
+				<!-- Menu collapse/expand button -->
 				<el-button @click="toggleCollapse">
 					<!-- When the menu is collapsed, the menu icon is displayed, otherwise the left arrow icon is displayed. -->
 					<el-icon v-if="isCollapsed">
@@ -32,7 +32,7 @@
 						<ArrowLeftIcon />
 					</el-icon>
 				</el-button>
-				<!-- 用户信息展示，下拉菜单 -->
+				<!-- User information display, drop-down menu -->
 				<div class="user-menu">
 					<el-dropdown @command="handleCommand">
 						<span class="el-dropdown-link">
@@ -163,25 +163,25 @@ const toggleCollapse = () => {
 
 const handleCommand = async command => {
 	if (command === "logout") {
-		// 向后端发送logout请求，删除redis中的token
+		// Send a logout request to the backend and delete the token in redis
 		const res = await api.logout()
 		if (res.code === 200) {
 			// Logout success, a pop-up window shows to tell logout is successful.
 			messageTip("success", "退出成功!")
-			// 清除localStorage或sessionStorage里的token
+			// Clear tokens in localStorage or sessionStorage
 			removeToken()
 			// After 2 seconds, jump to the login page
 			setTimeout(() => {
 				router.push("/")
 			}, 2000)
 		} else {
-			// 退出异常，弹框询问用户是否需要强制退出，如果需要，清除localStorage或sessionStorage里的token，并跳转登录页
+			// In case of exit exception, a pop-up box will ask the user whether he or she needs to force exit. If necessary, clear the token in local storage or session storage and jump to the login page.
 			ElMessageBox.confirm("退出异常，是否需要强制退出？", "确认是否要强制退出", {
 				confirmButtonText: "确定",
 				cancelButtonText: "取消",
 				type: "warning",
 			}).then(() => {
-				// 确定强制退出，清除localStorage或sessionStorage里的token，再跳转至登录页
+				// Confirm to force exit, clear the token in local storage or session storage, and then jump to the login page.
 				removeToken()
 				// After 2 seconds, jump to the login page
 				setTimeout(() => {
