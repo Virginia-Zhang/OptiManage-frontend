@@ -3,6 +3,7 @@ import config from "@/config"
 import storage from "@/utils/storage"
 import { messageTip, removeToken } from "@/utils/utils"
 import router from "@/router"
+import { el } from "element-plus/es/locales.mjs"
 
 const AxiosUtil = axios.create({
 	baseURL: config.baseApi,
@@ -68,9 +69,12 @@ AxiosUtil.interceptors.request.use(
 		const { headers } = config
 		// Get token from storage
 		const token = storage.getItem("token", "local") || storage.getItem("token", "session")
+		// Set token into header
 		if (token) {
 			if (!headers.Authorization) headers.Authorization = `Bearer ${token}`
 		}
+		// Set rememberMe into header
+		headers.rememberMe = storage.getItem("token", "local") ? "true" : "false"
 		return config
 	},
 	error => {
