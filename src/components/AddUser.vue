@@ -1,0 +1,132 @@
+<!-- Add user popup component -->
+<template>
+	<el-dialog title="添加用户" v-model="dialogVisible" width="60%" :before-close="handleClose">
+		<!-- form -->
+		<el-form :model="addUserForm" label-width="100px" ref="addUserFormRef" :rules="rules">
+			<el-form-item label="账号" prop="loginAct">
+				<!-- Turn off autofill -->
+				<el-input
+					v-model="addUserForm.loginAct"
+					readonly
+					@focus="$event.target.removeAttribute('readonly')"
+					placeholder="请输入账号"
+				/>
+			</el-form-item>
+			<el-form-item label="密码" prop="loginPwd">
+				<!-- Turn off autofill -->
+				<el-input
+					v-model="addUserForm.loginPwd"
+					type="password"
+					readonly
+					@focus="$event.target.removeAttribute('readonly')"
+					placeholder="请输入密码"
+				/>
+			</el-form-item>
+			<el-form-item label="姓名" prop="name">
+				<el-input v-model="addUserForm.name" placeholder="请输入姓名" />
+			</el-form-item>
+			<el-form-item label="手机" prop="phone">
+				<el-input v-model="addUserForm.phone" placeholder="请输入手机" />
+			</el-form-item>
+			<el-form-item label="邮箱" prop="email">
+				<el-input v-model="addUserForm.email" placeholder="请输入邮箱" />
+			</el-form-item>
+		</el-form>
+		<!-- Cancel and OK buttons -->
+		<template #footer>
+			<div class="dialog-footer">
+				<el-button @click="handleCancel(addUserFormRef)">取消</el-button>
+				<el-button type="primary" @click="addUser" :disabled="addUserLoading"
+					>确定</el-button
+				>
+			</div>
+		</template>
+	</el-dialog>
+</template>
+
+<script setup>
+import { ref, reactive } from "vue"
+
+import api from "@/http/api"
+import { messageTip } from "@/utils/utils"
+
+// Variables that control the display and hiding of pop-up windows
+const dialogVisible = ref(false)
+// form reference
+const addUserFormRef = ref(null)
+// form data
+const addUserForm = ref({
+	loginAct: "",
+	loginPwd: "",
+	name: "",
+	phone: "",
+	email: "",
+})
+// Form validation rules
+const rules = reactive({
+	loginAct: [{ required: true, message: "请输入账号", trigger: "blur" }],
+	loginPwd: [
+		{ required: true, message: "请输入密码", trigger: "blur" },
+		{ min: 6, max: 16, message: "长度在6-16位之间", trigger: "blur" },
+	],
+	name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
+	phone: [{ required: true, message: "请输入手机号", trigger: "blur" }],
+	email: [
+		{ required: true, message: "请输入邮箱", trigger: "blur" },
+		{ type: "email", message: "请输入正确的邮箱地址", trigger: ["blur", "change"] },
+	],
+})
+
+// Control pop-up window display
+const showAddUserDialog = () => {
+	dialogVisible.value = !dialogVisible.value
+}
+// Expose showAddUserDialog function to parent component
+defineExpose({
+	showAddUserDialog,
+})
+// Obtain getUserList method from the parent component
+const emits = defineEmits(["getUserList"])
+// Add state control to confirm button
+const addUserLoading = ref(false)
+
+// Add user
+const addUser = () => {
+	// Verify whether form data is legal
+	addUserFormRef.value.validate(async valid => {
+		if (!valid) return
+		addUserLoading.value = true
+		const res = await api.addUser(addUserForm.value)
+		if (res.code === 200 && res.data == 1) {
+			// Added successfully, close pop-up window, reset form data, and then refresh user list data
+			messageTip("success", "添加成功!")
+			showAddUserDialog()
+			addUserFormRef.value.resetFields()
+			emits("getUserList")
+		} else {
+			messageTip("error", "添加失败!请重试！")
+		}
+		addUserLoading.value = false
+	})
+}
+
+const handleCancel = formEl => {
+	// Reset form data
+	formEl.resetFields()
+	// Close pop-up window
+	showAddUserDialog()
+}
+
+const handleClose = done => {
+	// Reset form data
+	addUserFormRef.value.resetFields()
+	// Close pop-up window
+	done()
+}
+</script>
+
+<style scoped lang="scss">
+.dialog-footer button:first-child {
+	margin-right: 10px;
+}
+</style>

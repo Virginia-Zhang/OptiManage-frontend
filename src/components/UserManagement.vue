@@ -19,8 +19,10 @@
 		<el-table-column property="email" label="邮箱" width="220" show-overflow-tooltip />
 		<el-table-column property="createTime" label="创建时间" width="150" show-overflow-tooltip />
 		<el-table-column fixed="right" label="操作" min-width="200">
-			<template #default>
-				<el-button type="primary" size="small">详情</el-button>
+			<template #default="scope">
+				<el-button type="primary" size="small" @click="showUserDetails(scope.row)"
+					>详情</el-button
+				>
 				<el-button type="success" size="small">编辑</el-button>
 				<el-button type="danger" size="small">删除</el-button>
 			</template>
@@ -34,6 +36,10 @@
 		:current-page="currentPage"
 		@current-change="handleCurrentChange"
 	/>
+	<!-- User details dialog -->
+	<UserDetails ref="userDetailsRef" :user="user" />
+	<!-- Add user dialog -->
+	<AddUser ref="addUserRef" @getUserList="getUserList" />
 </template>
 
 <script setup>
@@ -41,11 +47,21 @@ import { ref, onMounted } from "vue"
 import { Plus, Delete } from "@element-plus/icons-vue"
 import api from "@/http/api"
 
+import UserDetails from "@/components/UserDetails.vue"
+import AddUser from "@/components/AddUser.vue"
+
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
 const userList = ref([])
+
+// The user object passed to  UserDetails dialog
+const user = ref({})
+// Ref to UserDetails dialog
+const userDetailsRef = ref(null)
+// Ref to AddUser dialog
+const addUserRef = ref(null)
 
 const handleCurrentChange = val => {
 	currentPage.value = val
@@ -67,6 +83,22 @@ const getUserList = async () => {
 }
 
 const handleSelectionChange = val => {}
+
+// Show user details dialog
+const showUserDetails = row => {
+	if (!row) return
+	if (userDetailsRef.value) {
+		user.value = row
+		userDetailsRef.value.toggleShowDialog()
+	}
+}
+
+// Show add user dialog
+const addUser = () => {
+	if (addUserRef.value) {
+		addUserRef.value.showAddUserDialog()
+	}
+}
 
 onMounted(() => {
 	getUserList()

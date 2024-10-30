@@ -3,7 +3,6 @@ import config from "@/config"
 import storage from "@/utils/storage"
 import { messageTip, removeToken } from "@/utils/utils"
 import router from "@/router"
-import { el } from "element-plus/es/locales.mjs"
 
 const AxiosUtil = axios.create({
 	baseURL: config.baseApi,
