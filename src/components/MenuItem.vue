@@ -16,12 +16,10 @@
 import { ElSubMenu, ElMenuItem, ElIcon } from "element-plus"
 import MenuItem from "./MenuItem.vue"
 
-const props = defineProps({
+defineProps({
 	menuItem: {
 		type: Object,
 		required: true,
 	},
 })
 </script>
-
-<style scoped></style>

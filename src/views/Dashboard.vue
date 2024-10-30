@@ -11,6 +11,7 @@
 				text-color="#fff"
 				:collapse-transition="false"
 				:unique-opened="true"
+				:router="true"
 			>
 				<MenuItem
 					v-for="item in menuDataList"
@@ -55,7 +56,7 @@
 				</div>
 			</el-header>
 			<el-main class="main-content">
-				<div>Main</div>
+				<router-view />
 			</el-main>
 			<el-footer class="footer">
 				<div class="footer-text">
@@ -92,7 +93,7 @@ import { menuData } from "@/constants/constants"
 const router = useRouter()
 
 const isCollapsed = ref(false)
-const activeMenu = ref("1")
+const activeMenu = ref("")
 const userName = ref("")
 // Logout button state control
 const logoutLoading = ref(false)

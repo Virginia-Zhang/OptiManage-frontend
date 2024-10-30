@@ -17,4 +17,8 @@ export default {
 	async logout() {
 		return await request.post("/logout")
 	},
+	// Query user list by page
+	async getUserList(params) {
+		return await request.get("/user/list", params)
+	},
 }

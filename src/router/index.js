@@ -38,6 +38,16 @@ const router = createRouter({
 			meta: {
 				title: "首页",
 			},
+			children: [
+				{
+					path: "user",
+					name: "user",
+					component: () => import("@/components/UserManagement.vue"),
+					meta: {
+						title: "用户管理",
+					},
+				},
+			],
 		},
 		// 404 page
 		{
@@ -51,7 +61,7 @@ const router = createRouter({
 	],
 })
 
-// TODO: Route guard, determine whether the route the user wants to access exists, if it exists, allow access, and modify the page title, otherwise jump to the 404 page
+// Route guard, determine whether the route the user wants to access exists; if exists, allow access, and modify the page title, otherwise jump to the 404 page
 router.beforeEach((to, from) => {
 	if (router.hasRoute(to.name)) {
 		document.title = to.meta.title

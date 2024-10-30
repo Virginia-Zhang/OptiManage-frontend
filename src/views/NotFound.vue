@@ -1,4 +1,4 @@
-// 404 Not Found page
+<!-- 404 Not Found page -->
 <template>
 	<div class="not-found-page">
 		<el-container class="content-wrapper">
