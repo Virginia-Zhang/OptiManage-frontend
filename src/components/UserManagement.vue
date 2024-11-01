@@ -17,6 +17,13 @@
 		<el-table-column property="name" label="姓名" width="180" show-overflow-tooltip />
 		<el-table-column property="phone" label="手机" width="180" show-overflow-tooltip />
 		<el-table-column property="email" label="邮箱" width="220" show-overflow-tooltip />
+		<el-table-column
+			property="region"
+			label="地区"
+			width="120"
+			:formatter="regionFormatter"
+			show-overflow-tooltip
+		/>
 		<el-table-column property="createTime" label="创建时间" width="150" show-overflow-tooltip />
 		<el-table-column fixed="right" label="操作" min-width="200">
 			<template #default="scope">
@@ -44,11 +51,13 @@
 
 <script setup>
 import { ref, onMounted } from "vue"
-import { Plus, Delete } from "@element-plus/icons-vue"
-import api from "@/http/api"
 
+import api from "@/http/api"
 import UserDetails from "@/components/UserDetails.vue"
 import AddUser from "@/components/AddUser.vue"
+import { regionData } from "@/constants/constants"
+
+import { Plus, Delete } from "@element-plus/icons-vue"
 
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -98,6 +107,12 @@ const addUser = () => {
 	if (addUserRef.value) {
 		addUserRef.value.showAddUserDialog()
 	}
+}
+
+// Format region data
+const regionFormatter = (row, column, cellValue, index) => {
+	const region = regionData.find(item => item.value === cellValue)
+	return region ? region.name : "未知地区"
 }
 
 onMounted(() => {

@@ -12,16 +12,6 @@
 					placeholder="请输入账号"
 				/>
 			</el-form-item>
-			<el-form-item label="密码" prop="loginPwd">
-				<!-- Turn off autofill -->
-				<el-input
-					v-model="addUserForm.loginPwd"
-					type="password"
-					readonly
-					@focus="$event.target.removeAttribute('readonly')"
-					placeholder="请输入密码"
-				/>
-			</el-form-item>
 			<el-form-item label="姓名" prop="name">
 				<el-input v-model="addUserForm.name" placeholder="请输入姓名" />
 			</el-form-item>
@@ -30,6 +20,20 @@
 			</el-form-item>
 			<el-form-item label="邮箱" prop="email">
 				<el-input v-model="addUserForm.email" placeholder="请输入邮箱" />
+			</el-form-item>
+			<el-form-item label="地区" prop="region">
+				<!-- 遍历regionData，生成option -->
+				<el-select v-model="addUserForm.region" placeholder="请选择地区" clearable>
+					<template #prefix>
+						<el-icon><MapLocation /></el-icon>
+					</template>
+					<el-option
+						v-for="item in regionData"
+						:key="item.value"
+						:label="item.name"
+						:value="item.value"
+					/>
+				</el-select>
 			</el-form-item>
 		</el-form>
 		<!-- Cancel and OK buttons -->
@@ -49,6 +53,9 @@ import { ref, reactive } from "vue"
 
 import api from "@/http/api"
 import { messageTip } from "@/utils/utils"
+import { regionData } from "@/constants/constants"
+
+import { MapLocation } from "@element-plus/icons-vue"
 
 // Variables that control the display and hiding of pop-up windows
 const dialogVisible = ref(false)
@@ -57,24 +64,21 @@ const addUserFormRef = ref(null)
 // form data
 const addUserForm = ref({
 	loginAct: "",
-	loginPwd: "",
 	name: "",
 	phone: "",
 	email: "",
+	region: 1,
 })
 // Form validation rules
 const rules = reactive({
 	loginAct: [{ required: true, message: "请输入账号", trigger: "blur" }],
-	loginPwd: [
-		{ required: true, message: "请输入密码", trigger: "blur" },
-		{ min: 6, max: 16, message: "长度在6-16位之间", trigger: "blur" },
-	],
 	name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
 	phone: [{ required: true, message: "请输入手机号", trigger: "blur" }],
 	email: [
 		{ required: true, message: "请输入邮箱", trigger: "blur" },
 		{ type: "email", message: "请输入正确的邮箱地址", trigger: ["blur", "change"] },
 	],
+	region: [{ required: true, message: "请选择地区", trigger: "blur" }],
 })
 
 // Control pop-up window display

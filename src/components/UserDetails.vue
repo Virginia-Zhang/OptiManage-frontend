@@ -7,6 +7,9 @@
 			<el-descriptions-item label="姓名">{{ user.name }}</el-descriptions-item>
 			<el-descriptions-item label="手机">{{ user.phone }}</el-descriptions-item>
 			<el-descriptions-item label="邮箱">{{ user.email }}</el-descriptions-item>
+			<el-descriptions-item label="地区">{{
+				convertRegionToText(user.region)
+			}}</el-descriptions-item>
 			<el-descriptions-item label="账号未过期">{{
 				user.accountNoExpired ? "是" : "否"
 			}}</el-descriptions-item>
@@ -33,6 +36,8 @@
 <script setup>
 import { ref } from "vue"
 
+import { regionData } from "@/constants/constants"
+
 defineProps({
 	// Receive user information passed by the parent component
 	user: Object,
@@ -52,5 +57,15 @@ defineExpose({ toggleShowDialog })
 // Close dialog
 const handleClose = () => {
 	dialogVisible.value = false
+}
+
+// 把region的数值转换成对应的文本，显示在页面上
+const convertRegionToText = region => {
+	// 遍历regionData，找到对应的文本，返回
+	for (const item of regionData) {
+		if (item.value === region) {
+			return item.name
+		}
+	}
 }
 </script>
