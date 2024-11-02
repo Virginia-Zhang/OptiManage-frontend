@@ -30,7 +30,9 @@
 				<el-button type="primary" size="small" @click="showUserDetails(scope.row)"
 					>详情</el-button
 				>
-				<el-button type="success" size="small">编辑</el-button>
+				<el-button type="success" size="small" @click="showEditUser(scope.row)"
+					>编辑</el-button
+				>
 				<el-button type="danger" size="small">删除</el-button>
 			</template>
 		</el-table-column>
@@ -47,6 +49,8 @@
 	<UserDetails ref="userDetailsRef" :user="user" />
 	<!-- Add user dialog -->
 	<AddUser ref="addUserRef" @getUserList="getUserList" />
+	<!-- Edit user dialog -->
+	<EditUser ref="editUserRef" :user="user" @getUserList="getUserList" />
 </template>
 
 <script setup>
@@ -56,6 +60,7 @@ import api from "@/http/api"
 import UserDetails from "@/components/UserDetails.vue"
 import AddUser from "@/components/AddUser.vue"
 import { regionData } from "@/constants/constants"
+import EditUser from "@/components/EditUser.vue"
 
 import { Plus, Delete } from "@element-plus/icons-vue"
 
@@ -65,12 +70,14 @@ const total = ref(0)
 
 const userList = ref([])
 
-// The user object passed to  UserDetails dialog
+// The user object passed to UserDetails and EditUser dialog
 const user = ref({})
 // Ref to UserDetails dialog
 const userDetailsRef = ref(null)
 // Ref to AddUser dialog
 const addUserRef = ref(null)
+// Ref to EditUser dialog
+const editUserRef = ref(null)
 
 const handleCurrentChange = val => {
 	currentPage.value = val
@@ -113,6 +120,16 @@ const addUser = () => {
 const regionFormatter = (row, column, cellValue, index) => {
 	const region = regionData.find(item => item.value === cellValue)
 	return region ? region.name : "未知地区"
+}
+
+// Show edit user dialog
+const showEditUser = row => {
+	if (!row) return
+	console.log("row: ", row)
+	if (editUserRef.value) {
+		user.value = row
+		editUserRef.value.showEditUserDialog()
+	}
 }
 
 onMounted(() => {

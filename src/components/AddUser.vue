@@ -22,7 +22,7 @@
 				<el-input v-model="addUserForm.email" placeholder="请输入邮箱" />
 			</el-form-item>
 			<el-form-item label="地区" prop="region">
-				<!-- 遍历regionData，生成option -->
+				<!--Traverse regionData and generate options -->
 				<el-select v-model="addUserForm.region" placeholder="请选择地区" clearable>
 					<template #prefix>
 						<el-icon><MapLocation /></el-icon>

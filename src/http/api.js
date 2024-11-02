@@ -23,6 +23,10 @@ export default {
 	},
 	// Add user
 	async addUser(data) {
+		return await request.post("/user/", data)
+	},
+	// Edit user
+	async editUser(data) {
 		return await request.put("/user/", data)
 	},
 }

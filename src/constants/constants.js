@@ -60,7 +60,6 @@ export const menuData = [
 	},
 ]
 
-// 地区数组
 export const regionData = [
 	{ name: "中国", value: 1 },
 	{ name: "日本", value: 2 },
