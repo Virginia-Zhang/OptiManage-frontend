@@ -5,6 +5,7 @@
 		<el-button type="danger" :icon="Delete" @click="batchDelete">批量删除</el-button>
 	</div>
 	<el-table
+		ref="userTableRef"
 		:data="userList"
 		:border="true"
 		stripe
@@ -24,8 +25,8 @@
 			:formatter="regionFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column property="createTime" label="创建时间" width="150" show-overflow-tooltip />
-		<el-table-column fixed="right" label="操作" min-width="200">
+		<el-table-column property="createTime" label="创建时间" width="180" show-overflow-tooltip />
+		<el-table-column fixed="right" label="操作" min-width="210">
 			<template #default="scope">
 				<el-button type="primary" size="small" @click="showUserDetails(scope.row)"
 					>详情</el-button
@@ -33,7 +34,14 @@
 				<el-button type="success" size="small" @click="showEditUser(scope.row)"
 					>编辑</el-button
 				>
-				<el-button type="danger" size="small">删除</el-button>
+				<!-- If the user's account enabled=0, the user cannot be deleted. Make this button gray, unclickable, and change the button text to "Deleted" -->
+				<el-button
+					:type="scope.row.accountEnabled ? 'danger' : 'info'"
+					size="small"
+					:disabled="!scope.row.accountEnabled"
+					@click="deleteUsers([scope.row.id])"
+					>{{ scope.row.accountEnabled ? "删除" : "已删除" }}</el-button
+				>
 			</template>
 		</el-table-column>
 	</el-table>
@@ -61,14 +69,18 @@ import UserDetails from "@/components/UserDetails.vue"
 import AddUser from "@/components/AddUser.vue"
 import { regionData } from "@/constants/constants"
 import EditUser from "@/components/EditUser.vue"
+import { messageTip } from "@/utils/utils"
 
 import { Plus, Delete } from "@element-plus/icons-vue"
+import { ElMessageBox } from "element-plus"
 
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
 const userList = ref([])
+// The ids of the users to be deleted
+const deletedIds = []
 
 // The user object passed to UserDetails and EditUser dialog
 const user = ref({})
@@ -78,6 +90,8 @@ const userDetailsRef = ref(null)
 const addUserRef = ref(null)
 // Ref to EditUser dialog
 const editUserRef = ref(null)
+// Ref to user table
+const userTableRef = ref(null)
 
 const handleCurrentChange = val => {
 	currentPage.value = val
@@ -97,8 +111,6 @@ const getUserList = async () => {
 		total.value = res.data.total
 	}
 }
-
-const handleSelectionChange = val => {}
 
 // Show user details dialog
 const showUserDetails = row => {
@@ -130,6 +142,46 @@ const showEditUser = row => {
 		user.value = row
 		editUserRef.value.showEditUserDialog()
 	}
+}
+
+// To delete the selected user, a pop-up window shows asking if you want to delete it. Click OK and then delete it.
+const deleteUsers = async ids => {
+	ElMessageBox.confirm("确定要删除吗？", "提示", {
+		confirmButtonText: "确定",
+		cancelButtonText: "取消",
+		type: "warning",
+	})
+		.then(async () => {
+			const res = await api.deleteUsers(ids)
+			if (res.code === 200) {
+				messageTip("success", "删除成功!")
+				getUserList()
+			} else {
+				messageTip("error", "删除失败!请重试！")
+			}
+		})
+		.catch(() => {
+			// Click Cancel to clear the selected user array
+			deletedIds.length = 0
+			userTableRef.value.clearSelection()
+		})
+}
+
+// Monitor changes of the selected status of table checkboxes
+const handleSelectionChange = selectedUsers => {
+	// Clear deletedIds last time
+	deletedIds.length = 0
+	// Get ids of the selected users this time and put them into deletedIds
+	selectedUsers.forEach(item => {
+		if (!item.accountEnabled) return
+		deletedIds.push(item.id)
+	})
+}
+
+// Batch delete
+const batchDelete = () => {
+	if (!deletedIds.length) return messageTip("warning", "请选择用户！")
+	deleteUsers(deletedIds)
 }
 
 onMounted(() => {

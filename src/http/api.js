@@ -29,4 +29,8 @@ export default {
 	async editUser(data) {
 		return await request.put("/user/", data)
 	},
+	// Delete users
+	async deleteUsers(data) {
+		return await request.delete("/user/", data)
+	},
 }
