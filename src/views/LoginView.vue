@@ -71,11 +71,15 @@ const onSubmit = formEl => {
 			// Login success, a pop-up window shows to tell login is successful.
 			if (res.code === 200) {
 				messageTip("success", "登录成功!")
-				// Save the login information(token string) to local storage or session storage
+				// Save the result into local storage or session storage
 				if (form.value.rememberMe) {
-					storage.setItem("token", res.data, "local")
+					storage.setItem("token", res.data.token, "local")
+					storage.setItem("roleList", res.data.roleList, "local")
+					storage.setItem("permissionList", res.data.permissionList, "local")
 				} else {
-					storage.setItem("token", res.data, "session")
+					storage.setItem("token", res.data.token, "session")
+					storage.setItem("roleList", res.data.roleList, "session")
+					storage.setItem("permissionList", res.data.permissionList, "session")
 				}
 				// After 2 seconds, jump to the dashboard page
 				setTimeout(() => {

@@ -13,7 +13,13 @@ export default {
 			return JSON.parse(sessionStorage.getItem(config.namespace) || "{}")
 		}
 	},
-	// Store new data in storage
+	/**
+	 **
+	 * @description Add data to storage
+	 * @param {String} key Key
+	 * @param {Any} value Value
+	 * @param {String} type local or session
+	 */
 	setItem(key, value, type) {
 		// Get the storage object of the current project
 		const storage = this.getStorage(type)

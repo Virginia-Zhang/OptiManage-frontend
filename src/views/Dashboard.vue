@@ -87,8 +87,9 @@ import {
 import { Menu as MenuIcon, ArrowLeft as ArrowLeftIcon } from "@element-plus/icons-vue"
 import MenuItem from "@/components/MenuItem.vue"
 import api from "@/http/api"
-import { messageTip, removeToken } from "@/utils/utils"
+import { messageTip, clearStorage } from "@/utils/utils"
 import { menuData } from "@/constants/constants"
+import storage from "../utils/storage"
 
 const router = useRouter()
 
@@ -99,7 +100,7 @@ const userName = ref("")
 const logoutLoading = ref(false)
 
 // Use shallowRef to ensure that menuData is only responsive on the first layer, and will not perform responsiveness on the icon component object in depth to avoid system warnings.
-const menuDataList = shallowRef(menuData)
+const menuDataList = shallowRef([])
 
 const toggleCollapse = () => {
 	isCollapsed.value = !isCollapsed.value
@@ -113,8 +114,8 @@ const handleCommand = async command => {
 		if (res.code === 200) {
 			// Logout success, a pop-up window shows to tell logout is successful.
 			messageTip("success", "退出成功!")
-			// Clear tokens in localStorage or sessionStorage
-			removeToken()
+			// Clear data in localStorage or sessionStorage
+			clearStorage()
 			// After 2 seconds, jump to the login page
 			setTimeout(() => {
 				router.push("/")
@@ -126,8 +127,8 @@ const handleCommand = async command => {
 				cancelButtonText: "取消",
 				type: "warning",
 			}).then(() => {
-				// Confirm to force exit, clear the token in local storage or session storage, and then jump to the login page.
-				removeToken()
+				// Confirm to force exit, clear the data in local storage or session storage, and then jump to the login page.
+				clearStorage()
 				// After 2 seconds, jump to the login page
 				setTimeout(() => {
 					router.push("/")
@@ -152,8 +153,22 @@ const fetchUserInfo = async () => {
 	}
 }
 
+// Get roleList from storage and determine whether the user has an administrator role. If not, delete the "User Management" menu item in menuData to prevent users from accessing this module.
+const authorize = () => {
+	const roleList = storage.getItem("roleList", "local") || storage.getItem("roleList", "session")
+	if (roleList.indexOf("admin") === -1) {
+		// If user is not an administrator, delete the "User Management" menu item and assign it to menuDataList.
+		const newMenuData = menuData.filter(item => item.index !== "/dashboard/user")
+		menuDataList.value = newMenuData
+	} else {
+		// If user is an administrator, assign menuData directly to menuDataList.
+		menuDataList.value = menuData
+	}
+}
+
 onMounted(() => {
 	fetchUserInfo()
+	authorize()
 })
 </script>
 

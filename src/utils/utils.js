@@ -17,3 +17,9 @@ export const removeToken = () => {
 	storage.removeItem("token", "local")
 	storage.removeItem("token", "session")
 }
+
+// Clear storage
+export const clearStorage = () => {
+	storage.clear("local")
+	storage.clear("session")
+}
