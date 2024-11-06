@@ -47,6 +47,14 @@ const router = createRouter({
 						title: "用户管理",
 					},
 				},
+				{
+					path: "marketing",
+					name: "marketing",
+					component: () => import("@/components/MarketingManagement.vue"),
+					meta: {
+						title: "市场活动",
+					},
+				},
 			],
 		},
 		// 404 page

@@ -34,13 +34,8 @@
 				<el-button type="success" size="small" @click="showEditUser(scope.row)"
 					>编辑</el-button
 				>
-				<!-- If the user's account enabled=0, the user cannot be deleted. Make this button gray, unclickable, and change the button text to "Deleted" -->
-				<el-button
-					:type="scope.row.accountEnabled ? 'danger' : 'info'"
-					size="small"
-					:disabled="!scope.row.accountEnabled"
-					@click="deleteUsers([scope.row.id])"
-					>{{ scope.row.accountEnabled ? "删除" : "已删除" }}</el-button
+				<el-button type="danger" size="small" @click="deleteUsers([scope.row.id])"
+					>删除</el-button
 				>
 			</template>
 		</el-table-column>
@@ -67,7 +62,7 @@ import { ref, onMounted } from "vue"
 import api from "@/http/api"
 import UserDetails from "@/components/UserDetails.vue"
 import AddUser from "@/components/AddUser.vue"
-import { regionData } from "@/constants/constants"
+import { regionData, PAGE_SIZE } from "@/constants/constants"
 import EditUser from "@/components/EditUser.vue"
 import { messageTip } from "@/utils/utils"
 
@@ -75,7 +70,7 @@ import { Plus, Delete } from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
 
 const currentPage = ref(1)
-const pageSize = ref(10)
+const pageSize = ref(PAGE_SIZE)
 const total = ref(0)
 
 const userList = ref([])

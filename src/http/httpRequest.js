@@ -1,7 +1,7 @@
 import axios from "axios"
 import config from "@/config"
 import storage from "@/utils/storage"
-import { messageTip, removeToken } from "@/utils/utils"
+import { messageTip, clearStorage } from "@/utils/utils"
 import router from "@/router"
 
 const AxiosUtil = axios.create({
@@ -39,10 +39,10 @@ const request = {
 // response interceptor
 AxiosUtil.interceptors.response.use(
 	response => {
-		// When token-related problems occur, show the message "Token is invalid. Please log in again", then clear the token, and jump to the login page in 2 seconds.
+		// When token-related problems occur, show the message "Token is invalid. Please log in again", then clear the storage, and jump to the login page in 2 seconds.
 		if (response.data.code > 900) {
 			messageTip("error", "Token无效，请重新登录！")
-			removeToken()
+			clearStorage()
 			setTimeout(() => {
 				router.push("/")
 			}, 2000)

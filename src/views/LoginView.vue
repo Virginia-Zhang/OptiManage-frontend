@@ -76,10 +76,12 @@ const onSubmit = formEl => {
 					storage.setItem("token", res.data.token, "local")
 					storage.setItem("roleList", res.data.roleList, "local")
 					storage.setItem("permissionList", res.data.permissionList, "local")
+					storage.setItem("preferredLanguage", res.data.preferredLanguage, "local")
 				} else {
 					storage.setItem("token", res.data.token, "session")
 					storage.setItem("roleList", res.data.roleList, "session")
 					storage.setItem("permissionList", res.data.permissionList, "session")
+					storage.setItem("preferredLanguage", res.data.preferredLanguage, "session")
 				}
 				// After 2 seconds, jump to the dashboard page
 				setTimeout(() => {

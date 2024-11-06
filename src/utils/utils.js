@@ -23,3 +23,11 @@ export const clearStorage = () => {
 	storage.clear("local")
 	storage.clear("session")
 }
+
+// Get preferredLanguage from storage, 1 is English, 2 is Chinese, 3 is Japanese
+export const getPreferredLanguage = () => {
+	return (
+		storage.getItem("preferredLanguage", "local") ||
+		storage.getItem("preferredLanguage", "session")
+	)
+}
