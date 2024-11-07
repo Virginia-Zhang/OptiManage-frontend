@@ -133,7 +133,6 @@ const searchForm = ref({
 })
 
 // 市场活动列表数据
-// TODO: cost要改，从后端拿到marketingList后，需要对list做加工，给每个item添加cost属性，值为costRMB/costUSD/costJPY，具体是什么根据preferredLanguage而定
 const marketingList = ref([
 	{
 		id: 1,
