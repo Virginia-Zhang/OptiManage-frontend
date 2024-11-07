@@ -8,7 +8,6 @@
 		<el-form-item label="活动名称">
 			<el-input v-model="searchForm.name" placeholder="请输入活动名称" />
 		</el-form-item>
-		<!-- A datetime selection component, including start time and end time, please use el date picker to write, type is datetimerange -->
 		<el-form-item label="活动时间">
 			<el-date-picker
 				v-model="searchForm.timeRange"
@@ -24,7 +23,7 @@
 			<el-select v-model="searchForm.budget" placeholder="请选择活动预算" width="200px">
 				<el-option v-for="item in budgetOptions" :key="item" :label="item" :value="item" />
 			</el-select>
-			<!-- Currency unit, there must be a gap to the left -->
+			<!-- Currency unit -->
 			<span style="margin-left: 5px">元</span>
 		</el-form-item>
 		<el-form-item label="地区">
@@ -49,7 +48,7 @@
 		<el-button type="primary" :icon="Plus" @click="addMarketing">录入市场活动</el-button>
 		<el-button type="danger" :icon="Delete" @click="batchDelete">批量删除</el-button>
 	</div>
-	<!-- Table area to display the list of marketing activities -->
+	<!-- Table area to display the list of marketing campaigns -->
 	<el-table
 		ref="marketingTableRef"
 		:data="marketingList"
