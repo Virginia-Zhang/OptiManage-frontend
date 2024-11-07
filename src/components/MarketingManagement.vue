@@ -1,6 +1,6 @@
-<!-- 市场活动组件 -->
+<!-- campaign component -->
 <template>
-	<!-- 搜索框表单，包含负责人、活动名称、活动时间（开始时间-结束时间）、活动预算、地区这些搜索条件，还有搜索和重置按钮，请使用el-form来写 -->
+	<!-- Search form -->
 	<el-form :inline="true" :model="searchForm" class="demo-form-inline">
 		<el-form-item label="负责人">
 			<el-input v-model="searchForm.owner" placeholder="请输入负责人" />
@@ -8,7 +8,7 @@
 		<el-form-item label="活动名称">
 			<el-input v-model="searchForm.name" placeholder="请输入活动名称" />
 		</el-form-item>
-		<!-- 一个datetime选择组件，包含开始时间和结束时间，请使用el-date-picker来写，type为datetimerange -->
+		<!-- A datetime selection component, including start time and end time, please use el date picker to write, type is datetimerange -->
 		<el-form-item label="活动时间">
 			<el-date-picker
 				v-model="searchForm.timeRange"
@@ -20,16 +20,14 @@
 				time-format="A hh:mm:ss"
 			/>
 		</el-form-item>
-		<!-- 活动预算显示为一个select下拉菜单，options是不同预算范围的数组，请使用el-select来写，请使用v-model绑定到searchForm.budget上 -->
 		<el-form-item label="活动预算">
 			<el-select v-model="searchForm.budget" placeholder="请选择活动预算" width="200px">
 				<el-option v-for="item in budgetOptions" :key="item" :label="item" :value="item" />
 			</el-select>
-			<!-- 货币单位，要和左边有间隙 -->
+			<!-- Currency unit, there must be a gap to the left -->
 			<span style="margin-left: 5px">元</span>
 		</el-form-item>
 		<el-form-item label="地区">
-			<!-- 一个select下拉菜单，options是不同地区的数组，请使用el-select来写，请使用v-model绑定到searchForm.region上 -->
 			<el-select v-model="searchForm.region" placeholder="请选择地区" clearable width="120px">
 				<template #prefix>
 					<el-icon><MapLocation /></el-icon>
@@ -51,7 +49,7 @@
 		<el-button type="primary" :icon="Plus" @click="addMarketing">录入市场活动</el-button>
 		<el-button type="danger" :icon="Delete" @click="batchDelete">批量删除</el-button>
 	</div>
-	<!-- 表格区域，展示市场活动列表 -->
+	<!-- Table area to display the list of marketing activities -->
 	<el-table
 		ref="marketingTableRef"
 		:data="marketingList"
@@ -108,7 +106,7 @@ import { getPreferredLanguage } from "@/utils/utils"
 
 import { Search, Refresh, MapLocation, Plus, Delete } from "@element-plus/icons-vue"
 
-// computed属性，根据storage里存储的preferredLanguage，显示不同的选项
+// A computed attribute, displays different options based on the preferred language stored in storage.
 const budgetOptions = computed(() => {
 	const preferredLanguage = getPreferredLanguage()
 	switch (preferredLanguage) {
@@ -123,7 +121,7 @@ const budgetOptions = computed(() => {
 	}
 })
 
-// 搜索表单数据
+// SearchForm data
 const searchForm = ref({
 	owner: "",
 	name: "",
@@ -132,8 +130,7 @@ const searchForm = ref({
 	region: 1,
 })
 
-// 市场活动列表数据
-// TODO: cost要改，从后端拿到marketingList后，需要对list做加工，给每个item添加cost属性，值为costRMB/costUSD/costJPY，具体是什么根据preferredLanguage而定
+// Marketing campaigns list data
 const marketingList = ref([
 	{
 		id: 1,
@@ -163,14 +160,14 @@ const marketingList = ref([
 	},
 ])
 
-// 市场活动总数
+// total number of campaigns
 const total = ref(0)
-// 当前页码
+// Current page number
 const currentPage = ref(1)
-// 每页显示条数
+// Number of items displayed per page
 const pageSize = ref(PAGE_SIZE)
 
-// 对marketingList进行加工，给每一个item添加cost属性，值为costRMB/costUSD/costJPY，具体是什么根据preferredLanguage而定
+// Process marketingList and add the cost attribute to each item. The value is costRMB/costUSD/costJPY. The specific value depends on preferredLanguage.
 const getMarketingList = () => {
 	const preferredLanguage = getPreferredLanguage()
 	switch (preferredLanguage) {
@@ -199,17 +196,17 @@ const handleCurrentChange = val => {
 	currentPage.value = val
 }
 
-// 添加市场活动
+// Add campaign
 const addMarketing = () => {
 	console.log("addMarketing")
 }
 
-// 查看市场活动详情
+// View campaign details
 const showMarketingDetails = row => {
 	console.log("showMarketingDetails", row)
 }
 
-// 编辑市场活动
+// Edit campaign
 const showEditMarketing = row => {
 	console.log("showEditMarketing", row)
 }
@@ -218,17 +215,17 @@ const handleSelectionChange = val => {
 	console.log("handleSelectionChange", val)
 }
 
-// 删除市场活动
+// Delete campaign
 const deleteMarketings = ids => {
 	console.log("deleteMarketings", ids)
 }
 
-// 批量删除市场活动
+// Delete campaigns in bulk
 const batchDelete = () => {
 	console.log("batchDelete")
 }
 
-// 地区格式化
+// region formatting
 const regionFormatter = (row, column, cellValue, index) => {
 	const region = regionData.find(item => item.value === cellValue)
 	return region ? region.name : "未知地区"
