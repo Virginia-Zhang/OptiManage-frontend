@@ -59,7 +59,7 @@
 	>
 		<el-table-column type="selection" width="55" fixed="left" />
 		<el-table-column type="index" width="60" fixed="left" />
-		<el-table-column property="ownerName" label="负责人" width="150" show-overflow-tooltip />
+		<el-table-column property="ownerAct" label="负责人" width="150" show-overflow-tooltip />
 		<el-table-column property="name" label="活动名称" width="180" show-overflow-tooltip />
 		<el-table-column property="startTime" label="开始时间" width="180" show-overflow-tooltip />
 		<el-table-column property="endTime" label="结束时间" width="220" show-overflow-tooltip />
@@ -102,6 +102,7 @@ import { computed, onMounted, ref } from "vue"
 import { regionData } from "@/constants/constants"
 import { budgetRangeRMB, budgetRangeUSD, budgetRangeJPY, PAGE_SIZE } from "../constants/constants"
 import { getPreferredLanguage } from "@/utils/utils"
+import api from "@/http/api"
 
 import { Search, Refresh, MapLocation, Plus, Delete } from "@element-plus/icons-vue"
 
@@ -130,34 +131,7 @@ const searchForm = ref({
 })
 
 // Marketing campaigns list data
-const marketingList = ref([
-	{
-		id: 1,
-		ownerId: 1,
-		ownerName: "管理员",
-		name: "活动1",
-		startTime: "2023-04-01 10:00:00",
-		endTime: "2023-04-05 12:00:00",
-		costRMB: 100,
-		costUSD: null,
-		costJPY: null,
-		region: 1,
-		createTime: "2023-04-01 10:00:00",
-	},
-	{
-		id: 2,
-		ownerId: 2,
-		ownerName: "用户1",
-		name: "活动2",
-		startTime: "2023-04-06 10:00:00",
-		endTime: "2023-04-07 12:00:00",
-		costRMB: 200,
-		costUSD: null,
-		costJPY: null,
-		region: 2,
-		createTime: "2023-04-06 10:00:00",
-	},
-])
+const marketingList = ref([])
 
 // total number of campaigns
 const total = ref(0)
@@ -166,24 +140,35 @@ const currentPage = ref(1)
 // Number of items displayed per page
 const pageSize = ref(PAGE_SIZE)
 
-// Process marketingList and add the cost attribute to each item. The value is costRMB/costUSD/costJPY. The specific value depends on preferredLanguage.
-const getMarketingList = () => {
-	const preferredLanguage = getPreferredLanguage()
-	switch (preferredLanguage) {
-		case 1:
-			marketingList.value.forEach(item => {
-				item.cost = item.costUSD
-			})
-			break
-		case 2:
-			marketingList.value.forEach(item => {
-				item.cost = item.costRMB
-			})
-			break
-		case 3:
-			marketingList.value.forEach(item => {
-				item.cost = item.costJPY
-			})
+// Get the list of marketing campaigns
+const getMarketingList = async () => {
+	const params = {
+		page: currentPage.value,
+		size: pageSize.value,
+	}
+	const res = await api.getActivityList(params)
+	if (res.code === 200) {
+		marketingList.value = res.data.rows
+		total.value = res.data.total
+		// Process marketingList and add the cost attribute to each item. The value is costRMB/costUSD/costJPY. The specific value depends on preferredLanguage.
+		const preferredLanguage = getPreferredLanguage()
+		switch (preferredLanguage) {
+			case 1:
+				marketingList.value.forEach(item => {
+					item.cost = item.costUsd
+				})
+				break
+			case 2:
+				marketingList.value.forEach(item => {
+					item.cost = item.costRmb
+				})
+				break
+			case 3:
+				marketingList.value.forEach(item => {
+					item.cost = item.costJpy
+				})
+		}
+		console.log("marketingList: ", marketingList.value)
 	}
 }
 
@@ -193,6 +178,7 @@ onMounted(() => {
 
 const handleCurrentChange = val => {
 	currentPage.value = val
+	getMarketingList()
 }
 
 // Add campaign

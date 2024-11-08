@@ -23,9 +23,9 @@
 				user.accountEnabled ? "是" : "否"
 			}}</el-descriptions-item>
 			<el-descriptions-item label="创建时间">{{ user.createTime }}</el-descriptions-item>
-			<el-descriptions-item label="创建人">{{ user.createByName }}</el-descriptions-item>
+			<el-descriptions-item label="创建人">{{ user.createByAct }}</el-descriptions-item>
 			<el-descriptions-item label="编辑时间">{{ user.editTime }}</el-descriptions-item>
-			<el-descriptions-item label="编辑人">{{ user.editByName }}</el-descriptions-item>
+			<el-descriptions-item label="编辑人">{{ user.editByAct }}</el-descriptions-item>
 			<el-descriptions-item label="最近登录时间">{{
 				user.lastLoginTime
 			}}</el-descriptions-item>

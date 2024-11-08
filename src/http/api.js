@@ -33,4 +33,8 @@ export default {
 	async deleteUsers(data) {
 		return await request.delete("/user/", data)
 	},
+	// Query marketing campaigns(activities) list by page
+	async getActivityList(params) {
+		return await request.get("/activity/list", params)
+	},
 }
