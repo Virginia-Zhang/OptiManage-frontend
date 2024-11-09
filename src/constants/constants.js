@@ -78,7 +78,7 @@ export const regionData = [
 	{ name: "其他", value: 11 },
 ]
 
-// 活动预算范围数组，货币单位为人民币
+// An array of different marketing campaign budget range, currency unit is RMB
 export const budgetRangeRMB = [
 	"0-5000",
 	"5001-10000",
@@ -89,7 +89,7 @@ export const budgetRangeRMB = [
 	"1000000+",
 ]
 
-// 活动预算范围数组，货币单位为美元
+// An array of different marketing campaign budget range, currency unit is USD
 export const budgetRangeUSD = [
 	"0-1000",
 	"1001-5000",
@@ -98,7 +98,7 @@ export const budgetRangeUSD = [
 	"50001-100000",
 	"100000+",
 ]
-// 活动预算单位数组，货币单位为日元
+// An array of different marketing campaign budget range, currency unit is JPY
 export const budgetRangeJPY = ["0-100000", "100001-1000000", "1000001-10000000", "10000000+"]
 
 export const PAGE_SIZE = 10

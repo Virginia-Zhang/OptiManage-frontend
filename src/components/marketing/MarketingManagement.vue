@@ -124,7 +124,7 @@ import api from "@/http/api"
 
 import { Search, Refresh, MapLocation, Plus, Delete } from "@element-plus/icons-vue"
 
-// computed属性，控制负责人搜索框显示与否。如果用户为admin，返回true，否则返回false。
+// A computed attribute, controls whether the person in charge search box is displayed or not. If the user is admin, returns true, otherwise returns false.
 const showOwnerSearch = computed(() => {
 	const roleList = getRoleList()
 	return roleList.indexOf("admin") !== -1

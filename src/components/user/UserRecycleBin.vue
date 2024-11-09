@@ -1,4 +1,4 @@
-<!-- 用户管理模块回收站 -->
+<!-- User recycle bin -->
 <template>
 	<div class="btn-group">
 		<el-button type="primary" :icon="RefreshRight" @click="batchRestore">批量恢复</el-button>
