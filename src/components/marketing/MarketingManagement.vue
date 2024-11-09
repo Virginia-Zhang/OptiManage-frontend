@@ -3,7 +3,14 @@
 	<!-- Search form -->
 	<el-form :inline="true" :model="searchForm" class="demo-form-inline">
 		<el-form-item label="负责人" v-if="showOwnerSearch">
-			<el-input v-model="searchForm.owner" placeholder="请输入负责人" />
+			<el-select v-model="searchForm.owner" placeholder="请选择负责人" width="200px">
+				<el-option
+					v-for="item in ownerOptions"
+					:key="item.id"
+					:label="item.loginAct"
+					:value="item.id"
+				/>
+			</el-select>
 		</el-form-item>
 		<el-form-item label="活动名称">
 			<el-input v-model="searchForm.name" placeholder="请输入活动名称" />
@@ -130,6 +137,9 @@ const showOwnerSearch = computed(() => {
 	return roleList.indexOf("admin") !== -1
 })
 
+// Get the list of users who can be selected as the owner of the activity
+const ownerOptions = ref([])
+
 // A computed attribute, displays different options based on the preferred language stored in storage.
 const budgetOptions = computed(() => {
 	const preferredLanguage = getPreferredLanguage()
@@ -195,8 +205,17 @@ const getMarketingList = async () => {
 	}
 }
 
+// Get ownerList and assign it to ownerOptions.value
+const getOwnerList = async () => {
+	const res = await api.getOwnerList()
+	if (res.code === 200) {
+		ownerOptions.value = res.data
+	}
+}
+
 onMounted(() => {
 	getMarketingList()
+	getOwnerList()
 })
 
 const handleCurrentChange = val => {
