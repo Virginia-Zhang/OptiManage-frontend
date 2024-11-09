@@ -22,12 +22,16 @@
 			<el-descriptions-item label="账号是否启用">{{
 				user.accountEnabled ? "是" : "否"
 			}}</el-descriptions-item>
-			<el-descriptions-item label="创建时间">{{ user.createTime }}</el-descriptions-item>
+			<el-descriptions-item label="创建时间">{{
+				formatTime(user.createTime)
+			}}</el-descriptions-item>
 			<el-descriptions-item label="创建人">{{ user.createByAct }}</el-descriptions-item>
-			<el-descriptions-item label="编辑时间">{{ user.editTime }}</el-descriptions-item>
+			<el-descriptions-item label="编辑时间">{{
+				formatTime(user.editTime)
+			}}</el-descriptions-item>
 			<el-descriptions-item label="编辑人">{{ user.editByAct }}</el-descriptions-item>
 			<el-descriptions-item label="最近登录时间">{{
-				user.lastLoginTime
+				formatTime(user.lastLoginTime)
 			}}</el-descriptions-item>
 		</el-descriptions>
 	</el-dialog>
@@ -37,6 +41,7 @@
 import { ref } from "vue"
 
 import { regionData } from "@/constants/constants"
+import { formatTime } from "@/utils/utils"
 
 defineProps({
 	// Receive user information passed by the parent component
@@ -59,9 +64,9 @@ const handleClose = () => {
 	dialogVisible.value = false
 }
 
-// 把region的数值转换成对应的文本，显示在页面上
+// Convert the value of region into the corresponding text and display it on the page
 const convertRegionToText = region => {
-	// 遍历regionData，找到对应的文本，返回
+	// Traverse regionData, find the corresponding text, and return
 	for (const item of regionData) {
 		if (item.value === region) {
 			return item.name

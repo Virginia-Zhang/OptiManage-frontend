@@ -89,7 +89,7 @@ const onSubmit = formEl => {
 				}, 2000)
 			} else {
 				// Login failed, a pop-up window shows to tell login is failed.
-				messageTip("error", "登录失败！请重试！")
+				messageTip("error", res.msg)
 			}
 			// Request completed, unlock
 			submitBtnLoading.value = false

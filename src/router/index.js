@@ -42,15 +42,23 @@ const router = createRouter({
 				{
 					path: "user",
 					name: "user",
-					component: () => import("@/components/UserManagement.vue"),
+					component: () => import("@/components/user/UserManagement.vue"),
 					meta: {
 						title: "用户管理",
 					},
 				},
 				{
+					path: "user-recycle",
+					name: "user-recycle",
+					component: () => import("@/components/user/UserRecycleBin.vue"),
+					meta: {
+						title: "用户管理-回收站",
+					},
+				},
+				{
 					path: "marketing",
 					name: "marketing",
-					component: () => import("@/components/MarketingManagement.vue"),
+					component: () => import("@/components/marketing/MarketingManagement.vue"),
 					meta: {
 						title: "市场活动",
 					},

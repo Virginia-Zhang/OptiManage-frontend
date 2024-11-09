@@ -1,5 +1,6 @@
 import { ElMessage } from "element-plus"
 import storage from "./storage"
+import dayjs from "dayjs"
 
 // Message pop-up window
 export const messageTip = (type, content) => {
@@ -30,4 +31,15 @@ export const getPreferredLanguage = () => {
 		storage.getItem("preferredLanguage", "local") ||
 		storage.getItem("preferredLanguage", "session")
 	)
+}
+
+// Get roleList from storage
+export const getRoleList = () => {
+	return storage.getItem("roleList", "local") || storage.getItem("roleList", "session")
+}
+
+// Format time
+export const formatTime = time => {
+	if (!time) return ""
+	return dayjs(time).format("YYYY-MM-DD HH:mm:ss")
 }

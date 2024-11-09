@@ -87,9 +87,8 @@ import {
 import { Menu as MenuIcon, ArrowLeft as ArrowLeftIcon } from "@element-plus/icons-vue"
 import MenuItem from "@/components/MenuItem.vue"
 import api from "@/http/api"
-import { messageTip, clearStorage } from "@/utils/utils"
+import { messageTip, clearStorage, getRoleList } from "@/utils/utils"
 import { menuData } from "@/constants/constants"
-import storage from "../utils/storage"
 
 const router = useRouter()
 
@@ -155,7 +154,7 @@ const fetchUserInfo = async () => {
 
 // Get roleList from storage and determine whether the user has an administrator role. If not, delete the "User Management" menu item in menuData to prevent users from accessing this module.
 const authorize = () => {
-	const roleList = storage.getItem("roleList", "local") || storage.getItem("roleList", "session")
+	const roleList = getRoleList()
 	if (roleList.indexOf("admin") === -1) {
 		// If user is not an administrator, delete the "User Management" menu item and assign it to menuDataList.
 		const newMenuData = menuData.filter(item => item.index !== "/dashboard/user")

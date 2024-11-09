@@ -2,7 +2,7 @@
 <template>
 	<!-- Search form -->
 	<el-form :inline="true" :model="searchForm" class="demo-form-inline">
-		<el-form-item label="负责人">
+		<el-form-item label="负责人" v-if="showOwnerSearch">
 			<el-input v-model="searchForm.owner" placeholder="请输入负责人" />
 		</el-form-item>
 		<el-form-item label="活动名称">
@@ -61,8 +61,20 @@
 		<el-table-column type="index" width="60" fixed="left" />
 		<el-table-column property="ownerAct" label="负责人" width="150" show-overflow-tooltip />
 		<el-table-column property="name" label="活动名称" width="180" show-overflow-tooltip />
-		<el-table-column property="startTime" label="开始时间" width="180" show-overflow-tooltip />
-		<el-table-column property="endTime" label="结束时间" width="220" show-overflow-tooltip />
+		<el-table-column
+			property="startTime"
+			label="开始时间"
+			width="180"
+			:formatter="timeFormatter"
+			show-overflow-tooltip
+		/>
+		<el-table-column
+			property="endTime"
+			label="结束时间"
+			width="220"
+			:formatter="timeFormatter"
+			show-overflow-tooltip
+		/>
 		<el-table-column property="cost" label="活动预算（元）" width="150" show-overflow-tooltip />
 		<el-table-column
 			property="region"
@@ -71,7 +83,13 @@
 			:formatter="regionFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column property="createTime" label="创建时间" width="180" show-overflow-tooltip />
+		<el-table-column
+			property="createTime"
+			label="创建时间"
+			width="180"
+			:formatter="timeFormatter"
+			show-overflow-tooltip
+		/>
 		<el-table-column fixed="right" label="操作" min-width="210">
 			<template #default="scope">
 				<el-button type="primary" size="small" @click="showMarketingDetails(scope.row)"
@@ -100,11 +118,17 @@
 import { computed, onMounted, ref } from "vue"
 
 import { regionData } from "@/constants/constants"
-import { budgetRangeRMB, budgetRangeUSD, budgetRangeJPY, PAGE_SIZE } from "../constants/constants"
-import { getPreferredLanguage } from "@/utils/utils"
+import { budgetRangeRMB, budgetRangeUSD, budgetRangeJPY, PAGE_SIZE } from "@/constants/constants"
+import { getPreferredLanguage, getRoleList, formatTime } from "@/utils/utils"
 import api from "@/http/api"
 
 import { Search, Refresh, MapLocation, Plus, Delete } from "@element-plus/icons-vue"
+
+// computed属性，控制负责人搜索框显示与否。如果用户为admin，返回true，否则返回false。
+const showOwnerSearch = computed(() => {
+	const roleList = getRoleList()
+	return roleList.indexOf("admin") !== -1
+})
 
 // A computed attribute, displays different options based on the preferred language stored in storage.
 const budgetOptions = computed(() => {
@@ -123,7 +147,6 @@ const budgetOptions = computed(() => {
 
 // SearchForm data
 const searchForm = ref({
-	owner: "",
 	name: "",
 	timeRange: "",
 	budget: "",
@@ -216,17 +239,31 @@ const regionFormatter = (row, column, cellValue, index) => {
 	return region ? region.name : "未知地区"
 }
 
+// Format time
+const timeFormatter = (row, column, cellValue, index) => {
+	return formatTime(cellValue)
+}
+
 const search = () => {
 	console.log("search", searchForm.value)
 }
 
 const reset = () => {
-	searchForm.value = {
-		owner: "",
-		name: "",
-		timeRange: "",
-		budget: "",
-		region: 1,
+	if (showOwnerSearch.value) {
+		searchForm.value = {
+			owner: "",
+			name: "",
+			timeRange: "",
+			budget: "",
+			region: 1,
+		}
+	} else {
+		searchForm.value = {
+			name: "",
+			timeRange: "",
+			budget: "",
+			region: 1,
+		}
 	}
 }
 </script>

@@ -29,12 +29,16 @@ export default {
 	async editUser(data) {
 		return await request.put("/user/", data)
 	},
-	// Delete users
-	async deleteUsers(data) {
-		return await request.delete("/user/", data)
+	// Remove/Restore users
+	async updateUsers(data) {
+		return await request.put("/user/updateUsers", data)
 	},
 	// Query marketing campaigns(activities) list by page
 	async getActivityList(params) {
 		return await request.get("/activity/list", params)
+	},
+	// Query deleted user list by page
+	async getDeletedUserList(params) {
+		return await request.get("/user/deletedList", params)
 	},
 }

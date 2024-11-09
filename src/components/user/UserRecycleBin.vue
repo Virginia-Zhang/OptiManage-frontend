@@ -1,8 +1,7 @@
-<!-- User Management component -->
+<!-- 用户管理模块回收站 -->
 <template>
 	<div class="btn-group">
-		<el-button type="primary" :icon="Plus" @click="addUser">添加用户</el-button>
-		<el-button type="danger" :icon="Delete" @click="batchDelete">批量删除</el-button>
+		<el-button type="primary" :icon="RefreshRight" @click="batchRestore">批量恢复</el-button>
 	</div>
 	<el-table
 		ref="userTableRef"
@@ -12,8 +11,8 @@
 		style="width: 100%"
 		@selection-change="handleSelectionChange"
 	>
-		<el-table-column type="selection" width="55" />
-		<el-table-column type="index" width="60" />
+		<el-table-column type="selection" width="55" fixed="left" />
+		<el-table-column type="index" width="60" fixed="left" />
 		<el-table-column property="loginAct" label="账号" width="180" show-overflow-tooltip />
 		<el-table-column property="name" label="姓名" width="180" show-overflow-tooltip />
 		<el-table-column property="phone" label="手机" width="180" show-overflow-tooltip />
@@ -25,17 +24,20 @@
 			:formatter="regionFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column property="createTime" label="创建时间" width="180" show-overflow-tooltip />
-		<el-table-column fixed="right" label="操作" min-width="210">
+		<el-table-column
+			property="createTime"
+			label="创建时间"
+			width="180"
+			:formatter="timeFormatter"
+			show-overflow-tooltip
+		/>
+		<el-table-column fixed="right" label="操作" min-width="140">
 			<template #default="scope">
 				<el-button type="primary" size="small" @click="showUserDetails(scope.row)"
 					>详情</el-button
 				>
-				<el-button type="success" size="small" @click="showEditUser(scope.row)"
-					>编辑</el-button
-				>
-				<el-button type="danger" size="small" @click="deleteUsers([scope.row.id])"
-					>删除</el-button
+				<el-button type="success" size="small" @click="restoreUsers([scope.row.id])"
+					>恢复</el-button
 				>
 			</template>
 		</el-table-column>
@@ -50,43 +52,34 @@
 	/>
 	<!-- User details dialog -->
 	<UserDetails ref="userDetailsRef" :user="user" />
-	<!-- Add user dialog -->
-	<AddUser ref="addUserRef" @getUserList="getUserList" />
-	<!-- Edit user dialog -->
-	<EditUser ref="editUserRef" :user="user" @getUserList="getUserList" />
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue"
 
+import { PAGE_SIZE, regionData } from "@/constants/constants"
+import { formatTime, messageTip } from "@/utils/utils"
 import api from "@/http/api"
-import UserDetails from "@/components/UserDetails.vue"
-import AddUser from "@/components/AddUser.vue"
-import { regionData, PAGE_SIZE } from "@/constants/constants"
-import EditUser from "@/components/EditUser.vue"
-import { messageTip } from "@/utils/utils"
+import UserDetails from "@/components/user/UserDetails.vue"
 
-import { Plus, Delete } from "@element-plus/icons-vue"
+import { RefreshRight } from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
+
+// Ref to user table
+const userTableRef = ref(null)
 
 const currentPage = ref(1)
 const pageSize = ref(PAGE_SIZE)
 const total = ref(0)
 
 const userList = ref([])
-// The ids of the users to be deleted
-const deletedIds = []
+// The ids of the users to be restored
+const restoredIds = []
 
-// The user object passed to UserDetails and EditUser dialog
+// The user object passed to UserDetails dialog
 const user = ref({})
 // Ref to UserDetails dialog
 const userDetailsRef = ref(null)
-// Ref to AddUser dialog
-const addUserRef = ref(null)
-// Ref to EditUser dialog
-const editUserRef = ref(null)
-// Ref to user table
-const userTableRef = ref(null)
 
 const handleCurrentChange = val => {
 	currentPage.value = val
@@ -100,7 +93,7 @@ const getUserList = async () => {
 		pageSize: pageSize.value,
 	}
 	// Send request
-	const res = await api.getUserList(params)
+	const res = await api.getDeletedUserList(params)
 	if (res.code === 200) {
 		userList.value = res.data.rows
 		total.value = res.data.total
@@ -116,48 +109,40 @@ const showUserDetails = row => {
 	}
 }
 
-// Show add user dialog
-const addUser = () => {
-	if (addUserRef.value) {
-		addUserRef.value.showAddUserDialog()
-	}
-}
-
 // Format region data
 const regionFormatter = (row, column, cellValue, index) => {
 	const region = regionData.find(item => item.value === cellValue)
 	return region ? region.name : "未知地区"
 }
 
-// Show edit user dialog
-const showEditUser = row => {
-	if (!row) return
-	console.log("row: ", row)
-	if (editUserRef.value) {
-		user.value = row
-		editUserRef.value.showEditUserDialog()
-	}
+// Format time
+const timeFormatter = (row, column, cellValue, index) => {
+	return formatTime(cellValue)
 }
 
-// To delete the selected user, a pop-up window shows asking if you want to delete it. Click OK and then delete it.
-const deleteUsers = async ids => {
-	ElMessageBox.confirm("确定要删除吗？", "提示", {
+// To restore the selected user, a pop-up window shows asking if you want to delete it. Click OK and then delete it.
+const restoreUsers = async ids => {
+	ElMessageBox.confirm("确定要恢复吗？", "提示", {
 		confirmButtonText: "确定",
 		cancelButtonText: "取消",
 		type: "warning",
 	})
 		.then(async () => {
-			const res = await api.deleteUsers(ids)
+			const params = {
+				ids,
+				accountEnabledValue: 1,
+			}
+			const res = await api.updateUsers(params)
 			if (res.code === 200) {
-				messageTip("success", "删除成功!")
+				messageTip("success", "恢复成功!")
 				getUserList()
 			} else {
-				messageTip("error", "删除失败!请重试！")
+				messageTip("error", "恢复失败!请重试！")
 			}
 		})
 		.catch(() => {
 			// Click Cancel to clear the selected user array
-			deletedIds.length = 0
+			restoredIds.length = 0
 			userTableRef.value.clearSelection()
 		})
 }
@@ -165,18 +150,17 @@ const deleteUsers = async ids => {
 // Monitor changes of the selected status of table checkboxes
 const handleSelectionChange = selectedUsers => {
 	// Clear deletedIds last time
-	deletedIds.length = 0
+	restoredIds.length = 0
 	// Get ids of the selected users this time and put them into deletedIds
 	selectedUsers.forEach(item => {
-		if (!item.accountEnabled) return
-		deletedIds.push(item.id)
+		restoredIds.push(item.id)
 	})
 }
 
 // Batch delete
-const batchDelete = () => {
-	if (!deletedIds.length) return messageTip("warning", "请选择用户！")
-	deleteUsers(deletedIds)
+const batchRestore = () => {
+	if (!restoredIds.length) return messageTip("warning", "请选择用户！")
+	restoreUsers(restoredIds)
 }
 
 onMounted(() => {

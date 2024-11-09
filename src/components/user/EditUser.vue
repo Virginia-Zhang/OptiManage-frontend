@@ -51,12 +51,6 @@
 					<el-option label="否" :value="1"></el-option>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="账号是否启用" prop="accountEnabled">
-				<el-select v-model="editUserForm.accountEnabled">
-					<el-option label="是" :value="1"></el-option>
-					<el-option label="否" :value="0"></el-option>
-				</el-select>
-			</el-form-item>
 		</el-form>
 		<!-- Cancel and OK buttons -->
 		<template #footer>
@@ -102,7 +96,6 @@ const editUserFormRules = ref({
 	accountNoExpired: [{ required: true, message: "请选择账号是否过期", trigger: "blur" }],
 	credentialsNoExpired: [{ required: true, message: "请选择密码是否过期", trigger: "blur" }],
 	accountNoLocked: [{ required: true, message: "请选择账号是否锁定", trigger: "blur" }],
-	accountEnabled: [{ required: true, message: "请选择账号是否启用", trigger: "blur" }],
 })
 const dialogVisible = ref(false)
 const editUserLoading = ref(false)

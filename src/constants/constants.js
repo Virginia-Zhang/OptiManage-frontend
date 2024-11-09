@@ -7,6 +7,7 @@ import {
 	Setting,
 	Notebook,
 	Avatar,
+	DeleteFilled,
 } from "@element-plus/icons-vue"
 
 export const menuData = [
@@ -50,7 +51,10 @@ export const menuData = [
 		index: "/dashboard/user",
 		title: "用户管理",
 		icon: User,
-		children: [{ index: "/dashboard/user", title: "用户管理", icon: User }],
+		children: [
+			{ index: "/dashboard/user", title: "用户管理", icon: User },
+			{ index: "/dashboard/user-recycle", title: "回收站", icon: DeleteFilled },
+		],
 	},
 	{
 		index: "/dashboard/system",
