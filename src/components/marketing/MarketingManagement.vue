@@ -124,8 +124,13 @@
 <script setup>
 import { computed, onMounted, ref } from "vue"
 
-import { regionData } from "@/constants/constants"
-import { budgetRangeRMB, budgetRangeUSD, budgetRangeJPY, PAGE_SIZE } from "@/constants/constants"
+import {
+	budgetRangeRMB,
+	budgetRangeUSD,
+	budgetRangeJPY,
+	PAGE_SIZE,
+	regionData,
+} from "@/constants/constants"
 import { getPreferredLanguage, getRoleList, formatTime } from "@/utils/utils"
 import api from "@/http/api"
 
@@ -177,7 +182,7 @@ const pageSize = ref(PAGE_SIZE)
 const getMarketingList = async () => {
 	const params = {
 		page: currentPage.value,
-		size: pageSize.value,
+		pageSize: pageSize.value,
 	}
 	const res = await api.getActivityList(params)
 	if (res.code === 200) {

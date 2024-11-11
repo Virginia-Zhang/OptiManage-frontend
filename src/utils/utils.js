@@ -1,6 +1,7 @@
 import { ElMessage } from "element-plus"
 import storage from "./storage"
 import dayjs from "dayjs"
+import { useUserStore } from "@/stores/userStore"
 
 // Message pop-up window
 export const messageTip = (type, content) => {
@@ -25,17 +26,16 @@ export const clearStorage = () => {
 	storage.clear("session")
 }
 
-// Get preferredLanguage from storage, 1 is English, 2 is Chinese, 3 is Japanese
+// Get preferredLanguage from Pinia, 1 is English, 2 is Chinese, 3 is Japanese
 export const getPreferredLanguage = () => {
-	return (
-		storage.getItem("preferredLanguage", "local") ||
-		storage.getItem("preferredLanguage", "session")
-	)
+	const userStore = useUserStore()
+	return userStore?.preferredLanguage
 }
 
-// Get roleList from storage
+// Get roleList from Pinia
 export const getRoleList = () => {
-	return storage.getItem("roleList", "local") || storage.getItem("roleList", "session")
+	const userStore = useUserStore()
+	return userStore?.roleList
 }
 
 // Format time
