@@ -128,17 +128,20 @@ const editUser = async () => {
 	await editUserFormRef.value.validate()
 	editUserLoading.value = true
 	// Send the form data to the server
-	const res = await api.editUser(editUserForm.value)
-	// Display the result message
-	if (res.code === 200 && res.data == 1) {
-		messageTip("success", "编辑成功!")
-		showEditUserDialog()
-		editUserFormRef.value.resetFields()
-		emit("getUserList")
-	} else {
-		messageTip("error", "编辑失败!请重试！")
+	try {
+		const res = await api.editUser(editUserForm.value)
+		// Display the result message
+		if (res.code === 200 && res.data == 1) {
+			messageTip("success", "编辑成功!")
+			showEditUserDialog()
+			editUserFormRef.value.resetFields()
+			emit("getUserList")
+		} else {
+			messageTip("error", "编辑失败!请重试！")
+		}
+	} finally {
+		editUserLoading.value = false
 	}
-	editUserLoading.value = false
 }
 </script>
 

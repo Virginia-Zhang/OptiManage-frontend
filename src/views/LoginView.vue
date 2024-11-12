@@ -12,7 +12,7 @@
 						<el-input v-model="form.loginAct" />
 					</el-form-item>
 					<el-form-item label="密码" prop="loginPwd">
-						<el-input v-model="form.loginPwd" type="password" />
+						<el-input v-model="form.loginPwd" type="password" show-password />
 					</el-form-item>
 					<el-form-item>
 						<el-button
@@ -69,46 +69,49 @@ const onSubmit = formEl => {
 		if (valid) {
 			// Turn off the lock to prevent users from sending frequent login requests
 			submitBtnLoading.value = true
-			const res = await api.login(form.value)
-			// Login success, a pop-up window shows to tell login is successful.
-			if (res.code === 200) {
-				messageTip("success", "登录成功!")
-				// Save the result into local storage or session storage
-				if (form.value.rememberMe) {
-					// store token into local storage
-					storage.setItem("token", res.data.token, "local")
-					// store roleList, permissionList and preferredLanguage into Pinia and localStorage
-					userStore.setUserData({
-						roleList: res.data.roleList,
-						permissionList: res.data.permissionList,
-						preferredLanguage: res.data.preferredLanguage,
-					})
-					storage.setItem("preferredLanguage", res.data.preferredLanguage, "local")
-					storage.setItem("roleList", res.data.roleList, "local")
-					storage.setItem("permissionList", res.data.permissionList, "local")
+			try {
+				const res = await api.login(form.value)
+				// Login success, a pop-up window shows to tell login is successful.
+				if (res.code === 200) {
+					messageTip("success", "登录成功!")
+					// Save the result into local storage or session storage
+					if (form.value.rememberMe) {
+						// store token into local storage
+						storage.setItem("token", res.data.token, "local")
+						// store roleList, permissionList and preferredLanguage into Pinia and localStorage
+						userStore.setUserData({
+							roleList: res.data.roleList,
+							permissionList: res.data.permissionList,
+							preferredLanguage: res.data.preferredLanguage,
+						})
+						storage.setItem("preferredLanguage", res.data.preferredLanguage, "local")
+						storage.setItem("roleList", res.data.roleList, "local")
+						storage.setItem("permissionList", res.data.permissionList, "local")
+					} else {
+						// store token into session storage
+						storage.setItem("token", res.data.token, "session")
+						// store roleList, permissionList and preferredLanguage into Pinia and sessionStorage
+						userStore.setUserData({
+							roleList: res.data.roleList,
+							permissionList: res.data.permissionList,
+							preferredLanguage: res.data.preferredLanguage,
+						})
+						storage.setItem("preferredLanguage", res.data.preferredLanguage, "session")
+						storage.setItem("roleList", res.data.roleList, "session")
+						storage.setItem("permissionList", res.data.permissionList, "session")
+					}
+					// After 2 seconds, jump to the dashboard page
+					setTimeout(() => {
+						router.push("/dashboard")
+					}, 2000)
 				} else {
-					// store token into session storage
-					storage.setItem("token", res.data.token, "session")
-					// store roleList, permissionList and preferredLanguage into Pinia and sessionStorage
-					userStore.setUserData({
-						roleList: res.data.roleList,
-						permissionList: res.data.permissionList,
-						preferredLanguage: res.data.preferredLanguage,
-					})
-					storage.setItem("preferredLanguage", res.data.preferredLanguage, "session")
-					storage.setItem("roleList", res.data.roleList, "session")
-					storage.setItem("permissionList", res.data.permissionList, "session")
+					// Login failed, a pop-up window shows to tell login is failed.
+					messageTip("error", res.msg)
 				}
-				// After 2 seconds, jump to the dashboard page
-				setTimeout(() => {
-					router.push("/dashboard")
-				}, 2000)
-			} else {
-				// Login failed, a pop-up window shows to tell login is failed.
-				messageTip("error", res.msg)
+			} finally {
+				// Stop loading
+				submitBtnLoading.value = false
 			}
-			// Request completed, unlock
-			submitBtnLoading.value = false
 		}
 	})
 }

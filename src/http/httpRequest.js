@@ -52,12 +52,13 @@ AxiosUtil.interceptors.response.use(
 	},
 	error => {
 		if (error.response) {
-			// Prompt based on the error information returned by the backend
+			// The request was made and the server responded with a status code that falls out of the range of 2xx.
+			messageTip("error", "服务器异常，请稍后再试。")
 			return Promise.reject(new Error(JSON.stringify(error.response.data)))
 		} else {
 			// Handle unresponsive errors, such as network errors
-			console.error("网络连接错误，请稍后再试。")
-			return Promise.reject(new Error("网络连接错误，请稍后再试。"))
+			messageTip("error", "服务器异常，请稍后再试。")
+			return Promise.reject(new Error("服务器异常，请稍后再试。"))
 		}
 	}
 )

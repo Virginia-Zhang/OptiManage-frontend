@@ -100,17 +100,20 @@ const addUser = () => {
 	addUserFormRef.value.validate(async valid => {
 		if (!valid) return
 		addUserLoading.value = true
-		const res = await api.addUser(addUserForm.value)
-		if (res.code === 200 && res.data == 1) {
-			// Added successfully, close pop-up window, reset form data, and then refresh user list data
-			messageTip("success", "添加成功!")
-			showAddUserDialog()
-			addUserFormRef.value.resetFields()
-			emits("getUserList")
-		} else {
-			messageTip("error", "添加失败!请重试！")
+		try {
+			const res = await api.addUser(addUserForm.value)
+			if (res.code === 200 && res.data == 1) {
+				// Added successfully, close pop-up window, reset form data, and then refresh user list data
+				messageTip("success", "添加成功!")
+				showAddUserDialog()
+				addUserFormRef.value.resetFields()
+				emits("getUserList")
+			} else {
+				messageTip("error", "添加失败!请重试！")
+			}
+		} finally {
+			addUserLoading.value = false
 		}
-		addUserLoading.value = false
 	})
 }
 

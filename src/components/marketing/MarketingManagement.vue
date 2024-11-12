@@ -38,6 +38,9 @@
 				width="200px"
 				clearable
 			>
+				<template #prefix>
+					<el-icon><Coin /></el-icon>
+				</template>
 				<el-option v-for="item in budgetOptions" :key="item" :label="item" :value="item" />
 			</el-select>
 			<!-- Currency unit -->
@@ -144,7 +147,7 @@ import {
 import { getPreferredLanguage, getRoleList, formatTime } from "@/utils/utils"
 import api from "@/http/api"
 
-import { Search, Refresh, MapLocation, Plus, Delete } from "@element-plus/icons-vue"
+import { Search, Refresh, MapLocation, Plus, Delete, Coin } from "@element-plus/icons-vue"
 
 // A computed attribute, controls whether the person in charge search box is displayed or not. If the user is admin, returns true, otherwise returns false.
 const showOwnerSearch = computed(() => {
