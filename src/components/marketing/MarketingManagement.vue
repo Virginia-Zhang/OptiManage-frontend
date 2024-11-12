@@ -3,7 +3,12 @@
 	<!-- Search form -->
 	<el-form :inline="true" :model="searchForm" class="demo-form-inline">
 		<el-form-item label="负责人" v-if="showOwnerSearch">
-			<el-select v-model="searchForm.owner" placeholder="请选择负责人" width="200px">
+			<el-select
+				v-model="searchForm.owner"
+				placeholder="请选择负责人"
+				width="200px"
+				clearable
+			>
 				<el-option
 					v-for="item in ownerOptions"
 					:key="item.id"
@@ -13,7 +18,7 @@
 			</el-select>
 		</el-form-item>
 		<el-form-item label="活动名称">
-			<el-input v-model="searchForm.name" placeholder="请输入活动名称" />
+			<el-input v-model="searchForm.name" placeholder="请输入活动名称" clearable />
 		</el-form-item>
 		<el-form-item label="活动时间">
 			<el-date-picker
@@ -27,7 +32,12 @@
 			/>
 		</el-form-item>
 		<el-form-item label="活动预算">
-			<el-select v-model="searchForm.budget" placeholder="请选择活动预算" width="200px">
+			<el-select
+				v-model="searchForm.budget"
+				placeholder="请选择活动预算"
+				width="200px"
+				clearable
+			>
 				<el-option v-for="item in budgetOptions" :key="item" :label="item" :value="item" />
 			</el-select>
 			<!-- Currency unit -->
@@ -144,10 +154,11 @@ const showOwnerSearch = computed(() => {
 
 // Get the list of users who can be selected as the owner of the activity
 const ownerOptions = ref([])
+// Get preferred language
+const preferredLanguage = getPreferredLanguage()
 
 // A computed attribute, displays different options based on the preferred language stored in storage.
 const budgetOptions = computed(() => {
-	const preferredLanguage = getPreferredLanguage()
 	switch (preferredLanguage) {
 		case 1:
 			return budgetRangeUSD
@@ -162,10 +173,10 @@ const budgetOptions = computed(() => {
 
 // SearchForm data
 const searchForm = ref({
-	name: "",
-	timeRange: "",
+	name: null,
+	timeRange: [],
 	budget: "",
-	region: 1,
+	region: null,
 })
 
 // Marketing campaigns list data
@@ -178,18 +189,18 @@ const currentPage = ref(1)
 // Number of items displayed per page
 const pageSize = ref(PAGE_SIZE)
 
+// Search parameters
+let params = {
+	page: currentPage.value,
+	pageSize: pageSize.value,
+}
 // Get the list of marketing campaigns
-const getMarketingList = async () => {
-	const params = {
-		page: currentPage.value,
-		pageSize: pageSize.value,
-	}
+const getMarketingList = async params => {
 	const res = await api.getActivityList(params)
 	if (res.code === 200) {
 		marketingList.value = res.data.rows
 		total.value = res.data.total
 		// Process marketingList and add the cost attribute to each item. The value is costRMB/costUSD/costJPY. The specific value depends on preferredLanguage.
-		const preferredLanguage = getPreferredLanguage()
 		switch (preferredLanguage) {
 			case 1:
 				marketingList.value.forEach(item => {
@@ -205,8 +216,8 @@ const getMarketingList = async () => {
 				marketingList.value.forEach(item => {
 					item.cost = item.costJpy
 				})
+				break
 		}
-		console.log("marketingList: ", marketingList.value)
 	}
 }
 
@@ -219,13 +230,14 @@ const getOwnerList = async () => {
 }
 
 onMounted(() => {
-	getMarketingList()
+	getMarketingList(params)
 	getOwnerList()
 })
 
 const handleCurrentChange = val => {
 	currentPage.value = val
-	getMarketingList()
+	params.page = currentPage.value
+	getMarketingList(params)
 }
 
 // Add campaign
@@ -269,24 +281,73 @@ const timeFormatter = (row, column, cellValue, index) => {
 }
 
 const search = () => {
-	console.log("search", searchForm.value)
+	// Clear the searching parameters last time
+	currentPage.value = 1
+	params = {
+		page: currentPage.value,
+		size: pageSize.value,
+	}
+	// Piece together the searching parameters for this time
+	params = {
+		...params,
+		ownerId: searchForm.value.owner,
+		name: searchForm.value.name,
+		region: searchForm.value.region,
+	}
+	// If the user selects activity time, process form.value.timeRange, split it into start time and end time, and convert them into date strings
+	if (searchForm.value.timeRange?.length) {
+		const startTime = formatTime(searchForm.value.timeRange[0])
+		const endTime = formatTime(searchForm.value.timeRange[1])
+		params.startTime = startTime
+		params.endTime = endTime
+	}
+	// If the user selects activity budget, process form.value.budget and split it into start cost and end cost.
+	if (searchForm.value.budget) {
+		let startCost
+		let endCost
+		// If budget is in "number-number" format ("5001-10000"), split it into startCost and endCost.
+		if (searchForm.value.budget.includes("-")) {
+			startCost = searchForm.value.budget.split("-")[0]
+			endCost = searchForm.value.budget.split("-")[1]
+		} else {
+			// If the budget is in the "number+" format ("1000000+"), remove the + at the end of the string, and then the remaining part is the start cost, without endCost.
+			startCost = searchForm.value.budget.slice(0, -1)
+		}
+
+		// Determine the currency unit that should be used for startCost and endCost according to preferredLanguage.
+		switch (preferredLanguage) {
+			case 1:
+				params.startCostUSD = Number(startCost)
+				params.endCostUSD = endCost ? Number(endCost) : null
+				break
+			case 2:
+				params.startCostRMB = Number(startCost)
+				params.endCostRMB = endCost ? Number(endCost) : null
+				break
+			case 3:
+				params.startCostJPY = Number(startCost)
+				params.endCostJPY = endCost ? Number(endCost) : null
+				break
+		}
+	}
+	getMarketingList(params)
 }
 
 const reset = () => {
 	if (showOwnerSearch.value) {
 		searchForm.value = {
-			owner: "",
-			name: "",
-			timeRange: "",
+			owner: null,
+			name: null,
+			timeRange: [],
 			budget: "",
-			region: 1,
+			region: null,
 		}
 	} else {
 		searchForm.value = {
-			name: "",
-			timeRange: "",
+			name: null,
+			timeRange: [],
 			budget: "",
-			region: 1,
+			region: null,
 		}
 	}
 }
