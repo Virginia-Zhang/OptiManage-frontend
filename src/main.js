@@ -19,7 +19,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 	app.component(key, component)
 }
 
-// 根据preferredLanguage设置ElementPlus的语言
+// Set the language of element plus according to preferredLanguage
 const preferredLanguage = getPreferredLanguage()
 let locale
 switch (preferredLanguage) {

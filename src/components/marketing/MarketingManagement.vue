@@ -4,9 +4,13 @@
 	<el-form :inline="true" :model="searchForm" class="demo-form-inline">
 		<el-form-item label="负责人" v-if="showOwnerSearch">
 			<el-select
-				v-model="searchForm.owner"
+				v-model="searchForm.owners"
 				placeholder="请选择负责人"
 				width="200px"
+				multiple
+				collapse-tags
+				collapse-tags-tooltip
+				:max-collapse-tags="3"
 				clearable
 			>
 				<el-option
@@ -43,11 +47,29 @@
 				</template>
 				<el-option v-for="item in budgetOptions" :key="item" :label="item" :value="item" />
 			</el-select>
-			<!-- Currency unit -->
-			<span style="margin-left: 5px">元</span>
+			<!-- Currency unit is also a drop-down menu with three options: USD, RMB, and JPY. When the option changes, clear the value in the budget box. -->
+			<el-select
+				v-model="searchForm.currency"
+				placeholder="请选择货币单位"
+				width="10px"
+				@change="() => (searchForm.budget = null)"
+				clearable
+			>
+				<el-option label="USD" :value="1" />
+				<el-option label="RMB" :value="2" />
+				<el-option label="JPY" :value="3" />
+			</el-select>
 		</el-form-item>
 		<el-form-item label="地区">
-			<el-select v-model="searchForm.region" placeholder="请选择地区" clearable width="120px">
+			<el-select
+				v-model="searchForm.regions"
+				placeholder="请选择地区"
+				multiple
+				collapse-tags
+				collapse-tags-tooltip
+				:max-collapse-tags="3"
+				clearable
+			>
 				<template #prefix>
 					<el-icon><MapLocation /></el-icon>
 				</template>
@@ -95,7 +117,13 @@
 			:formatter="timeFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column property="cost" label="活动预算（元）" width="150" show-overflow-tooltip />
+		<el-table-column property="cost" label="活动预算" width="100" show-overflow-tooltip />
+		<el-table-column
+			property="currencyUnit"
+			label="货币单位"
+			width="100"
+			show-overflow-tooltip
+		/>
 		<el-table-column
 			property="region"
 			label="地区"
@@ -144,10 +172,19 @@ import {
 	PAGE_SIZE,
 	regionData,
 } from "@/constants/constants"
-import { getPreferredLanguage, getRoleList, formatTime } from "@/utils/utils"
+import { getRoleList, formatTime } from "@/utils/utils"
 import api from "@/http/api"
 
 import { Search, Refresh, MapLocation, Plus, Delete, Coin } from "@element-plus/icons-vue"
+
+// SearchForm data
+const searchForm = ref({
+	name: null,
+	timeRange: [],
+	budget: null,
+	currency: null,
+	regions: null,
+})
 
 // A computed attribute, controls whether the person in charge search box is displayed or not. If the user is admin, returns true, otherwise returns false.
 const showOwnerSearch = computed(() => {
@@ -157,12 +194,10 @@ const showOwnerSearch = computed(() => {
 
 // Get the list of users who can be selected as the owner of the activity
 const ownerOptions = ref([])
-// Get preferred language
-const preferredLanguage = getPreferredLanguage()
 
-// A computed attribute, displays different options based on the preferred language stored in storage.
+// A computed attribute, displays different options based on the currency unit selected by the user.
 const budgetOptions = computed(() => {
-	switch (preferredLanguage) {
+	switch (searchForm.value.currency) {
 		case 1:
 			return budgetRangeUSD
 		case 2:
@@ -170,16 +205,8 @@ const budgetOptions = computed(() => {
 		case 3:
 			return budgetRangeJPY
 		default:
-			return budgetRangeUSD
+			return []
 	}
-})
-
-// SearchForm data
-const searchForm = ref({
-	name: null,
-	timeRange: [],
-	budget: "",
-	region: null,
 })
 
 // Marketing campaigns list data
@@ -203,24 +230,17 @@ const getMarketingList = async params => {
 	if (res.code === 200) {
 		marketingList.value = res.data.rows
 		total.value = res.data.total
-		// Process marketingList and add the cost attribute to each item. The value is costRMB/costUSD/costJPY. The specific value depends on preferredLanguage.
-		switch (preferredLanguage) {
-			case 1:
-				marketingList.value.forEach(item => {
-					item.cost = item.costUsd
-				})
-				break
-			case 2:
-				marketingList.value.forEach(item => {
-					item.cost = item.costRmb
-				})
-				break
-			case 3:
-				marketingList.value.forEach(item => {
-					item.cost = item.costJpy
-				})
-				break
-		}
+		// Process marketingList, adding cost and currencyUnit attributes to each item.
+		marketingList.value.forEach(item => {
+			item.cost = item.costUsd || item.costRmb || item.costJpy
+			if (item.costUsd) {
+				item.currencyUnit = "USD"
+			} else if (item.costRmb) {
+				item.currencyUnit = "RMB"
+			} else {
+				item.currencyUnit = "JPY"
+			}
+		})
 	}
 }
 
@@ -288,14 +308,22 @@ const search = () => {
 	currentPage.value = 1
 	params = {
 		page: currentPage.value,
-		size: pageSize.value,
+		pageSize: pageSize.value,
 	}
 	// Piece together the searching parameters for this time
 	params = {
 		...params,
-		ownerId: searchForm.value.owner,
+		// Convert owners into a string and put it into queryString
+		ownerIds:
+			searchForm.value.owners && searchForm.value.owners.length
+				? searchForm.value.owners.join(",")
+				: null,
 		name: searchForm.value.name,
-		region: searchForm.value.region,
+		// Convert regions into a string and put it into queryString
+		regions:
+			searchForm.value.regions && searchForm.value.regions.length
+				? searchForm.value.regions.join(",")
+				: null,
 	}
 	// If the user selects activity time, process form.value.timeRange, split it into start time and end time, and convert them into date strings
 	if (searchForm.value.timeRange?.length) {
@@ -304,8 +332,8 @@ const search = () => {
 		params.startTime = startTime
 		params.endTime = endTime
 	}
-	// If the user selects activity budget, process form.value.budget and split it into start cost and end cost.
-	if (searchForm.value.budget) {
+	// If the user selects activity budget and currency, process form.value.budget and split it into start cost and end cost.
+	if (searchForm.value.budget && searchForm.value.currency) {
 		let startCost
 		let endCost
 		// If budget is in "number-number" format ("5001-10000"), split it into startCost and endCost.
@@ -317,8 +345,8 @@ const search = () => {
 			startCost = searchForm.value.budget.slice(0, -1)
 		}
 
-		// Determine the currency unit that should be used for startCost and endCost according to preferredLanguage.
-		switch (preferredLanguage) {
+		// Determine the currency unit that should be used for startCost and endCost according to the.currency unit
+		switch (searchForm.value.currency) {
 			case 1:
 				params.startCostUSD = Number(startCost)
 				params.endCostUSD = endCost ? Number(endCost) : null
@@ -339,18 +367,18 @@ const search = () => {
 const reset = () => {
 	if (showOwnerSearch.value) {
 		searchForm.value = {
-			owner: null,
+			owners: null,
 			name: null,
 			timeRange: [],
 			budget: "",
-			region: null,
+			regions: null,
 		}
 	} else {
 		searchForm.value = {
 			name: null,
 			timeRange: [],
 			budget: "",
-			region: null,
+			regions: null,
 		}
 	}
 }

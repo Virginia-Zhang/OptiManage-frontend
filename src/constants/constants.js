@@ -10,6 +10,7 @@ import {
 	DeleteFilled,
 } from "@element-plus/icons-vue"
 
+// Menu list data in sidebar of Dashboard page
 export const menuData = [
 	{
 		index: "/dashboard/marketing",
@@ -64,6 +65,7 @@ export const menuData = [
 	},
 ]
 
+// region list data
 export const regionData = [
 	{ name: "中国", value: 1 },
 	{ name: "日本", value: 2 },
@@ -101,4 +103,5 @@ export const budgetRangeUSD = [
 // An array of different marketing campaign budget range, currency unit is JPY
 export const budgetRangeJPY = ["0-100000", "100001-1000000", "1000001-10000000", "10000000+"]
 
+// The number of items per page by default
 export const PAGE_SIZE = 10

@@ -12,9 +12,11 @@ const AxiosUtil = axios.create({
 
 const request = {
 	// GET method
-
 	get(url, params = {}, config = {}) {
-		return AxiosUtil.get(url, { params, ...config })
+		return AxiosUtil.get(url, {
+			params,
+			...config,
+		})
 	},
 
 	// POST method
