@@ -45,4 +45,8 @@ export default {
 	async getOwnerList() {
 		return await request.get("/user/owners")
 	},
+	// Add new marketing campaign(activity)
+	async addActivity(data) {
+		return await request.post("/activity/", data)
+	},
 }

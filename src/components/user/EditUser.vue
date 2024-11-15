@@ -91,7 +91,10 @@ const editUserFormRules = ref({
 	loginAct: [{ required: true, message: "请输入账号", trigger: "blur" }],
 	name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
 	phone: [{ required: true, message: "请输入手机号", trigger: "blur" }],
-	email: [{ required: true, message: "请输入邮箱", trigger: "blur" }],
+	email: [
+		{ required: true, message: "请输入邮箱", trigger: "blur" },
+		{ type: "email", message: "请输入正确的邮箱地址", trigger: ["blur", "change"] },
+	],
 	region: [{ required: true, message: "请输入地区", trigger: "blur" }],
 	accountNoExpired: [{ required: true, message: "请选择账号是否过期", trigger: "blur" }],
 	credentialsNoExpired: [{ required: true, message: "请选择密码是否过期", trigger: "blur" }],
@@ -137,7 +140,7 @@ const editUser = async () => {
 			editUserFormRef.value.resetFields()
 			emit("getUserList")
 		} else {
-			messageTip("error", "编辑失败!请重试！")
+			messageTip("error", res.msg || "编辑失败!请重试！")
 		}
 	} finally {
 		editUserLoading.value = false

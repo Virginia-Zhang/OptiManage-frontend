@@ -89,8 +89,10 @@ import MenuItem from "@/components/MenuItem.vue"
 import api from "@/http/api"
 import { messageTip, clearStorage, getRoleList } from "@/utils/utils"
 import { menuData } from "@/constants/constants"
+import { useUserStore } from "../stores/userStore"
 
 const router = useRouter()
+const userStore = useUserStore()
 
 const isCollapsed = ref(false)
 const activeMenu = ref("")
@@ -113,8 +115,9 @@ const handleCommand = async command => {
 		if (res.code === 200) {
 			// Logout success, a pop-up window shows to tell logout is successful.
 			messageTip("success", "退出成功!")
-			// Clear data in localStorage or sessionStorage
+			// Clear data in localStorage or sessionStorage, and in Pinia
 			clearStorage()
+			userStore.clearUserData()
 			// After 2 seconds, jump to the login page
 			setTimeout(() => {
 				router.push("/")

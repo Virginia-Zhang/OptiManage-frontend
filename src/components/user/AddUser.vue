@@ -57,7 +57,7 @@ import { regionData } from "@/constants/constants"
 
 import { MapLocation } from "@element-plus/icons-vue"
 
-// Variables that control the display and hiding of pop-up windows
+// Variables that control the display and hiding of the pop-up window
 const dialogVisible = ref(false)
 // form reference
 const addUserFormRef = ref(null)
@@ -109,7 +109,7 @@ const addUser = () => {
 				addUserFormRef.value.resetFields()
 				emits("getUserList")
 			} else {
-				messageTip("error", "添加失败!请重试！")
+				messageTip("error", res.msg || "添加失败!请重试！")
 			}
 		} finally {
 			addUserLoading.value = false

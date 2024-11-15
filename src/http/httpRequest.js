@@ -3,6 +3,9 @@ import config from "@/config"
 import storage from "@/utils/storage"
 import { messageTip, clearStorage } from "@/utils/utils"
 import router from "@/router"
+import { useUserStore } from "../stores/userStore"
+
+const userStore = useUserStore()
 
 const AxiosUtil = axios.create({
 	baseURL: config.baseApi,
@@ -41,10 +44,11 @@ const request = {
 // response interceptor
 AxiosUtil.interceptors.response.use(
 	response => {
-		// When token-related problems occur, show the message "Token is invalid. Please log in again", then clear the storage, and jump to the login page in 2 seconds.
+		// When token-related problems occur, show the message "Token is invalid. Please log in again", then clear the user data in storage and Pinia, and jump to the login page in 2 seconds.
 		if (response.data.code > 900) {
 			messageTip("error", "Token无效，请重新登录！")
 			clearStorage()
+			userStore.clearUserData()
 			setTimeout(() => {
 				router.push("/")
 			}, 2000)

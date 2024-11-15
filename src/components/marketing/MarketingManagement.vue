@@ -160,6 +160,12 @@
 		:current-page="currentPage"
 		@current-change="handleCurrentChange"
 	/>
+	<!-- AddMarketing component -->
+	<AddMarketing
+		ref="addMarketingRef"
+		:ownerOptions="ownerOptions"
+		@getMarketingList="getMarketingList"
+	/>
 </template>
 
 <script setup>
@@ -174,6 +180,7 @@ import {
 } from "@/constants/constants"
 import { getRoleList, formatTime } from "@/utils/utils"
 import api from "@/http/api"
+import AddMarketing from "./AddMarketing.vue"
 
 import { Search, Refresh, MapLocation, Plus, Delete, Coin } from "@element-plus/icons-vue"
 
@@ -218,6 +225,9 @@ const total = ref(0)
 const currentPage = ref(1)
 // Number of items displayed per page
 const pageSize = ref(PAGE_SIZE)
+
+// AddMarketing component instance
+const addMarketingRef = ref(null)
 
 // Search parameters
 let params = {
@@ -265,7 +275,9 @@ const handleCurrentChange = val => {
 
 // Add campaign
 const addMarketing = () => {
-	console.log("addMarketing")
+	if (!addMarketingRef.value) return
+	// Show AddMarketing component
+	addMarketingRef.value.showAddMarketingDialog()
 }
 
 // View campaign details
@@ -365,22 +377,7 @@ const search = () => {
 }
 
 const reset = () => {
-	if (showOwnerSearch.value) {
-		searchForm.value = {
-			owners: null,
-			name: null,
-			timeRange: [],
-			budget: "",
-			regions: null,
-		}
-	} else {
-		searchForm.value = {
-			name: null,
-			timeRange: [],
-			budget: "",
-			regions: null,
-		}
-	}
+	searchForm.value = {}
 }
 </script>
 

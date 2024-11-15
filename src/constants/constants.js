@@ -70,14 +70,7 @@ export const regionData = [
 	{ name: "中国", value: 1 },
 	{ name: "日本", value: 2 },
 	{ name: "美国", value: 3 },
-	{ name: "英国", value: 4 },
-	{ name: "法国", value: 5 },
-	{ name: "德国", value: 6 },
-	{ name: "新加坡", value: 7 },
-	{ name: "印度", value: 8 },
-	{ name: "澳大利亚", value: 9 },
-	{ name: "韩国", value: 10 },
-	{ name: "其他", value: 11 },
+	{ name: "其他", value: 4 },
 ]
 
 // An array of different marketing campaign budget range, currency unit is RMB
