@@ -166,6 +166,13 @@
 		:ownerOptions="ownerOptions"
 		@getMarketingList="getMarketingList"
 	/>
+	<!-- EditMarketing component -->
+	<EditMarketing
+		ref="editMarketingRef"
+		:ownerOptions="ownerOptions"
+		:activity="activity"
+		@getMarketingList="getMarketingList"
+	/>
 </template>
 
 <script setup>
@@ -180,8 +187,8 @@ import {
 } from "@/constants/constants"
 import { getRoleList, formatTime } from "@/utils/utils"
 import api from "@/http/api"
-import AddMarketing from "./AddMarketing.vue"
-
+import AddMarketing from "@/components/marketing/AddMarketing.vue"
+import EditMarketing from "@/components/marketing/EditMarketing.vue"
 import { Search, Refresh, MapLocation, Plus, Delete, Coin } from "@element-plus/icons-vue"
 
 // SearchForm data
@@ -228,6 +235,11 @@ const pageSize = ref(PAGE_SIZE)
 
 // AddMarketing component instance
 const addMarketingRef = ref(null)
+// EditMarketing component instance
+const editMarketingRef = ref(null)
+
+// Marketing activity data passed to the child component
+const activity = ref({})
 
 // Search parameters
 let params = {
@@ -287,7 +299,9 @@ const showMarketingDetails = row => {
 
 // Edit campaign
 const showEditMarketing = row => {
-	console.log("showEditMarketing", row)
+	if (!editMarketingRef.value) return
+	activity.value = row
+	editMarketingRef.value.showEditMarketingDialog()
 }
 
 const handleSelectionChange = val => {
@@ -339,10 +353,8 @@ const search = () => {
 	}
 	// If the user selects activity time, process form.value.timeRange, split it into start time and end time, and convert them into date strings
 	if (searchForm.value.timeRange?.length) {
-		const startTime = formatTime(searchForm.value.timeRange[0])
-		const endTime = formatTime(searchForm.value.timeRange[1])
-		params.startTime = startTime
-		params.endTime = endTime
+		params.startTime = formatTime(searchForm.value.timeRange[0])
+		params.endTime = formatTime(searchForm.value.timeRange[1])
 	}
 	// If the user selects activity budget and currency, process form.value.budget and split it into start cost and end cost.
 	if (searchForm.value.budget && searchForm.value.currency) {

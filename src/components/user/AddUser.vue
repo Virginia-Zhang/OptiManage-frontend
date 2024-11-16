@@ -124,11 +124,8 @@ const handleCancel = formEl => {
 	showAddUserDialog()
 }
 
-const handleClose = done => {
-	// Reset form data
-	addUserFormRef.value.resetFields()
-	// Close pop-up window
-	done()
+const handleClose = () => {
+	handleCancel(addUserFormRef.value)
 }
 </script>
 

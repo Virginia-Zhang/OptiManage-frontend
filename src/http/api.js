@@ -49,4 +49,8 @@ export default {
 	async addActivity(data) {
 		return await request.post("/activity/", data)
 	},
+	// Edit marketing campaign(activity)
+	async editActivity(data) {
+		return await request.put("/activity/", data)
+	},
 }

@@ -43,3 +43,8 @@ export const formatTime = time => {
 	if (!time) return ""
 	return dayjs(time).format("YYYY-MM-DD HH:mm:ss")
 }
+
+// Turn formatted time string into timestamp
+export const parseTime = time => {
+	return dayjs(time).valueOf()
+}

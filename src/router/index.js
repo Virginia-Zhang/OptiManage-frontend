@@ -42,7 +42,7 @@ const router = createRouter({
 				{
 					path: "user",
 					name: "user",
-					component: () => import("@/components/user/UserManagement.vue"),
+					component: () => import("@/views/UserManagement.vue"),
 					meta: {
 						title: "用户管理",
 					},
@@ -50,7 +50,7 @@ const router = createRouter({
 				{
 					path: "user-recycle",
 					name: "user-recycle",
-					component: () => import("@/components/user/UserRecycleBin.vue"),
+					component: () => import("@/views/UserRecycleBin.vue"),
 					meta: {
 						title: "用户管理-回收站",
 					},
@@ -58,7 +58,7 @@ const router = createRouter({
 				{
 					path: "marketing",
 					name: "marketing",
-					component: () => import("@/components/marketing/MarketingManagement.vue"),
+					component: () => import("@/views/MarketingManagement.vue"),
 					meta: {
 						title: "市场活动",
 					},

@@ -119,11 +119,8 @@ const handleCancel = formEl => {
 	showEditUserDialog()
 }
 
-const handleClose = done => {
-	// Reset form data
-	editUserFormRef.value.resetFields()
-	// Close pop-up window
-	done()
+const handleClose = () => {
+	handleCancel(editUserFormRef.value)
 }
 
 const editUser = async () => {
