@@ -27,9 +27,9 @@
 					</template>
 					<el-option
 						v-for="item in regionData"
-						:key="item.value"
+						:key="item.id"
 						:label="item.name"
-						:value="item.value"
+						:value="item.id"
 					/>
 				</el-select>
 			</el-form-item>
@@ -69,11 +69,11 @@ import { ref, watchEffect } from "vue"
 
 import api from "@/http/api"
 import { messageTip } from "@/utils/utils"
-import { regionData } from "@/constants/constants"
+import { regionData, PAGE_SIZE } from "@/constants/constants"
 
 import { MapLocation } from "@element-plus/icons-vue"
 
-const emit = defineEmits(["getUserList"])
+const emits = defineEmits(["getUserList"])
 const props = defineProps({
 	// Receive user information passed by the parent component
 	user: Object,
@@ -133,9 +133,13 @@ const editUser = async () => {
 		// Display the result message
 		if (res.code === 200 && res.data == 1) {
 			messageTip("success", "编辑成功!")
-			showEditUserDialog()
-			editUserFormRef.value.resetFields()
-			emit("getUserList")
+			handleCancel(editUserFormRef.value)
+			// Trigger the getUserList method of the parent component, pass the params, and display the user list starting from the first page
+			const params = {
+				page: 1,
+				pageSize: PAGE_SIZE,
+			}
+			emits("getUserList", params)
 		} else {
 			messageTip("error", res.msg || "编辑失败!请重试！")
 		}

@@ -3,14 +3,15 @@ import config from "@/config"
 import storage from "@/utils/storage"
 import { messageTip, clearStorage } from "@/utils/utils"
 import router from "@/router"
-import { useUserStore } from "../stores/userStore"
+import { useUserStore } from "@/stores/userStore"
+import { useMarketingStore } from "@/stores/marketingStore"
 
 const userStore = useUserStore()
+const marketingStore = useMarketingStore()
 
 const AxiosUtil = axios.create({
 	baseURL: config.baseApi,
 	timeout: 10000,
-	// withCredentials: true
 })
 
 const request = {
@@ -23,19 +24,16 @@ const request = {
 	},
 
 	// POST method
-
 	post(url, data = {}, config = {}) {
 		return AxiosUtil.post(url, data, config)
 	},
 
 	// PUT method
-
 	put(url, data, config = {}) {
 		return AxiosUtil.put(url, data, config)
 	},
 
 	// DELETE method
-
 	delete(url, data, config = {}) {
 		return AxiosUtil.delete(url, { data, ...config })
 	},
@@ -49,6 +47,7 @@ AxiosUtil.interceptors.response.use(
 			messageTip("error", "Token无效，请重新登录！")
 			clearStorage()
 			userStore.clearUserData()
+			marketingStore.clearSelectedMarketingActivity()
 			setTimeout(() => {
 				router.push("/")
 			}, 2000)

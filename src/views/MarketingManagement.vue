@@ -40,6 +40,7 @@
 				v-model="searchForm.budget"
 				placeholder="请选择活动预算"
 				width="200px"
+				@clear="searchForm.currencyUnit = null"
 				clearable
 			>
 				<template #prefix>
@@ -49,15 +50,15 @@
 			</el-select>
 			<!-- Currency unit is also a drop-down menu with three options: USD, RMB, and JPY. When the option changes, clear the value in the budget box. -->
 			<el-select
-				v-model="searchForm.currency"
+				v-model="searchForm.currencyUnit"
 				placeholder="请选择货币单位"
 				width="10px"
 				@change="() => (searchForm.budget = null)"
 				clearable
 			>
-				<el-option label="USD" :value="1" />
-				<el-option label="RMB" :value="2" />
-				<el-option label="JPY" :value="3" />
+				<el-option label="USD" value="USD" />
+				<el-option label="RMB" value="RMB" />
+				<el-option label="JPY" value="JPY" />
 			</el-select>
 		</el-form-item>
 		<el-form-item label="地区">
@@ -75,9 +76,9 @@
 				</template>
 				<el-option
 					v-for="item in regionData"
-					:key="item.value"
+					:key="item.id"
 					:label="item.name"
-					:value="item.value"
+					:value="item.id"
 				/>
 			</el-select>
 		</el-form-item>
@@ -185,18 +186,21 @@ import {
 	PAGE_SIZE,
 	regionData,
 } from "@/constants/constants"
-import { getRoleList, formatTime } from "@/utils/utils"
+import { getRoleList, formatTime, messageTip } from "@/utils/utils"
 import api from "@/http/api"
 import AddMarketing from "@/components/marketing/AddMarketing.vue"
 import EditMarketing from "@/components/marketing/EditMarketing.vue"
 import { Search, Refresh, MapLocation, Plus, Delete, Coin } from "@element-plus/icons-vue"
+import { useMarketingStore } from "@/stores/marketingStore"
+
+const marketingStore = useMarketingStore()
 
 // SearchForm data
 const searchForm = ref({
 	name: null,
 	timeRange: [],
 	budget: null,
-	currency: null,
+	currencyUnit: null,
 	regions: null,
 })
 
@@ -211,12 +215,12 @@ const ownerOptions = ref([])
 
 // A computed attribute, displays different options based on the currency unit selected by the user.
 const budgetOptions = computed(() => {
-	switch (searchForm.value.currency) {
-		case 1:
+	switch (searchForm.value.currencyUnit) {
+		case "USD":
 			return budgetRangeUSD
-		case 2:
+		case "RMB":
 			return budgetRangeRMB
-		case 3:
+		case "JPY":
 			return budgetRangeJPY
 		default:
 			return []
@@ -252,17 +256,6 @@ const getMarketingList = async params => {
 	if (res.code === 200) {
 		marketingList.value = res.data.rows
 		total.value = res.data.total
-		// Process marketingList, adding cost and currencyUnit attributes to each item.
-		marketingList.value.forEach(item => {
-			item.cost = item.costUsd || item.costRmb || item.costJpy
-			if (item.costUsd) {
-				item.currencyUnit = "USD"
-			} else if (item.costRmb) {
-				item.currencyUnit = "RMB"
-			} else {
-				item.currencyUnit = "JPY"
-			}
-		})
 	}
 }
 
@@ -295,6 +288,8 @@ const addMarketing = () => {
 // View campaign details
 const showMarketingDetails = row => {
 	console.log("showMarketingDetails", row)
+	// Save selected marketing activity data to pinia
+	marketingStore.setSelectedMarketingActivity(row)
 }
 
 // Edit campaign
@@ -320,7 +315,7 @@ const batchDelete = () => {
 
 // region formatting
 const regionFormatter = (row, column, cellValue, index) => {
-	const region = regionData.find(item => item.value === cellValue)
+	const region = regionData.find(item => item.id === cellValue)
 	return region ? region.name : "未知地区"
 }
 
@@ -350,6 +345,7 @@ const search = () => {
 			searchForm.value.regions && searchForm.value.regions.length
 				? searchForm.value.regions.join(",")
 				: null,
+		currencyUnit: searchForm.value.currencyUnit,
 	}
 	// If the user selects activity time, process form.value.timeRange, split it into start time and end time, and convert them into date strings
 	if (searchForm.value.timeRange?.length) {
@@ -357,7 +353,7 @@ const search = () => {
 		params.endTime = formatTime(searchForm.value.timeRange[1])
 	}
 	// If the user selects activity budget and currency, process form.value.budget and split it into start cost and end cost.
-	if (searchForm.value.budget && searchForm.value.currency) {
+	if (searchForm.value.budget && searchForm.value.currencyUnit) {
 		let startCost
 		let endCost
 		// If budget is in "number-number" format ("5001-10000"), split it into startCost and endCost.
@@ -368,22 +364,19 @@ const search = () => {
 			// If the budget is in the "number+" format ("1000000+"), remove the + at the end of the string, and then the remaining part is the start cost, without endCost.
 			startCost = searchForm.value.budget.slice(0, -1)
 		}
-
-		// Determine the currency unit that should be used for startCost and endCost according to the.currency unit
-		switch (searchForm.value.currency) {
-			case 1:
-				params.startCostUSD = Number(startCost)
-				params.endCostUSD = endCost ? Number(endCost) : null
-				break
-			case 2:
-				params.startCostRMB = Number(startCost)
-				params.endCostRMB = endCost ? Number(endCost) : null
-				break
-			case 3:
-				params.startCostJPY = Number(startCost)
-				params.endCostJPY = endCost ? Number(endCost) : null
-				break
-		}
+		// Remove the "," in the startCost and endCost strings and convert them into numbers
+		startCost = Number(startCost.replaceAll(",", ""))
+		endCost = endCost ? Number(endCost.replaceAll(",", "")) : null
+		params.startCost = startCost
+		params.endCost = endCost
+	} else if (searchForm.value.budget && !searchForm.value.currencyUnit) {
+		// If the user only selects the budget, but not the currencyUnit, then the budget is invalid.
+		messageTip("warning", "请选择货币单位，或清空活动预算！")
+		return
+	} else if (!searchForm.value.budget && searchForm.value.currencyUnit) {
+		// If the user only selects the currencyUnit, but not the budget, then the budget is invalid.
+		messageTip("warning", "请选择活动预算，或清空货币单位！")
+		return
 	}
 	getMarketingList(params)
 }

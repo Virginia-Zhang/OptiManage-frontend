@@ -94,19 +94,23 @@ const editUserRef = ref(null)
 // Ref to user table
 const userTableRef = ref(null)
 
+// Default pagination params
+const params = {
+	page: currentPage.value,
+	pageSize: pageSize.value,
+}
 const handleCurrentChange = val => {
 	currentPage.value = val
-	getUserList()
+	params.page = currentPage.value
+	getUserList(params)
 }
 
 // Query user list by page
-const getUserList = async () => {
-	const params = {
-		page: currentPage.value,
-		pageSize: pageSize.value,
-	}
+const getUserList = async data => {
+	currentPage.value = data.page
+	pageSize.value = data.pageSize
 	// Send request
-	const res = await api.getUserList(params)
+	const res = await api.getUserList(data)
 	if (res.code === 200) {
 		userList.value = res.data.rows
 		total.value = res.data.total
@@ -131,7 +135,7 @@ const addUser = () => {
 
 // Format region data
 const regionFormatter = (row, column, cellValue, index) => {
-	const region = regionData.find(item => item.value === cellValue)
+	const region = regionData.find(item => item.id === cellValue)
 	return region ? region.name : "未知地区"
 }
 
@@ -143,7 +147,6 @@ const timeFormatter = (row, column, cellValue, index) => {
 // Show edit user dialog
 const showEditUser = row => {
 	if (!row) return
-	console.log("row: ", row)
 	if (editUserRef.value) {
 		user.value = row
 		editUserRef.value.showEditUserDialog()
@@ -165,7 +168,11 @@ const deleteUsers = async ids => {
 			const res = await api.updateUsers(params)
 			if (res.code === 200) {
 				messageTip("success", "删除成功!")
-				getUserList()
+				getUserList({
+					page: 1,
+					pageSize: pageSize.value,
+				})
+				currentPage.value = 1
 			} else {
 				messageTip("error", "删除失败!请重试！")
 			}
@@ -195,7 +202,7 @@ const batchDelete = () => {
 }
 
 onMounted(() => {
-	getUserList()
+	getUserList(params)
 })
 </script>
 

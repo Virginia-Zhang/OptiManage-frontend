@@ -89,10 +89,12 @@ import MenuItem from "@/components/MenuItem.vue"
 import api from "@/http/api"
 import { messageTip, clearStorage, getRoleList } from "@/utils/utils"
 import { menuData } from "@/constants/constants"
-import { useUserStore } from "../stores/userStore"
+import { useUserStore } from "@/stores/userStore"
+import { useMarketingStore } from "@/stores/marketingStore"
 
 const router = useRouter()
 const userStore = useUserStore()
+const marketingStore = useMarketingStore()
 
 const isCollapsed = ref(false)
 const activeMenu = ref("")
@@ -118,6 +120,7 @@ const handleCommand = async command => {
 			// Clear data in localStorage or sessionStorage, and in Pinia
 			clearStorage()
 			userStore.clearUserData()
+			marketingStore.clearSelectedMarketingActivity()
 			// After 2 seconds, jump to the login page
 			setTimeout(() => {
 				router.push("/")

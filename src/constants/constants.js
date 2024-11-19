@@ -65,36 +65,62 @@ export const menuData = [
 	},
 ]
 
-// region list data
+// region details
+// language: 1-English, 2-Chinese, 3-Japanese
 export const regionData = [
-	{ name: "中国", value: 1 },
-	{ name: "日本", value: 2 },
-	{ name: "美国", value: 3 },
-	{ name: "其他", value: 4 },
+	{
+		id: 1,
+		name: "中国",
+		currencyUnit: "RMB",
+		language: 2,
+	},
+	{
+		id: 2,
+		name: "日本",
+		currencyUnit: "JPY",
+		language: 3,
+	},
+	{
+		id: 3,
+		name: "美国",
+		currencyUnit: "USD",
+		language: 1,
+	},
+	{
+		id: 4,
+		name: "其他",
+		currencyUnit: "USD",
+		language: 1,
+	},
 ]
 
 // An array of different marketing campaign budget range, currency unit is RMB
 export const budgetRangeRMB = [
-	"0-5000",
-	"5001-10000",
-	"10001-50000",
-	"50001-100000",
-	"100001-500000",
-	"500001-1000000",
-	"1000000+",
+	"0-5,000",
+	"5,000-10,000",
+	"10,000-50,000",
+	"50,000-100,000",
+	"100,000-500,000",
+	"500,000-1,000,000",
+	"1,000,000+",
 ]
 
 // An array of different marketing campaign budget range, currency unit is USD
 export const budgetRangeUSD = [
-	"0-1000",
-	"1001-5000",
-	"5001-10000",
-	"10001-50000",
-	"50001-100000",
-	"100000+",
+	"0-1,000",
+	"1,000-5,000",
+	"5,000-10,000",
+	"10,000-50,000",
+	"50,000-100,000",
+	"100,000+",
 ]
 // An array of different marketing campaign budget range, currency unit is JPY
-export const budgetRangeJPY = ["0-100000", "100001-1000000", "1000001-10000000", "10000000+"]
+export const budgetRangeJPY = [
+	"0-100,000",
+	"100,000-1,000,000",
+	"1,000,000-1,000,0000",
+	"10,000,000+",
+]
 
 // The number of items per page by default
 export const PAGE_SIZE = 10

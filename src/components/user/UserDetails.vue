@@ -1,7 +1,7 @@
 <!-- User details pop-up window -->
 <template>
 	<el-dialog v-model="dialogVisible" title="用户详情" width="30%" :before-close="handleClose">
-		<el-descriptions :column="1" border>
+		<el-descriptions :column="1" :border="true">
 			<el-descriptions-item label="ID">{{ user.id }}</el-descriptions-item>
 			<el-descriptions-item label="账号">{{ user.loginAct }}</el-descriptions-item>
 			<el-descriptions-item label="姓名">{{ user.name }}</el-descriptions-item>
@@ -68,7 +68,7 @@ const handleClose = () => {
 const convertRegionToText = region => {
 	// Traverse regionData, find the corresponding text, and return
 	for (const item of regionData) {
-		if (item.value === region) {
+		if (item.id === region) {
 			return item.name
 		}
 	}

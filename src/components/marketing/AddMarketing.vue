@@ -56,7 +56,7 @@
 					v-model="addMarketingForm.region"
 					placeholder="请选择地区"
 					@change="handleRegionChange"
-					@clear="currencyUnit = ''"
+					@clear="currencyUnit = null"
 					clearable
 				>
 					<template #prefix>
@@ -64,9 +64,9 @@
 					</template>
 					<el-option
 						v-for="item in regionData"
-						:key="item.value"
+						:key="item.id"
 						:label="item.name"
-						:value="item.value"
+						:value="item.id"
 					/>
 				</el-select>
 			</el-form-item>
@@ -74,15 +74,16 @@
 				<el-input
 					v-model="addMarketingForm.cost"
 					placeholder="请输入活动预算"
-					style="width: 750px"
+					style="width: 740px"
 				/>
-				<span style="margin-left: 5px">{{ currencyUnit }}</span>
+				<span style="margin-left: 5px">{{ addMarketingForm.currencyUnit || "" }}</span>
 			</el-form-item>
 			<el-form-item label="活动描述" prop="description">
 				<el-input
 					v-model="addMarketingForm.description"
 					type="textarea"
 					placeholder="请输入活动描述"
+					:rows="4"
 				/>
 			</el-form-item>
 		</el-form>
@@ -103,7 +104,7 @@ import { ref, reactive, computed } from "vue"
 
 import api from "@/http/api"
 import { messageTip, getRoleList, formatTime } from "@/utils/utils"
-import { regionData } from "@/constants/constants"
+import { regionData, PAGE_SIZE } from "@/constants/constants"
 
 import { MapLocation } from "@element-plus/icons-vue"
 
@@ -120,6 +121,7 @@ const addMarketingForm = ref({
 	endTime: null,
 	region: null,
 	cost: null,
+	currencyUnit: null,
 	description: null,
 })
 // Form validation rules
@@ -142,8 +144,6 @@ const rules = reactive({
 		{ max: 128, message: "活动描述长度不能超过1024个字符", trigger: "blur" },
 	],
 })
-// Currency unit for cost
-const currencyUnit = ref("")
 
 // A computed attribute, controls whether the person in charge search box is displayed or not. If the user is admin, returns true, otherwise returns false.
 const showOwnerSearch = computed(() => {
@@ -164,17 +164,17 @@ const emits = defineEmits(["getMarketingList"])
 const addMarketingLoading = ref(false)
 
 const handleRegionChange = value => {
-	currencyUnit.value = ""
+	addMarketingForm.value.currencyUnit = null
 	// Set currency unit based on selected region, RMB for 1, JPY for 2, and USD for others
 	switch (value) {
 		case 1:
-			currencyUnit.value = "RMB"
+			addMarketingForm.value.currencyUnit = "RMB"
 			break
 		case 2:
-			currencyUnit.value = "JPY"
+			addMarketingForm.value.currencyUnit = "JPY"
 			break
 		default:
-			currencyUnit.value = "USD"
+			addMarketingForm.value.currencyUnit = "USD"
 	}
 }
 
@@ -191,20 +191,8 @@ const addMarketing = () => {
 		// Format startTime and endTime
 		addMarketingForm.value.startTime = formatTime(addMarketingForm.value.startTime)
 		addMarketingForm.value.endTime = formatTime(addMarketingForm.value.endTime)
-		// According to the value of currencyUnit, determine whether costRmb, costJpy or costUsd should be used for cost.
-		switch (currencyUnit.value) {
-			case "RMB":
-				addMarketingForm.value.costRmb = Number(addMarketingForm.value.cost)
-				break
-			case "JPY":
-				addMarketingForm.value.costJpy = Number(addMarketingForm.value.cost)
-				break
-			case "USD":
-				addMarketingForm.value.costUsd = Number(addMarketingForm.value.cost)
-				break
-		}
-		// Delete cost attribute
-		delete addMarketingForm.value.cost
+		// Convert cost to number type
+		addMarketingForm.value.cost = Number(addMarketingForm.value.cost)
 		// Open loading
 		addMarketingLoading.value = true
 		try {
@@ -213,7 +201,12 @@ const addMarketing = () => {
 				// Added successfully, close pop-up window, reset form data, and then refresh marketing list data
 				messageTip("success", "添加成功!")
 				handleCancel(addMarketingFormRef.value)
-				emits("getMarketingList")
+				// Trigger the getMarketingList method of the parent component, pass the params, and display the marketing activity list starting from the first page
+				const params = {
+					page: 1,
+					pageSize: PAGE_SIZE,
+				}
+				emits("getMarketingList", params)
 			} else {
 				messageTip("error", res.msg || "添加失败!请重试！")
 			}
@@ -228,11 +221,7 @@ const handleCancel = formEl => {
 	// Reset form data
 	formEl.resetFields()
 	// Reset currency unit
-	currencyUnit.value = ""
-	// Reset costs
-	if (addMarketingForm.value.costRmb) delete addMarketingForm.value.costRmb
-	if (addMarketingForm.value.costUsd) delete addMarketingForm.value.costUsd
-	if (addMarketingForm.value.costJpy) delete addMarketingForm.value.costJpy
+	addMarketingForm.value.currencyUnit = null
 	// Close pop-up window
 	showAddMarketingDialog()
 }
@@ -245,5 +234,8 @@ const handleClose = () => {
 <style scoped lang="scss">
 .dialog-footer button:first-child {
 	margin-right: 10px;
+}
+.el-input__wrapper {
+	flex-grow: 0;
 }
 </style>

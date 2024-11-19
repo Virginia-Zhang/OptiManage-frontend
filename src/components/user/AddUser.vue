@@ -29,9 +29,9 @@
 					</template>
 					<el-option
 						v-for="item in regionData"
-						:key="item.value"
+						:key="item.id"
 						:label="item.name"
-						:value="item.value"
+						:value="item.id"
 					/>
 				</el-select>
 			</el-form-item>
@@ -53,7 +53,7 @@ import { ref, reactive } from "vue"
 
 import api from "@/http/api"
 import { messageTip } from "@/utils/utils"
-import { regionData } from "@/constants/constants"
+import { regionData, PAGE_SIZE } from "@/constants/constants"
 
 import { MapLocation } from "@element-plus/icons-vue"
 
@@ -63,11 +63,12 @@ const dialogVisible = ref(false)
 const addUserFormRef = ref(null)
 // form data
 const addUserForm = ref({
-	loginAct: "",
-	name: "",
-	phone: "",
-	email: "",
-	region: 1,
+	loginAct: null,
+	name: null,
+	phone: null,
+	email: null,
+	region: null,
+	preferredLanguage: null,
 })
 // Form validation rules
 const rules = reactive({
@@ -99,15 +100,24 @@ const addUser = () => {
 	// Verify whether form data is legal
 	addUserFormRef.value.validate(async valid => {
 		if (!valid) return
+		// Add the preferredLanguage field, and find the language in regionData based on the value of the region field.
+		addUserForm.value.preferredLanguage = regionData.find(
+			item => item.id === addUserForm.value.region
+		).language
+
 		addUserLoading.value = true
 		try {
 			const res = await api.addUser(addUserForm.value)
 			if (res.code === 200 && res.data == 1) {
 				// Added successfully, close pop-up window, reset form data, and then refresh user list data
 				messageTip("success", "添加成功!")
-				showAddUserDialog()
-				addUserFormRef.value.resetFields()
-				emits("getUserList")
+				handleCancel(addUserFormRef.value)
+				// Trigger the getUserList method of the parent component, pass the params, and display the user list starting from the first page
+				const params = {
+					page: 1,
+					pageSize: PAGE_SIZE,
+				}
+				emits("getUserList", params)
 			} else {
 				messageTip("error", res.msg || "添加失败!请重试！")
 			}

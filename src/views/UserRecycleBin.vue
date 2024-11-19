@@ -111,7 +111,7 @@ const showUserDetails = row => {
 
 // Format region data
 const regionFormatter = (row, column, cellValue, index) => {
-	const region = regionData.find(item => item.value === cellValue)
+	const region = regionData.find(item => item.id === cellValue)
 	return region ? region.name : "未知地区"
 }
 
@@ -135,6 +135,7 @@ const restoreUsers = async ids => {
 			const res = await api.updateUsers(params)
 			if (res.code === 200) {
 				messageTip("success", "恢复成功!")
+				currentPage.value = 1
 				getUserList()
 			} else {
 				messageTip("error", "恢复失败!请重试！")
