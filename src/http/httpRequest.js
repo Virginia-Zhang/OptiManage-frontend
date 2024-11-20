@@ -34,7 +34,7 @@ const request = {
 	},
 
 	// DELETE method
-	delete(url, data, config = {}) {
+	delete(url, data = {}, config = {}) {
 		return AxiosUtil.delete(url, { data, ...config })
 	},
 }

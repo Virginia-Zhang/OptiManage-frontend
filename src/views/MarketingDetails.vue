@@ -63,16 +63,66 @@
 			<el-button @click="handleCancel(remarkFormRef)">返回</el-button>
 		</el-form-item>
 	</el-form>
+	<!-- Table area to display marketing activity remarks -->
+	<el-table :data="remarkList" :border="true" stripe style="width: 100%" table-layout="auto">
+		<el-table-column type="index" width="60" fixed="left" />
+		<el-table-column property="noteContent" label="备注内容" width="400">
+			<template #default="scope">
+				<div v-html="scope.row.noteContent.replace(/\n/g, '<br>')"></div>
+			</template>
+		</el-table-column>
+		<el-table-column
+			property="createTime"
+			label="创建时间"
+			width="170"
+			:formatter="timeFormatter"
+			show-overflow-tooltip
+		/>
+		<el-table-column property="createByAct" label="创建人" show-overflow-tooltip />
+		<el-table-column
+			property="editTime"
+			label="编辑时间"
+			width="170"
+			:formatter="timeFormatter"
+			show-overflow-tooltip
+		/>
+		<el-table-column property="editByAct" label="编辑人" show-overflow-tooltip />
+		<el-table-column fixed="right" label="操作" min-width="70">
+			<template #default="scope">
+				<el-button type="success" size="small" @click="showEditMarketingRemark(scope.row)"
+					>编辑</el-button
+				>
+				<el-button type="danger" size="small" @click="deleteMarketingRemark(scope.row.id)"
+					>删除</el-button
+				>
+			</template>
+		</el-table-column>
+	</el-table>
+	<el-pagination
+		background
+		layout="prev, pager, next"
+		:page-size="pageSize"
+		:total="total"
+		:current-page="currentPage"
+		@current-change="handleCurrentChange"
+		style="margin-top: 20px"
+	/>
+	<EditMarketingRemark
+		ref="editMarketingRemarkRef"
+		:remark="remark"
+		@getMarketingRemarkList="getMarketingRemarkList"
+	/>
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 
 import { useMarketingStore } from "@/stores/marketingStore"
 import { formatTime, messageTip } from "../utils/utils"
 import { regionData } from "@/constants/constants"
 import api from "@/http/api"
+import EditMarketingRemark from "@/components/marketing/EditMarketingRemark.vue"
 
 const router = useRouter()
 const marketingStore = useMarketingStore()
@@ -80,18 +130,33 @@ const marketingStore = useMarketingStore()
 // Get the currently selected marketing activity data from the marketing store
 const { selectedMarketingActivity } = marketingStore
 
+// Remark form data
 const remarkForm = ref({
 	activityId: selectedMarketingActivity.id,
 	noteContent: "",
 })
+// Remark form validation rules
 const remarkRules = {
 	noteContent: [
 		{ required: true, message: "请输入备注内容", trigger: "blur" },
 		{ min: 1, max: 5000, message: "备注内容长度在1-5000个字符", trigger: "blur" },
 	],
 }
+// Remark form reference
 const remarkFormRef = ref(null)
+// Submit button loading status
 const submitRemarkLoading = ref(false)
+
+// Remark list
+const remarkList = ref([])
+const total = ref(0)
+const pageSize = ref(5)
+const currentPage = ref(1)
+
+// Remark editing component reference
+const editMarketingRemarkRef = ref(null)
+// Remark data, which is used as props passed to the editing component
+const remark = ref({})
 
 // Convert the value of region into the corresponding text and display it on the page
 const convertRegionToText = region => {
@@ -112,6 +177,7 @@ const submitRemark = () => {
 			if (res.code === 200 && res.data == 1) {
 				messageTip("success", "添加备注成功!")
 				remarkFormRef.value.resetFields()
+				getMarketingRemarkList()
 			} else {
 				messageTip("error", res.msg || "添加备注失败!请重试！")
 			}
@@ -126,6 +192,52 @@ const handleCancel = formEl => {
 	formEl.resetFields()
 	// Back to the previous page
 	router.back()
+}
+
+const getMarketingRemarkList = async () => {
+	const res = await api.getActivityRemarkList({
+		page: currentPage.value,
+		pageSize: pageSize.value,
+		activityId: selectedMarketingActivity.id,
+	})
+	if (res.code === 200) {
+		remarkList.value = res.data.rows
+		total.value = res.data.total
+	}
+}
+const handleCurrentChange = async page => {
+	currentPage.value = page
+	await getMarketingRemarkList()
+}
+
+onMounted(() => {
+	getMarketingRemarkList()
+})
+
+// Convert timestamp to readable time
+const timeFormatter = (row, column, cellValue, index) => {
+	return formatTime(cellValue)
+}
+
+// Show edit remark dialog
+const showEditMarketingRemark = row => {
+	remark.value = row
+	editMarketingRemarkRef.value.showEditMarketingRemarkDialog()
+}
+
+// Delete remark by id
+const deleteMarketingRemark = async id => {
+	try {
+		const res = await api.deleteActivityRemarkById(id)
+		if (res.code === 200 && res.data == 1) {
+			messageTip("success", "删除备注成功!")
+			getMarketingRemarkList()
+		} else {
+			messageTip("error", res.msg || "删除备注失败!请重试！")
+		}
+	} catch (error) {
+		messageTip("error", "删除备注失败!请重试！")
+	}
 }
 </script>
 <style scoped lang="scss"></style>

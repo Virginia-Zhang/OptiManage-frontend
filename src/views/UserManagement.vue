@@ -163,7 +163,7 @@ const deleteUsers = async ids => {
 		.then(async () => {
 			const params = {
 				ids,
-				accountEnabledValue: 0,
+				isDeletedValue: 0,
 			}
 			const res = await api.updateUsers(params)
 			if (res.code === 200) {
@@ -190,7 +190,6 @@ const handleSelectionChange = selectedUsers => {
 	deletedIds.length = 0
 	// Get ids of the selected users this time and put them into deletedIds
 	selectedUsers.forEach(item => {
-		if (!item.accountEnabled) return
 		deletedIds.push(item.id)
 	})
 }

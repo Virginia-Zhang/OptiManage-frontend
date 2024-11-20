@@ -130,7 +130,7 @@ const restoreUsers = async ids => {
 		.then(async () => {
 			const params = {
 				ids,
-				accountEnabledValue: 1,
+				isDeletedValue: 1,
 			}
 			const res = await api.updateUsers(params)
 			if (res.code === 200) {

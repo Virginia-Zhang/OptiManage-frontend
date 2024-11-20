@@ -191,8 +191,10 @@ import { getRoleList, formatTime, messageTip } from "@/utils/utils"
 import api from "@/http/api"
 import AddMarketing from "@/components/marketing/AddMarketing.vue"
 import EditMarketing from "@/components/marketing/EditMarketing.vue"
-import { Search, Refresh, MapLocation, Plus, Delete, Coin } from "@element-plus/icons-vue"
 import { useMarketingStore } from "@/stores/marketingStore"
+
+import { Search, Refresh, MapLocation, Plus, Delete, Coin } from "@element-plus/icons-vue"
+import { ElMessageBox } from "element-plus"
 
 const router = useRouter()
 const marketingStore = useMarketingStore()
@@ -231,6 +233,8 @@ const budgetOptions = computed(() => {
 
 // Marketing campaigns list data
 const marketingList = ref([])
+// Marketing table instance
+const marketingTableRef = ref(null)
 
 // total number of campaigns
 const total = ref(0)
@@ -246,6 +250,9 @@ const editMarketingRef = ref(null)
 
 // Marketing activity data passed to the child component
 const activity = ref({})
+
+// The ids of the activities to be deleted
+const deletedIds = []
 
 // Search parameters
 let params = {
@@ -289,7 +296,6 @@ const addMarketing = () => {
 
 // View campaign details
 const showMarketingDetails = row => {
-	console.log("showMarketingDetails", row)
 	// Save selected marketing activity data to pinia
 	marketingStore.setSelectedMarketingActivity(row)
 	// Jump to the marketing activity details page, and carry the activity ID in the route
@@ -303,18 +309,49 @@ const showEditMarketing = row => {
 	editMarketingRef.value.showEditMarketingDialog()
 }
 
-const handleSelectionChange = val => {
-	console.log("handleSelectionChange", val)
+const handleSelectionChange = selectedActivities => {
+	deletedIds.length = 0
+	selectedActivities.forEach(item => {
+		deletedIds.push(item.id)
+	})
 }
 
-// Delete campaign
+// Delete marketing campaigns
 const deleteMarketings = ids => {
 	console.log("deleteMarketings", ids)
+	ElMessageBox.confirm("确定要删除吗？", "提示", {
+		confirmButtonText: "确定",
+		cancelButtonText: "取消",
+		type: "warning",
+	})
+		.then(async () => {
+			const params = {
+				ids,
+				isDeletedValue: 1,
+			}
+			const res = await api.updateActivities(params)
+			if (res.code === 200) {
+				messageTip("success", "删除成功!")
+				getMarketingList({
+					page: 1,
+					pageSize: pageSize.value,
+				})
+				currentPage.value = 1
+			} else {
+				messageTip("error", "删除失败!请重试！")
+			}
+		})
+		.catch(() => {
+			// Click Cancel to clear the selected user array
+			deletedIds.length = 0
+			marketingTableRef.value.clearSelection()
+		})
 }
 
 // Delete campaigns in bulk
 const batchDelete = () => {
-	console.log("batchDelete")
+	if (!deletedIds.length) return messageTip("warning", "请选择市场活动！")
+	deleteMarketings(deletedIds)
 }
 
 // region formatting

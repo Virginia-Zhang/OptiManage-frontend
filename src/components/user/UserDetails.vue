@@ -26,10 +26,12 @@
 				formatTime(user.createTime)
 			}}</el-descriptions-item>
 			<el-descriptions-item label="创建人">{{ user.createByAct }}</el-descriptions-item>
-			<el-descriptions-item label="编辑时间">{{
+			<el-descriptions-item :label="user.accountEnabled ? '编辑时间' : '删除时间'">{{
 				formatTime(user.editTime)
 			}}</el-descriptions-item>
-			<el-descriptions-item label="编辑人">{{ user.editByAct }}</el-descriptions-item>
+			<el-descriptions-item :label="user.accountEnabled ? '编辑人' : '删除人'">{{
+				user.editByAct
+			}}</el-descriptions-item>
 			<el-descriptions-item label="最近登录时间">{{
 				formatTime(user.lastLoginTime)
 			}}</el-descriptions-item>

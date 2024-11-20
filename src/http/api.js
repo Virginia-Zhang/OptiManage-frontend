@@ -57,4 +57,21 @@ export default {
 	async addActivityRemark(data) {
 		return await request.post("/activityRemark/", data)
 	},
+	// Query marketing activity remark list
+	async getActivityRemarkList(params) {
+		return await request.get("/activityRemark/list", params)
+	},
+	// Edit marketing activity remark
+	async editActivityRemark(data) {
+		return await request.put("/activityRemark/", data)
+	},
+	// Delete marketing activity remark by id
+	async deleteActivityRemarkById(id) {
+		// Id is included in dynamic routing parameters
+		return await request.delete("/activityRemark/" + id)
+	},
+	// Remove/Restore marketing campaigns(activities)
+	async updateActivities(data) {
+		return await request.put("/activity/updateActivities", data)
+	},
 }
