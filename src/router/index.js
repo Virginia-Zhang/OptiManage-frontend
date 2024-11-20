@@ -63,6 +63,14 @@ const router = createRouter({
 						title: "市场活动",
 					},
 				},
+				{
+					path: "marketing-details/:id",
+					name: "marketing-details",
+					component: () => import("@/views/MarketingDetails.vue"),
+					meta: {
+						title: "市场活动详情",
+					},
+				},
 			],
 		},
 		// 404 page

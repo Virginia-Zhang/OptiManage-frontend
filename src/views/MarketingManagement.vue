@@ -178,6 +178,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from "vue"
+import { useRouter } from "vue-router"
 
 import {
 	budgetRangeRMB,
@@ -193,6 +194,7 @@ import EditMarketing from "@/components/marketing/EditMarketing.vue"
 import { Search, Refresh, MapLocation, Plus, Delete, Coin } from "@element-plus/icons-vue"
 import { useMarketingStore } from "@/stores/marketingStore"
 
+const router = useRouter()
 const marketingStore = useMarketingStore()
 
 // SearchForm data
@@ -290,6 +292,8 @@ const showMarketingDetails = row => {
 	console.log("showMarketingDetails", row)
 	// Save selected marketing activity data to pinia
 	marketingStore.setSelectedMarketingActivity(row)
+	// Jump to the marketing activity details page, and carry the activity ID in the route
+	router.push({ name: "marketing-details", params: { id: row.id } })
 }
 
 // Edit campaign
