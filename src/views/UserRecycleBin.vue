@@ -91,9 +91,10 @@ const getUserList = async () => {
 	const params = {
 		page: currentPage.value,
 		pageSize: pageSize.value,
+		isDeleted: 0,
 	}
 	// Send request
-	const res = await api.getDeletedUserList(params)
+	const res = await api.getUserList(params)
 	if (res.code === 200) {
 		userList.value = res.data.rows
 		total.value = res.data.total

@@ -16,7 +16,10 @@ export const menuData = [
 		index: "/dashboard/marketing",
 		title: "市场活动",
 		icon: PieChart,
-		children: [{ index: "/dashboard/marketing", title: "市场活动", icon: PieChart }],
+		children: [
+			{ index: "/dashboard/marketing", title: "市场活动", icon: PieChart },
+			{ index: "/dashboard/marketing-recycle", title: "回收站", icon: DeleteFilled },
+		],
 	},
 	{
 		index: "/dashboard/clue",

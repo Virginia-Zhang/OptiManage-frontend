@@ -37,10 +37,6 @@ export default {
 	async getActivityList(params) {
 		return await request.get("/activity/list", params)
 	},
-	// Query deleted user list by page
-	async getDeletedUserList(params) {
-		return await request.get("/user/deletedList", params)
-	},
 	// Query marketing campaigns(activities) owners list
 	async getOwnerList() {
 		return await request.get("/user/owners")

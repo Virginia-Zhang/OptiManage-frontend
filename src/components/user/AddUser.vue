@@ -116,6 +116,7 @@ const addUser = () => {
 				const params = {
 					page: 1,
 					pageSize: PAGE_SIZE,
+					isDeleted: 1,
 				}
 				emits("getUserList", params)
 			} else {

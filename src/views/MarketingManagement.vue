@@ -318,31 +318,28 @@ const handleSelectionChange = selectedActivities => {
 
 // Delete marketing campaigns
 const deleteMarketings = ids => {
-	console.log("deleteMarketings", ids)
 	ElMessageBox.confirm("确定要删除吗？", "提示", {
 		confirmButtonText: "确定",
 		cancelButtonText: "取消",
 		type: "warning",
 	})
 		.then(async () => {
-			const params = {
+			const data = {
 				ids,
 				isDeletedValue: 1,
 			}
-			const res = await api.updateActivities(params)
+			const res = await api.updateActivities(data)
 			if (res.code === 200) {
 				messageTip("success", "删除成功!")
-				getMarketingList({
-					page: 1,
-					pageSize: pageSize.value,
-				})
 				currentPage.value = 1
+				params.page = currentPage.value
+				getMarketingList(params)
 			} else {
 				messageTip("error", "删除失败!请重试！")
 			}
 		})
 		.catch(() => {
-			// Click Cancel to clear the selected user array
+			// Click Cancel to clear the selected activity array
 			deletedIds.length = 0
 			marketingTableRef.value.clearSelection()
 		})

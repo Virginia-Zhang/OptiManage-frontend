@@ -71,6 +71,14 @@ const router = createRouter({
 						title: "市场活动详情",
 					},
 				},
+				{
+					path: "marketing-recycle",
+					name: "marketing-recycle",
+					component: () => import("@/views/MarketingRecycleBin.vue"),
+					meta: {
+						title: "市场活动-回收站",
+					},
+				},
 			],
 		},
 		// 404 page

@@ -94,10 +94,11 @@ const editUserRef = ref(null)
 // Ref to user table
 const userTableRef = ref(null)
 
-// Default pagination params
+// Default query params, query all undeleted users
 const params = {
 	page: currentPage.value,
 	pageSize: pageSize.value,
+	isDeleted: 1,
 }
 const handleCurrentChange = val => {
 	currentPage.value = val
@@ -161,18 +162,16 @@ const deleteUsers = async ids => {
 		type: "warning",
 	})
 		.then(async () => {
-			const params = {
+			const data = {
 				ids,
 				isDeletedValue: 0,
 			}
-			const res = await api.updateUsers(params)
+			const res = await api.updateUsers(data)
 			if (res.code === 200) {
 				messageTip("success", "删除成功!")
-				getUserList({
-					page: 1,
-					pageSize: pageSize.value,
-				})
 				currentPage.value = 1
+				params.page = currentPage.value
+				getUserList(params)
 			} else {
 				messageTip("error", "删除失败!请重试！")
 			}

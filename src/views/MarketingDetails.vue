@@ -44,10 +44,18 @@
 		<el-descriptions-item label="编辑人">{{
 			selectedMarketingActivity.editByAct ? selectedMarketingActivity.editByAct : "--"
 		}}</el-descriptions-item>
-		<el-descriptions-item label="填写备注">如有需要，请在下方输入活动备注</el-descriptions-item>
+		<el-descriptions-item label="填写备注" v-if="!selectedMarketingActivity.isDeleted"
+			>如有需要，请在下方输入活动备注</el-descriptions-item
+		>
 	</el-descriptions>
 	<!-- Marketing activity remark form-->
-	<el-form ref="remarkFormRef" :model="remarkForm" :rules="remarkRules" style="margin-top: 20px">
+	<el-form
+		ref="remarkFormRef"
+		:model="remarkForm"
+		:rules="remarkRules"
+		style="margin-top: 20px"
+		v-if="!selectedMarketingActivity.isDeleted"
+	>
 		<el-form-item prop="noteContent">
 			<el-input
 				v-model="remarkForm.noteContent"
@@ -64,7 +72,13 @@
 		</el-form-item>
 	</el-form>
 	<!-- Table area to display marketing activity remarks -->
-	<el-table :data="remarkList" :border="true" stripe style="width: 100%" table-layout="auto">
+	<el-table
+		:data="remarkList"
+		:border="true"
+		stripe
+		style="width: 100%; margin-top: 20px"
+		table-layout="auto"
+	>
 		<el-table-column type="index" width="60" fixed="left" />
 		<el-table-column property="noteContent" label="备注内容" width="400">
 			<template #default="scope">
@@ -87,7 +101,12 @@
 			show-overflow-tooltip
 		/>
 		<el-table-column property="editByAct" label="编辑人" show-overflow-tooltip />
-		<el-table-column fixed="right" label="操作" min-width="70">
+		<el-table-column
+			fixed="right"
+			label="操作"
+			min-width="70"
+			v-if="!selectedMarketingActivity.isDeleted"
+		>
 			<template #default="scope">
 				<el-button type="success" size="small" @click="showEditMarketingRemark(scope.row)"
 					>编辑</el-button
@@ -107,10 +126,18 @@
 		@current-change="handleCurrentChange"
 		style="margin-top: 20px"
 	/>
+	<el-button
+		type="primary"
+		@click="router.back()"
+		v-if="selectedMarketingActivity.isDeleted"
+		style="margin-top: 20px"
+		>返回</el-button
+	>
 	<EditMarketingRemark
 		ref="editMarketingRemarkRef"
 		:remark="remark"
 		@getMarketingRemarkList="getMarketingRemarkList"
+		v-if="!selectedMarketingActivity.isDeleted"
 	/>
 </template>
 
