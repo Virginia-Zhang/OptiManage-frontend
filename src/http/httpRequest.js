@@ -6,9 +6,6 @@ import router from "@/router"
 import { useUserStore } from "@/stores/userStore"
 import { useMarketingStore } from "@/stores/marketingStore"
 
-const userStore = useUserStore()
-const marketingStore = useMarketingStore()
-
 const AxiosUtil = axios.create({
 	baseURL: config.baseApi,
 	timeout: 10000,
@@ -46,8 +43,11 @@ AxiosUtil.interceptors.response.use(
 		if (response.data.code > 900) {
 			messageTip("error", "Token无效，请重新登录！")
 			clearStorage()
+			const userStore = useUserStore()
+			const marketingStore = useMarketingStore()
 			userStore.clearUserData()
 			marketingStore.clearSelectedMarketingActivity()
+			marketingStore.clearOwnerOptions()
 			setTimeout(() => {
 				router.push("/")
 			}, 2000)

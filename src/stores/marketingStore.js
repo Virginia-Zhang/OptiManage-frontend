@@ -10,6 +10,11 @@ export const useMarketingStore = defineStore({
 		selectedMarketingActivity:
 			storage.getItem("selectedMarketingActivity", "local") ||
 			storage.getItem("selectedMarketingActivity", "session" || {}),
+		// Owner options list
+		ownerOptions:
+			storage.getItem("ownerOptions", "local") ||
+			storage.getItem("ownerOptions", "session") ||
+			[],
 	}),
 	actions: {
 		setSelectedMarketingActivity(data) {
@@ -21,12 +26,29 @@ export const useMarketingStore = defineStore({
 				storage.setItem("selectedMarketingActivity", data, "session")
 			}
 		},
+		setOwnerOptions(data) {
+			this.ownerOptions = data
+			// If the user selects "Remember Me", save the data to local storage, otherwise save it to session storage
+			if (storage.getItem("token", "local")) {
+				storage.setItem("ownerOptions", data, "local")
+			} else {
+				storage.setItem("ownerOptions", data, "session")
+			}
+		},
 		clearSelectedMarketingActivity() {
 			this.selectedMarketingActivity = {}
 			if (storage.getItem("token", "local")) {
 				storage.removeItem("selectedMarketingActivity", "local")
 			} else {
 				storage.removeItem("selectedMarketingActivity", "session")
+			}
+		},
+		clearOwnerOptions() {
+			this.ownerOptions = []
+			if (storage.getItem("token", "local")) {
+				storage.removeItem("ownerOptions", "local")
+			} else {
+				storage.removeItem("ownerOptions", "session")
 			}
 		},
 	},

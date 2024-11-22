@@ -146,10 +146,12 @@ import { onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 
 import { useMarketingStore } from "@/stores/marketingStore"
-import { formatTime, messageTip } from "../utils/utils"
+import { formatTime, messageTip } from "../../utils/utils"
 import { regionData } from "@/constants/constants"
 import api from "@/http/api"
 import EditMarketingRemark from "@/components/marketing/EditMarketingRemark.vue"
+
+import { ElMessageBox } from "element-plus"
 
 const router = useRouter()
 const marketingStore = useMarketingStore()
@@ -254,17 +256,23 @@ const showEditMarketingRemark = row => {
 
 // Delete remark by id
 const deleteMarketingRemark = async id => {
-	try {
-		const res = await api.deleteActivityRemarkById(id)
-		if (res.code === 200 && res.data == 1) {
-			messageTip("success", "删除备注成功!")
-			getMarketingRemarkList()
-		} else {
-			messageTip("error", res.msg || "删除备注失败!请重试！")
+	ElMessageBox.confirm("确定要删除吗？", "提示", {
+		confirmButtonText: "确定",
+		cancelButtonText: "取消",
+		type: "warning",
+	}).then(async () => {
+		try {
+			const res = await api.deleteActivityRemarkById(id)
+			if (res.code === 200 && res.data == 1) {
+				messageTip("success", "删除备注成功!")
+				getMarketingRemarkList()
+			} else {
+				messageTip("error", res.msg || "删除备注失败!请重试！")
+			}
+		} catch (error) {
+			messageTip("error", "删除备注失败!请重试！")
 		}
-	} catch (error) {
-		messageTip("error", "删除备注失败!请重试！")
-	}
+	})
 }
 </script>
 <style scoped lang="scss"></style>

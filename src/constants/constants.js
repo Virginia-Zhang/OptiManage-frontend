@@ -22,10 +22,10 @@ export const menuData = [
 		],
 	},
 	{
-		index: "/dashboard/clue",
+		index: "/dashboard/clues",
 		title: "线索管理",
 		icon: List,
-		children: [{ index: "/dashboard/clue", title: "线索管理", icon: List }],
+		children: [{ index: "/dashboard/clues", title: "线索管理", icon: List }],
 	},
 	{
 		index: "/dashboard/customer",
@@ -127,3 +127,33 @@ export const budgetRangeJPY = [
 
 // The number of items per page by default
 export const PAGE_SIZE = 10
+
+// Marketing clue state options
+export const clueStateOptions = [
+	{ name: "已转客户", id: 1 },
+	{ name: "虚假线索", id: 2 },
+	{ name: "需要条件", id: 3 },
+	{ name: "将来联系", id: 4 },
+	{ name: "丢失线索", id: 5 },
+	{ name: "试图联系", id: 6 },
+	{ name: "未联系", id: 7 },
+	{ name: "已联系", id: 8 },
+]
+
+// Marketing clue source options
+export const clueSourceOptions = [
+	{ name: "易车网", id: 1 },
+	{ name: "员工介绍", id: 2 },
+	{ name: "官方网站", id: 3 },
+	{ name: "公众号", id: 4 },
+	{ name: "门店参观", id: 5 },
+	{ name: "懂车帝", id: 6 },
+	{ name: "朋友圈", id: 7 },
+	{ name: "合作伙伴", id: 8 },
+	{ name: "地图", id: 9 },
+	{ name: "视频直播", id: 10 },
+	{ name: "网络广告", id: 11 },
+	{ name: "汽车之家", id: 12 },
+	{ name: "车展会", id: 13 },
+	{ name: "知乎", id: 14 },
+]

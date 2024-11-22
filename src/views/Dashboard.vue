@@ -121,6 +121,7 @@ const handleCommand = async command => {
 			clearStorage()
 			userStore.clearUserData()
 			marketingStore.clearSelectedMarketingActivity()
+			marketingStore.clearOwnerOptions()
 			// After 2 seconds, jump to the login page
 			setTimeout(() => {
 				router.push("/")

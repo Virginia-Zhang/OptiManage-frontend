@@ -6,7 +6,6 @@
 			<el-select
 				v-model="searchForm.owners"
 				placeholder="请选择负责人"
-				width="200px"
 				multiple
 				collapse-tags
 				collapse-tags-tooltip
@@ -14,7 +13,7 @@
 				clearable
 			>
 				<el-option
-					v-for="item in ownerOptions"
+					v-for="item in ownerOptionsList"
 					:key="item.id"
 					:label="item.loginAct"
 					:value="item.id"
@@ -39,7 +38,6 @@
 			<el-select
 				v-model="searchForm.budget"
 				placeholder="请选择活动预算"
-				width="200px"
 				@clear="searchForm.currencyUnit = null"
 				clearable
 			>
@@ -52,7 +50,6 @@
 			<el-select
 				v-model="searchForm.currencyUnit"
 				placeholder="请选择货币单位"
-				width="10px"
 				@change="() => (searchForm.budget = null)"
 				clearable
 			>
@@ -177,7 +174,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue"
+import { computed, onMounted, ref, watchEffect } from "vue"
 import { useRouter } from "vue-router"
 
 import {
@@ -187,7 +184,7 @@ import {
 	PAGE_SIZE,
 	regionData,
 } from "@/constants/constants"
-import { getRoleList, formatTime, messageTip } from "@/utils/utils"
+import { showOwnerSearch, formatTime, messageTip, getOwnerList } from "@/utils/utils"
 import api from "@/http/api"
 import AddMarketing from "@/components/marketing/AddMarketing.vue"
 import EditMarketing from "@/components/marketing/EditMarketing.vue"
@@ -208,15 +205,6 @@ const searchForm = ref({
 	regions: null,
 })
 
-// A computed attribute, controls whether the person in charge search box is displayed or not. If the user is admin, returns true, otherwise returns false.
-const showOwnerSearch = computed(() => {
-	const roleList = getRoleList()
-	return roleList.indexOf("admin") !== -1
-})
-
-// Get the list of users who can be selected as the owner of the activity
-const ownerOptions = ref([])
-
 // A computed attribute, displays different options based on the currency unit selected by the user.
 const budgetOptions = computed(() => {
 	switch (searchForm.value.currencyUnit) {
@@ -229,6 +217,14 @@ const budgetOptions = computed(() => {
 		default:
 			return []
 	}
+})
+
+// Get the list of owners options
+const ownerOptionsList = ref([])
+
+// Get owner options list from Pinia
+watchEffect(() => {
+	ownerOptionsList.value = marketingStore.ownerOptions
 })
 
 // Marketing campaigns list data
@@ -265,14 +261,6 @@ const getMarketingList = async params => {
 	if (res.code === 200) {
 		marketingList.value = res.data.rows
 		total.value = res.data.total
-	}
-}
-
-// Get ownerList and assign it to ownerOptions.value
-const getOwnerList = async () => {
-	const res = await api.getOwnerList()
-	if (res.code === 200) {
-		ownerOptions.value = res.data
 	}
 }
 

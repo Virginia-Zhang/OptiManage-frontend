@@ -70,4 +70,16 @@ export default {
 	async updateActivities(data) {
 		return await request.put("/activity/updateActivities", data)
 	},
+	// Get activity option list, including activity's id and name only
+	async getActivityOptionList() {
+		return await request.get("/activity/activities")
+	},
+	// Get product option list, including product's id and name only
+	async getProductOptionList() {
+		return await request.get("/product/products")
+	},
+	// Query marketing clues(leads) list by page
+	async getClueList(params) {
+		return await request.get("/clue/list", params)
+	},
 }

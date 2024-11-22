@@ -42,7 +42,7 @@ const router = createRouter({
 				{
 					path: "user",
 					name: "user",
-					component: () => import("@/views/UserManagement.vue"),
+					component: () => import("@/views/user/UserManagement.vue"),
 					meta: {
 						title: "用户管理",
 					},
@@ -50,7 +50,7 @@ const router = createRouter({
 				{
 					path: "user-recycle",
 					name: "user-recycle",
-					component: () => import("@/views/UserRecycleBin.vue"),
+					component: () => import("@/views/user/UserRecycleBin.vue"),
 					meta: {
 						title: "用户管理-回收站",
 					},
@@ -58,7 +58,7 @@ const router = createRouter({
 				{
 					path: "marketing",
 					name: "marketing",
-					component: () => import("@/views/MarketingManagement.vue"),
+					component: () => import("@/views/marketing/MarketingManagement.vue"),
 					meta: {
 						title: "市场活动",
 					},
@@ -66,7 +66,7 @@ const router = createRouter({
 				{
 					path: "marketing-details/:id",
 					name: "marketing-details",
-					component: () => import("@/views/MarketingDetails.vue"),
+					component: () => import("@/views/marketing/MarketingDetails.vue"),
 					meta: {
 						title: "市场活动详情",
 					},
@@ -74,9 +74,17 @@ const router = createRouter({
 				{
 					path: "marketing-recycle",
 					name: "marketing-recycle",
-					component: () => import("@/views/MarketingRecycleBin.vue"),
+					component: () => import("@/views/marketing/MarketingRecycleBin.vue"),
 					meta: {
 						title: "市场活动-回收站",
+					},
+				},
+				{
+					path: "clues",
+					name: "clues",
+					component: () => import("@/views/clues/CluesManagement.vue"),
+					meta: {
+						title: "线索管理",
 					},
 				},
 			],
