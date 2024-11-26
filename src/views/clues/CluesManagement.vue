@@ -238,9 +238,7 @@
 				<el-button type="primary" size="small" @click="showClueDetails(scope.row)"
 					>详情</el-button
 				>
-				<el-button type="success" size="small" @click="showEditClue(scope.row)"
-					>编辑</el-button
-				>
+				<el-button type="success" size="small" @click="editClue(scope.row)">编辑</el-button>
 				<el-button type="danger" size="small" @click="deleteClues([scope.row.id])"
 					>删除</el-button
 				>
@@ -261,7 +259,7 @@
 import { ref, onMounted, watchEffect } from "vue"
 import { useRouter } from "vue-router"
 
-import { showOwnerSearch, getOwnerList, formatTime } from "@/utils/utils"
+import { showOwnerSearch, getOwnerList, formatTime, messageTip } from "@/utils/utils"
 import {
 	clueStateOptions,
 	clueSourceOptions,
@@ -274,11 +272,14 @@ import {
 import api from "@/http/api"
 import { useMarketingStore } from "@/stores/marketingStore"
 import { useProductStore } from "@/stores/productStore"
+import { useClueStore } from "@/stores/clueStore"
 
 import { Search, Plus, Delete, MapLocation, Refresh } from "@element-plus/icons-vue"
+import { ElMessageBox } from "element-plus"
 
 const marketingStore = useMarketingStore()
 const productStore = useProductStore()
+const clueStore = useClueStore()
 
 const router = useRouter()
 
@@ -312,6 +313,9 @@ const total = ref(0)
 const currentPage = ref(1)
 // Number of items displayed per page
 const pageSize = ref(PAGE_SIZE)
+
+// The ids of the clues to be deleted
+const deletedIds = []
 
 // Get owner options list from Pinia
 watchEffect(() => {
@@ -443,6 +447,54 @@ const reset = () => {
 // Add a new marketing clue/lead
 const addClue = () => {
 	router.push({ name: "clues-add" })
+}
+
+// Edit a marketing clue/lead
+const editClue = row => {
+	clueStore.setSelectedClue(row)
+	router.push({ name: "clues-edit", params: { id: row.id } })
+}
+
+const handleSelectionChange = selectedClues => {
+	deletedIds.length = 0
+	selectedClues.forEach(item => {
+		deletedIds.push(item.id)
+	})
+}
+
+// Delete marketing clues
+const deleteClues = ids => {
+	ElMessageBox.confirm("确定要删除吗？", "提示", {
+		confirmButtonText: "确定",
+		cancelButtonText: "取消",
+		type: "warning",
+	})
+		.then(async () => {
+			const data = {
+				ids,
+				isDeletedValue: 1,
+			}
+			const res = await api.updateClues(data)
+			if (res.code === 200) {
+				messageTip("success", "删除成功!")
+				currentPage.value = 1
+				params.page = currentPage.value
+				getClueList(params)
+			} else {
+				messageTip("error", "删除失败!请重试！")
+			}
+		})
+		.catch(() => {
+			// Click Cancel to clear the selected clues array
+			deletedIds.length = 0
+			clueTableRef.value.clearSelection()
+		})
+}
+
+// Delete clues in bulk
+const batchDelete = () => {
+	if (!deletedIds.length) return messageTip("warning", "请选择市场线索！")
+	deleteClues(deletedIds)
 }
 </script>
 

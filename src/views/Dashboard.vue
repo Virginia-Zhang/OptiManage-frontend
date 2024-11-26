@@ -92,11 +92,13 @@ import { menuData } from "@/constants/constants"
 import { useUserStore } from "@/stores/userStore"
 import { useMarketingStore } from "@/stores/marketingStore"
 import { useProductStore } from "@/stores/productStore"
+import { useClueStore } from "@/stores/clueStore"
 
 const router = useRouter()
 const userStore = useUserStore()
 const marketingStore = useMarketingStore()
 const productStore = useProductStore()
+const clueStore = useClueStore()
 
 const isCollapsed = ref(false)
 const activeMenu = ref("")
@@ -124,6 +126,7 @@ const handleCommand = async command => {
 			userStore.clearUserData()
 			marketingStore.clearAll()
 			productStore.clearAll()
+			clueStore.clearAll()
 			// After 2 seconds, jump to the login page
 			setTimeout(() => {
 				router.push("/")

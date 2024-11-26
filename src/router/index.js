@@ -95,6 +95,14 @@ const router = createRouter({
 						title: "录入线索",
 					},
 				},
+				{
+					path: "clues-edit/:id",
+					name: "clues-edit",
+					component: () => import("@/views/clues/EditClue.vue"),
+					meta: {
+						title: "编辑线索",
+					},
+				},
 			],
 		},
 		// 404 page

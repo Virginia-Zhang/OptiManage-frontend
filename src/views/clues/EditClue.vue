@@ -1,9 +1,9 @@
-<!-- Add marketing lead/clue page -->
+<!-- Edit marketing clues/leads page -->
 <template>
-	<el-form :model="addClueForm" label-width="100px" :rules="rules" ref="addClueFormRef">
+	<el-form :model="editClueForm" label-width="100px" :rules="rules" ref="editClueFormRef">
 		<el-form-item label="负责人" prop="ownerId" v-if="showOwnerSearch">
 			<el-select
-				v-model="addClueForm.ownerId"
+				v-model="editClueForm.ownerId"
 				placeholder="请选择负责人"
 				width="200px"
 				clearable
@@ -18,7 +18,7 @@
 		</el-form-item>
 		<el-form-item label="所属活动" prop="activityId">
 			<el-select
-				v-model="addClueForm.activityId"
+				v-model="editClueForm.activityId"
 				placeholder="请选择所属活动"
 				width="200px"
 				clearable
@@ -32,11 +32,11 @@
 			</el-select>
 		</el-form-item>
 		<el-form-item label="姓名" prop="fullName">
-			<el-input v-model="addClueForm.fullName" placeholder="请输入客户姓名" />
+			<el-input v-model="editClueForm.fullName" placeholder="请输入客户姓名" />
 		</el-form-item>
 		<el-form-item label="性别" prop="gender">
 			<el-select
-				v-model="addClueForm.gender"
+				v-model="editClueForm.gender"
 				placeholder="请选择客户性别"
 				width="200px"
 				clearable
@@ -53,10 +53,10 @@
 			<!--Monitor option changes and dynamically load the currency unit based on the region value -->
 			<!--When the region value is cleared, clear the currency unit as well -->
 			<el-select
-				v-model="addClueForm.region"
+				v-model="editClueForm.region"
 				placeholder="请选择线索所在区域"
 				@change="handleRegionChange"
-				@clear="addClueForm.currencyUnit = null"
+				@clear="editClueForm.currencyUnit = null"
 				clearable
 			>
 				<template #prefix>
@@ -71,38 +71,38 @@
 			</el-select>
 		</el-form-item>
 		<el-form-item label="手机" prop="phone">
-			<el-input v-model="addClueForm.phone" placeholder="请输入客户手机号码" />
+			<el-input v-model="editClueForm.phone" placeholder="请输入客户手机号码" />
 		</el-form-item>
 		<el-form-item label="邮箱" prop="email">
-			<el-input v-model="addClueForm.email" placeholder="请输入客户邮箱" />
+			<el-input v-model="editClueForm.email" placeholder="请输入客户邮箱" />
 		</el-form-item>
 		<el-form-item label="其他联系方式" prop="otherContactDetails">
 			<el-input
-				v-model="addClueForm.otherContactDetails"
+				v-model="editClueForm.otherContactDetails"
 				placeholder="请输入客户其他联系方式"
 			/>
 		</el-form-item>
 		<el-form-item label="年龄" prop="age">
-			<el-input v-model="addClueForm.age" placeholder="请输入客户年龄" type="number" />
+			<el-input v-model="editClueForm.age" placeholder="请输入客户年龄" type="number" />
 		</el-form-item>
 		<el-form-item label="职业" prop="job">
-			<el-input v-model="addClueForm.job" placeholder="请输入客户职业" />
+			<el-input v-model="editClueForm.job" placeholder="请输入客户职业" />
 		</el-form-item>
 		<el-form-item label="收入" prop="yearIncome" class="content">
 			<el-input
-				v-model="addClueForm.yearIncome"
+				v-model="editClueForm.yearIncome"
 				placeholder="请输入客户年收入"
 				type="number"
 				style="flex: 1"
 			/>
-			<div class="currency-unit">{{ addClueForm.currencyUnit || "" }}</div>
+			<div class="currency-unit">{{ editClueForm.currencyUnit || "" }}</div>
 		</el-form-item>
 		<el-form-item label="住址" prop="address">
-			<el-input v-model="addClueForm.address" placeholder="请输入客户住址" />
+			<el-input v-model="editClueForm.address" placeholder="请输入客户住址" />
 		</el-form-item>
 		<el-form-item label="是否贷款" prop="needLoan">
 			<el-select
-				v-model="addClueForm.needLoan"
+				v-model="editClueForm.needLoan"
 				placeholder="请选择客户是否贷款"
 				width="200px"
 				clearable
@@ -117,7 +117,7 @@
 		</el-form-item>
 		<el-form-item label="意向状态" prop="intentionState">
 			<el-select
-				v-model="addClueForm.intentionState"
+				v-model="editClueForm.intentionState"
 				placeholder="请选择客户的意向状态"
 				width="200px"
 				clearable
@@ -132,7 +132,7 @@
 		</el-form-item>
 		<el-form-item label="意向产品" prop="intentionProduct">
 			<el-select
-				v-model="addClueForm.intentionProduct"
+				v-model="editClueForm.intentionProduct"
 				placeholder="请选择客户的意向产品"
 				width="200px"
 				clearable
@@ -147,7 +147,7 @@
 		</el-form-item>
 		<el-form-item label="线索状态" prop="state">
 			<el-select
-				v-model="addClueForm.state"
+				v-model="editClueForm.state"
 				placeholder="请选择线索状态"
 				width="200px"
 				clearable
@@ -162,7 +162,7 @@
 		</el-form-item>
 		<el-form-item label="线索来源" prop="source">
 			<el-select
-				v-model="addClueForm.source"
+				v-model="editClueForm.source"
 				placeholder="请选择线索来源"
 				width="200px"
 				clearable
@@ -177,7 +177,7 @@
 		</el-form-item>
 		<el-form-item label="线索描述" prop="description">
 			<el-input
-				v-model="addClueForm.description"
+				v-model="editClueForm.description"
 				placeholder="请输入线索描述"
 				type="textarea"
 				:rows="4"
@@ -185,7 +185,7 @@
 		</el-form-item>
 		<el-form-item label="下次联系时间" prop="nextContactTime">
 			<el-date-picker
-				v-model="addClueForm.nextContactTime"
+				v-model="editClueForm.nextContactTime"
 				type="datetime"
 				placeholder="请选择下次联系时间"
 				format="YYYY-MM-DD HH:mm:ss"
@@ -198,13 +198,13 @@
 			<el-button type="primary" @click="submitClue" :disabled="submitClueLoading"
 				>提交</el-button
 			>
-			<el-button @click="handleBack">返回</el-button>
+			<el-button @click="handleBack(editClueFormRef)">返回</el-button>
 		</el-form-item>
 	</el-form>
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, watchEffect } from "vue"
 import { useRouter } from "vue-router"
 
 import { showOwnerSearch, messageTip, formatTime } from "@/utils/utils"
@@ -218,17 +218,19 @@ import {
 } from "@/constants/constants"
 import { useMarketingStore } from "@/stores/marketingStore"
 import { useProductStore } from "@/stores/productStore"
+import { useClueStore } from "@/stores/clueStore"
 import api from "@/http/api"
 
 const marketingStore = useMarketingStore()
 const productStore = useProductStore()
+const clueStore = useClueStore()
 
 const { ownerOptions, activityOptions } = marketingStore
 const { productOptions } = productStore
 
 const router = useRouter()
 
-const addClueForm = ref({
+const editClueForm = ref({
 	activityId: null,
 	fullName: null,
 	gender: null,
@@ -249,7 +251,11 @@ const addClueForm = ref({
 	description: null,
 	nextContactTime: null,
 })
-const addClueFormRef = ref(null)
+const editClueFormRef = ref(null)
+
+watchEffect(() => {
+	Object.assign(editClueForm.value, clueStore.selectedClue)
+})
 
 const submitClueLoading = ref(false)
 const rules = {
@@ -274,32 +280,31 @@ const rules = {
 }
 
 const handleRegionChange = value => {
-	addClueForm.value.currencyUnit = null
+	editClueForm.value.currencyUnit = null
 	// Set currency unit based on selected region, 万元 for 1, 万円 for 2, and thousand USD for others
 	switch (value) {
 		case 1:
-			addClueForm.value.currencyUnit = "万元"
+			editClueForm.value.currencyUnit = "万元"
 			break
 		case 2:
-			addClueForm.value.currencyUnit = "万円"
+			editClueForm.value.currencyUnit = "万円"
 			break
 		default:
-			addClueForm.value.currencyUnit = "thousand USD"
+			editClueForm.value.currencyUnit = "thousand USD"
 	}
 }
 
 const submitClue = async () => {
-	addClueFormRef.value.validate(async valid => {
+	editClueFormRef.value.validate(async valid => {
 		if (!valid) return
-		addClueForm.value.nextContactTime = formatTime(addClueForm.value.nextContactTime)
+		editClueForm.value.nextContactTime = formatTime(editClueForm.value.nextContactTime)
 		submitClueLoading.value = true
 		try {
-			const res = await api.addClue(addClueForm.value)
+			const res = await api.editClue(editClueForm.value)
 			if (res.code === 200 && res.data == 1) {
-				messageTip("success", "添加线索成功!")
-				addClueFormRef.value.resetFields()
+				messageTip("success", "编辑线索成功!")
 			} else {
-				messageTip("error", res.msg || "添加线索失败!请重试！")
+				messageTip("error", res.msg || "编辑线索失败!请重试！")
 			}
 		} finally {
 			submitClueLoading.value = false
@@ -307,8 +312,9 @@ const submitClue = async () => {
 	})
 }
 
-const handleBack = () => {
-	addClueForm.value = {}
+const handleBack = formEl => {
+	if (!formEl) return
+	formEl.resetFields()
 	router.back()
 }
 </script>

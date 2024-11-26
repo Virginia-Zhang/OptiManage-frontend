@@ -86,4 +86,12 @@ export default {
 	async addClue(data) {
 		return await request.post("/clue/", data)
 	},
+	// Edit marketing clue(lead)
+	async editClue(data) {
+		return await request.put("/clue/", data)
+	},
+	// Remove/Restore marketing clues(leads)
+	async updateClues(data) {
+		return await request.put("/clue/updateClues", data)
+	},
 }
