@@ -5,6 +5,7 @@ import { messageTip, clearStorage } from "@/utils/utils"
 import router from "@/router"
 import { useUserStore } from "@/stores/userStore"
 import { useMarketingStore } from "@/stores/marketingStore"
+import { useProductStore } from "@/stores/productStore"
 
 const AxiosUtil = axios.create({
 	baseURL: config.baseApi,
@@ -45,9 +46,10 @@ AxiosUtil.interceptors.response.use(
 			clearStorage()
 			const userStore = useUserStore()
 			const marketingStore = useMarketingStore()
+			const productStore = useProductStore()
 			userStore.clearUserData()
-			marketingStore.clearSelectedMarketingActivity()
-			marketingStore.clearOwnerOptions()
+			marketingStore.clearAll()
+			productStore.clearAll()
 			setTimeout(() => {
 				router.push("/")
 			}, 2000)

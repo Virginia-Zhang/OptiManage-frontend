@@ -44,21 +44,32 @@
 		</el-form-item>
 		<el-form-item label="客户性别">
 			<el-select v-model="searchForm.gender" placeholder="请选择客户性别" clearable>
-				<el-option label="男性" :value="1" />
-				<el-option label="女性" :value="2" />
+				<el-option
+					v-for="item in genderOptions"
+					:key="item.value"
+					:label="item.name"
+					:value="item.value"
+				/>
 			</el-select>
 		</el-form-item>
 		<el-form-item label="是否贷款">
 			<el-select v-model="searchForm.needLoan" placeholder="请选择是否贷款" clearable>
-				<el-option label="不需要" :value="0" />
-				<el-option label="需要" :value="1" />
+				<el-option
+					v-for="item in needLoanOptions"
+					:key="item.value"
+					:label="item.name"
+					:value="item.value"
+				/>
 			</el-select>
 		</el-form-item>
 		<el-form-item label="意向状态">
 			<el-select v-model="searchForm.intentionState" placeholder="请选择意向状态" clearable>
-				<el-option label="无意向" :value="0" />
-				<el-option label="有意向" :value="1" />
-				<el-option label="意向不明" :value="2" />
+				<el-option
+					v-for="item in intentionStateOptions"
+					:key="item.value"
+					:label="item.name"
+					:value="item.value"
+				/>
 			</el-select>
 		</el-form-item>
 		<el-form-item label="意向产品">
@@ -144,9 +155,6 @@
 	</el-form>
 	<div class="btn-group">
 		<el-button type="primary" :icon="Plus" @click="addClue">录入线索</el-button>
-		<el-button type="primary" :icon="DocumentAdd" @click="importClue"
-			>导入线索（Excel）</el-button
-		>
 		<el-button type="danger" :icon="Delete" @click="batchDelete">批量删除</el-button>
 	</div>
 	<!-- Table area to display the list of marketing clues -->
@@ -251,15 +259,28 @@
 
 <script setup>
 import { ref, onMounted, watchEffect } from "vue"
+import { useRouter } from "vue-router"
 
 import { showOwnerSearch, getOwnerList, formatTime } from "@/utils/utils"
-import { clueStateOptions, clueSourceOptions, regionData, PAGE_SIZE } from "@/constants/constants"
+import {
+	clueStateOptions,
+	clueSourceOptions,
+	regionData,
+	PAGE_SIZE,
+	genderOptions,
+	needLoanOptions,
+	intentionStateOptions,
+} from "@/constants/constants"
 import api from "@/http/api"
 import { useMarketingStore } from "@/stores/marketingStore"
+import { useProductStore } from "@/stores/productStore"
 
-import { Search, Plus, DocumentAdd, Delete, MapLocation, Refresh } from "@element-plus/icons-vue"
+import { Search, Plus, Delete, MapLocation, Refresh } from "@element-plus/icons-vue"
 
 const marketingStore = useMarketingStore()
+const productStore = useProductStore()
+
+const router = useRouter()
 
 const searchForm = ref({
 	activities: null,
@@ -301,12 +322,14 @@ watchEffect(() => {
 const getActivityOptionList = async () => {
 	const res = await api.getActivityOptionList()
 	activityOptions.value = res.data
+	marketingStore.setActivityOptions(res.data)
 }
 
 // Get product options
 const getProductOptionList = async () => {
 	const res = await api.getProductOptionList()
 	productOptions.value = res.data
+	productStore.setProductOptions(res.data)
 }
 
 // Search parameters
@@ -382,39 +405,44 @@ const search = () => {
 	currentPage.value = 1
 	// Update the parameters
 	params.page = currentPage.value
-	;(params.owners =
+	params.owners =
 		searchForm.value.owners && searchForm.value.owners.length
 			? searchForm.value.owners.join(",")
-			: null),
-		(params.activities =
-			searchForm.value.activities && searchForm.value.activities.length
-				? searchForm.value.activities.join(",")
-				: null),
-		(params.fullName = searchForm.value.fullName),
-		(params.gender = searchForm.value.gender),
-		(params.needLoan = searchForm.value.needLoan),
-		(params.intentionState = searchForm.value.intentionState),
-		(params.intentionProducts =
-			searchForm.value.intentionProducts && searchForm.value.intentionProducts.length
-				? searchForm.value.intentionProducts.join(",")
-				: null),
-		(params.states =
-			searchForm.value.states && searchForm.value.states.length
-				? searchForm.value.states.join(",")
-				: null),
-		(params.sources =
-			searchForm.value.sources && searchForm.value.sources.length
-				? searchForm.value.sources.join(",")
-				: null),
-		(params.regions =
-			searchForm.value.regions && searchForm.value.regions.length
-				? searchForm.value.regions.join(",")
-				: null),
-		getClueList(params)
+			: null
+	params.activities =
+		searchForm.value.activities && searchForm.value.activities.length
+			? searchForm.value.activities.join(",")
+			: null
+	params.fullName = searchForm.value.fullName
+	params.gender = searchForm.value.gender
+	params.needLoan = searchForm.value.needLoan
+	params.intentionState = searchForm.value.intentionState
+	params.intentionProducts =
+		searchForm.value.intentionProducts && searchForm.value.intentionProducts.length
+			? searchForm.value.intentionProducts.join(",")
+			: null
+	params.states =
+		searchForm.value.states && searchForm.value.states.length
+			? searchForm.value.states.join(",")
+			: null
+	params.sources =
+		searchForm.value.sources && searchForm.value.sources.length
+			? searchForm.value.sources.join(",")
+			: null
+	params.regions =
+		searchForm.value.regions && searchForm.value.regions.length
+			? searchForm.value.regions.join(",")
+			: null
+	getClueList(params)
 }
 
 const reset = () => {
 	searchForm.value = {}
+}
+
+// Add a new marketing clue/lead
+const addClue = () => {
+	router.push({ name: "clues-add" })
 }
 </script>
 

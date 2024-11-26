@@ -82,4 +82,8 @@ export default {
 	async getClueList(params) {
 		return await request.get("/clue/list", params)
 	},
+	// Add new marketing clue(lead)
+	async addClue(data) {
+		return await request.post("/clue/", data)
+	},
 }

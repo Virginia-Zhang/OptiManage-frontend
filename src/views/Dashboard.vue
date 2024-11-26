@@ -91,10 +91,12 @@ import { messageTip, clearStorage, getRoleList } from "@/utils/utils"
 import { menuData } from "@/constants/constants"
 import { useUserStore } from "@/stores/userStore"
 import { useMarketingStore } from "@/stores/marketingStore"
+import { useProductStore } from "@/stores/productStore"
 
 const router = useRouter()
 const userStore = useUserStore()
 const marketingStore = useMarketingStore()
+const productStore = useProductStore()
 
 const isCollapsed = ref(false)
 const activeMenu = ref("")
@@ -120,8 +122,8 @@ const handleCommand = async command => {
 			// Clear data in localStorage or sessionStorage, and in Pinia
 			clearStorage()
 			userStore.clearUserData()
-			marketingStore.clearSelectedMarketingActivity()
-			marketingStore.clearOwnerOptions()
+			marketingStore.clearAll()
+			productStore.clearAll()
 			// After 2 seconds, jump to the login page
 			setTimeout(() => {
 				router.push("/")

@@ -157,3 +157,22 @@ export const clueSourceOptions = [
 	{ name: "车展会", id: 13 },
 	{ name: "知乎", id: 14 },
 ]
+
+// Customer gender options
+export const genderOptions = [
+	{ name: "男", value: 1 },
+	{ name: "女", value: 2 },
+]
+
+// Customer need_loan options
+export const needLoanOptions = [
+	{ name: "不需要", value: 0 },
+	{ name: "需要", value: 1 },
+]
+
+// Customer intention_state options
+export const intentionStateOptions = [
+	{ name: "无意向", value: 0 },
+	{ name: "有意向", value: 1 },
+	{ name: "意向不明", value: 2 },
+]

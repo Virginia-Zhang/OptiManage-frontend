@@ -87,6 +87,14 @@ const router = createRouter({
 						title: "线索管理",
 					},
 				},
+				{
+					path: "clues-add",
+					name: "clues-add",
+					component: () => import("@/views/clues/AddClue.vue"),
+					meta: {
+						title: "录入线索",
+					},
+				},
 			],
 		},
 		// 404 page
