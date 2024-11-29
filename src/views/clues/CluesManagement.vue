@@ -256,7 +256,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watchEffect } from "vue"
+import { ref, onMounted, watchEffect, computed } from "vue"
 import { useRouter } from "vue-router"
 
 import { showOwnerSearch, getOwnerList, formatTime, messageTip } from "@/utils/utils"
@@ -297,9 +297,9 @@ const searchForm = ref({
 
 // Get the list of owners options
 const ownerOptionsList = ref([])
-// Get the list of activities
+// Get the list of activities options
 const activityOptions = ref([])
-// Get the list of products
+// Get the list of products options
 const productOptions = ref([])
 
 // Clue Table instance
@@ -495,6 +495,12 @@ const deleteClues = ids => {
 const batchDelete = () => {
 	if (!deletedIds.length) return messageTip("warning", "请选择市场线索！")
 	deleteClues(deletedIds)
+}
+
+// Show clue details
+const showClueDetails = row => {
+	clueStore.setSelectedClue(row)
+	router.push({ name: "clues-details", params: { id: row.id } })
 }
 </script>
 

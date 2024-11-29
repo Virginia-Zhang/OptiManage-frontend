@@ -103,6 +103,14 @@ const router = createRouter({
 						title: "编辑线索",
 					},
 				},
+				{
+					path: "clues-details/:id",
+					name: "clues-details",
+					component: () => import("@/views/clues/ClueDetails.vue"),
+					meta: {
+						title: "线索详情",
+					},
+				},
 			],
 		},
 		// 404 page

@@ -1,6 +1,25 @@
 <!-- Add marketing lead/clue page -->
 <template>
 	<el-form :model="addClueForm" label-width="100px" :rules="rules" ref="addClueFormRef">
+		<el-form-item label="地区" prop="region">
+			<el-select
+				v-model="addClueForm.region"
+				placeholder="请选择线索所在区域"
+				@change="handleRegionChange"
+				@clear="handleRegionClear"
+				clearable
+			>
+				<template #prefix>
+					<el-icon><MapLocation /></el-icon>
+				</template>
+				<el-option
+					v-for="item in regionData"
+					:key="item.id"
+					:label="item.name"
+					:value="item.id"
+				/>
+			</el-select>
+		</el-form-item>
 		<el-form-item label="负责人" prop="ownerId" v-if="showOwnerSearch">
 			<el-select
 				v-model="addClueForm.ownerId"
@@ -8,8 +27,11 @@
 				width="200px"
 				clearable
 			>
+				<template #empty>
+					<span>请先选择地区！</span>
+				</template>
 				<el-option
-					v-for="item in ownerOptions"
+					v-for="item in owners"
 					:key="item.id"
 					:label="item.loginAct"
 					:value="item.id"
@@ -23,8 +45,11 @@
 				width="200px"
 				clearable
 			>
+				<template #empty>
+					<span>请先选择地区！</span>
+				</template>
 				<el-option
-					v-for="item in activityOptions"
+					v-for="item in activities"
 					:key="item.id"
 					:label="item.name"
 					:value="item.id"
@@ -46,27 +71,6 @@
 					:key="item.value"
 					:label="item.name"
 					:value="item.value"
-				/>
-			</el-select>
-		</el-form-item>
-		<el-form-item label="地区" prop="region">
-			<!--Monitor option changes and dynamically load the currency unit based on the region value -->
-			<!--When the region value is cleared, clear the currency unit as well -->
-			<el-select
-				v-model="addClueForm.region"
-				placeholder="请选择线索所在区域"
-				@change="handleRegionChange"
-				@clear="addClueForm.currencyUnit = null"
-				clearable
-			>
-				<template #prefix>
-					<el-icon><MapLocation /></el-icon>
-				</template>
-				<el-option
-					v-for="item in regionData"
-					:key="item.id"
-					:label="item.name"
-					:value="item.id"
 				/>
 			</el-select>
 		</el-form-item>
@@ -137,8 +141,11 @@
 				width="200px"
 				clearable
 			>
+				<template #empty>
+					<span>请先选择地区！</span>
+				</template>
 				<el-option
-					v-for="item in productOptions"
+					v-for="item in products"
 					:key="item.id"
 					:label="item.name"
 					:value="item.id"
@@ -167,8 +174,11 @@
 				width="200px"
 				clearable
 			>
+				<template #empty>
+					<span>请先选择地区！</span>
+				</template>
 				<el-option
-					v-for="item in clueSourceOptions"
+					v-for="item in clueSources"
 					:key="item.id"
 					:label="item.name"
 					:value="item.id"
@@ -251,6 +261,15 @@ const addClueForm = ref({
 })
 const addClueFormRef = ref(null)
 
+// According to the region selected by the user, the owner options list of the corresponding region is displayed.
+const owners = ref([])
+// According to the region selected by the user, the activity options list of the corresponding region is displayed.
+const activities = ref([])
+// According to the region selected by the user, the product options list of the corresponding region is displayed.
+const products = ref([])
+// According to the region selected by the user, the clue source options list of the corresponding region is displayed.
+const clueSources = ref([])
+
 const submitClueLoading = ref(false)
 const rules = {
 	ownerId: [{ required: true, message: "请选择负责人", trigger: "blur" }],
@@ -275,6 +294,10 @@ const rules = {
 
 const handleRegionChange = value => {
 	addClueForm.value.currencyUnit = null
+	addClueForm.value.ownerId = null
+	addClueForm.value.activityId = null
+	addClueForm.value.intentionProduct = null
+	addClueForm.value.source = null
 	// Set currency unit based on selected region, 万元 for 1, 万円 for 2, and thousand USD for others
 	switch (value) {
 		case 1:
@@ -286,6 +309,26 @@ const handleRegionChange = value => {
 		default:
 			addClueForm.value.currencyUnit = "thousand USD"
 	}
+	// According to the selected value, the items in the corresponding region are filtered out from the owner options and assigned to the owners array.
+	owners.value = ownerOptions.filter(item => item.region === value)
+	// According to the selected value, the items in the corresponding region are filtered out from the activity options and assigned to the activities array.
+	activities.value = activityOptions.filter(item => item.region === value)
+	// According to the selected value, select the items in the corresponding region from the product options and assign them to the products array.
+	products.value = productOptions.filter(item => item.region === value)
+	// According to the selected value, the items in the corresponding region are filtered out from the clue source options and assigned to the clue sources array.
+	clueSources.value = clueSourceOptions.filter(item => item.region.includes(value))
+}
+
+const handleRegionClear = () => {
+	owners.value = []
+	activities.value = []
+	products.value = []
+	clueSources.value = []
+	addClueForm.value.currencyUnit = null
+	addClueForm.value.ownerId = null
+	addClueForm.value.activityId = null
+	addClueForm.value.intentionProduct = null
+	addClueForm.value.source = null
 }
 
 const submitClue = async () => {

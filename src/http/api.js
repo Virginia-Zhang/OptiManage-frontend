@@ -94,4 +94,25 @@ export default {
 	async updateClues(data) {
 		return await request.put("/clue/updateClues", data)
 	},
+	// Add marketing clue(lead) remark
+	async addClueRemark(data) {
+		return await request.post("/clueRemark/", data)
+	},
+	// Query marketing clue(lead) remark list
+	async getClueRemarkList(params) {
+		return await request.get("/clueRemark/list", params)
+	},
+	// Edit marketing clue(lead) remark
+	async editClueRemark(data) {
+		return await request.put("/clueRemark/", data)
+	},
+	// Delete marketing clue(lead) remark by id
+	async deleteClueRemarkById(id) {
+		// Id is included in dynamic routing parameters
+		return await request.delete("/clueRemark/" + id)
+	},
+	// Convert clue to customer
+	async convertToCustomer(data) {
+		return await request.post("/customer/", data)
+	},
 }

@@ -255,7 +255,7 @@ const showEditMarketingRemark = row => {
 }
 
 // Delete remark by id
-const deleteMarketingRemark = async id => {
+const deleteMarketingRemark = id => {
 	ElMessageBox.confirm("确定要删除吗？", "提示", {
 		confirmButtonText: "确定",
 		cancelButtonText: "取消",
