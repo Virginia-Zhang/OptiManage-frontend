@@ -36,12 +36,15 @@
 		<el-descriptions-item label="创建人">{{
 			selectedMarketingActivity.createByAct
 		}}</el-descriptions-item>
-		<el-descriptions-item label="编辑时间">{{
-			selectedMarketingActivity.editTime
-				? formatTime(selectedMarketingActivity.editTime)
-				: "--"
-		}}</el-descriptions-item>
-		<el-descriptions-item label="编辑人">{{
+		<el-descriptions-item
+			:label="selectedMarketingActivity.isDeleted ? '删除时间' : '编辑时间'"
+			>{{
+				selectedMarketingActivity.editTime
+					? formatTime(selectedMarketingActivity.editTime)
+					: "--"
+			}}</el-descriptions-item
+		>
+		<el-descriptions-item :label="selectedMarketingActivity.isDeleted ? '删除人' : '编辑人'">{{
 			selectedMarketingActivity.editByAct ? selectedMarketingActivity.editByAct : "--"
 		}}</el-descriptions-item>
 		<el-descriptions-item label="填写备注" v-if="!selectedMarketingActivity.isDeleted"

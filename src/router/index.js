@@ -111,6 +111,14 @@ const router = createRouter({
 						title: "线索详情",
 					},
 				},
+				{
+					path: "clues-recycle",
+					name: "clues-recycle",
+					component: () => import("@/views/clues/CluesRecycleBin.vue"),
+					meta: {
+						title: "线索管理-回收站",
+					},
+				},
 			],
 		},
 		// 404 page

@@ -25,7 +25,10 @@ export const menuData = [
 		index: "/dashboard/clues",
 		title: "线索管理",
 		icon: List,
-		children: [{ index: "/dashboard/clues", title: "线索管理", icon: List }],
+		children: [
+			{ index: "/dashboard/clues", title: "线索管理", icon: List },
+			{ index: "/dashboard/clues-recycle", title: "回收站", icon: DeleteFilled },
+		],
 	},
 	{
 		index: "/dashboard/customer",

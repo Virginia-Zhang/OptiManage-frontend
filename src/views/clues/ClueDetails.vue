@@ -60,10 +60,10 @@
 			formatTime(selectedClue.createTime)
 		}}</el-descriptions-item>
 		<el-descriptions-item label="创建人">{{ selectedClue.createByAct }}</el-descriptions-item>
-		<el-descriptions-item label="编辑时间">{{
+		<el-descriptions-item :label="selectedClue.isDeleted ? '删除时间' : '编辑时间'">{{
 			selectedClue.editTime ? formatTime(selectedClue.editTime) : "--"
 		}}</el-descriptions-item>
-		<el-descriptions-item label="编辑人">{{
+		<el-descriptions-item :label="selectedClue.isDeleted ? '删除人' : '编辑人'">{{
 			selectedClue.editByAct ? selectedClue.editByAct : "--"
 		}}</el-descriptions-item>
 		<el-descriptions-item label="填写线索备注" v-if="!selectedClue.isDeleted"
