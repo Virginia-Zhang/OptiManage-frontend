@@ -28,7 +28,7 @@
 		}}</el-descriptions-item>
 		<el-descriptions-item label="活动描述">
 			<!-- Use v-html to replace the newline character \n with the <br> tag to make the newline take effect -->
-			<div v-html="selectedMarketingActivity.description.replace(/\n/g, '<br>')"></div>
+			<div v-html="selectedMarketingActivity.description?.replace(/\n/g, '<br>')"></div>
 		</el-descriptions-item>
 		<el-descriptions-item label="创建时间">{{
 			formatTime(selectedMarketingActivity.createTime)

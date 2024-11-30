@@ -115,4 +115,8 @@ export default {
 	async convertToCustomer(data) {
 		return await request.post("/customer/", data)
 	},
+	// Query customer list by page
+	async getCustomerList(params) {
+		return await request.get("/customer/list", params)
+	},
 }

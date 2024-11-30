@@ -43,6 +43,7 @@
 				v-model="editClueForm.activityId"
 				placeholder="请选择所属活动"
 				width="200px"
+				@clear="editClueForm.activityName = null"
 				clearable
 			>
 				<template #empty>
@@ -139,6 +140,7 @@
 				v-model="editClueForm.intentionProduct"
 				placeholder="请选择客户的意向产品"
 				width="200px"
+				@clear="editClueForm.intentionProductName = null"
 				clearable
 			>
 				<template #empty>
@@ -348,12 +350,28 @@ const handleRegionClear = () => {
 const submitClue = async () => {
 	editClueFormRef.value.validate(async valid => {
 		if (!valid) return
+		// If the state is 1 -Transferred customer, check whether the fields of intentionProduct, description, and nextContactTime are not empty. If empty, prompt the user.
+		if (editClueForm.value.state === 1) {
+			if (!editClueForm.value.intentionProduct) {
+				return messageTip("error", "请选择意向产品！")
+			}
+			if (!editClueForm.value.description || editClueForm.value.description.trim() === "") {
+				return messageTip("error", "请填写客户描述！")
+			}
+			if (!editClueForm.value.nextContactTime) {
+				return messageTip("error", "请选择下次联系时间！")
+			}
+		}
 		editClueForm.value.nextContactTime = formatTime(editClueForm.value.nextContactTime)
 		submitClueLoading.value = true
 		try {
+			console.log("editClueForm: ", editClueForm.value)
 			const res = await api.editClue(editClueForm.value)
 			if (res.code === 200 && res.data == 1) {
 				messageTip("success", "编辑线索成功!")
+				setTimeout(() => {
+					router.back()
+				}, 2000)
 			} else {
 				messageTip("error", res.msg || "编辑线索失败!请重试！")
 			}

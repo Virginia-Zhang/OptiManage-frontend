@@ -119,6 +119,14 @@ const router = createRouter({
 						title: "线索管理-回收站",
 					},
 				},
+				{
+					path: "customer",
+					name: "customer",
+					component: () => import("@/views/customer/CustomerManagement.vue"),
+					meta: {
+						title: "客户管理",
+					},
+				},
 			],
 		},
 		// 404 page

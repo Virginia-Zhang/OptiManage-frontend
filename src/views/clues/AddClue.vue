@@ -334,6 +334,18 @@ const handleRegionClear = () => {
 const submitClue = async () => {
 	addClueFormRef.value.validate(async valid => {
 		if (!valid) return
+		// If the state is 1 -Transferred customer, check whether the fields of intentionProduct, description, and nextContactTime are not empty. If empty, prompt the user.
+		if (addClueForm.value.state === 1) {
+			if (!addClueForm.value.intentionProduct) {
+				return messageTip("error", "请选择意向产品！")
+			}
+			if (!addClueForm.value.description) {
+				return messageTip("error", "请填写客户描述！")
+			}
+			if (!addClueForm.value.nextContactTime) {
+				return messageTip("error", "请选择下次联系时间！")
+			}
+		}
 		addClueForm.value.nextContactTime = formatTime(addClueForm.value.nextContactTime)
 		submitClueLoading.value = true
 		try {
