@@ -13,7 +13,7 @@
 			selectedClue.fullName || "--"
 		}}</el-descriptions-item>
 		<el-descriptions-item label="客户性别">{{
-			(selectedClue.gender && selectedClue.gender == 1 ? "男" : "女") || "--"
+			selectedClue.gender === 1 ? "男性" : selectedClue.gender === 2 ? "女性" : "--"
 		}}</el-descriptions-item>
 		<el-descriptions-item label="客户手机">{{
 			selectedClue.phone || "--"
@@ -34,8 +34,7 @@
 		}}</el-descriptions-item>
 		<el-descriptions-item label="住址">{{ selectedClue.address || "--" }}</el-descriptions-item>
 		<el-descriptions-item label="是否贷款">{{
-			(selectedClue.needLoan != null && selectedClue.needLoan == 1 ? "需要" : "不需要") ||
-			"--"
+			selectedClue.needLoan === 0 ? "不需要" : selectedClue.needLoan === 1 ? "需要" : "--"
 		}}</el-descriptions-item>
 		<el-descriptions-item label="意向状态">{{
 			convertIntentionStateToText(selectedClue.intentionState)
@@ -329,6 +328,7 @@ const handleCancel = formEl => {
 
 // Convert the value of contact method into the corresponding text and display it on the page
 const contactMethodFormatter = (row, column) => {
+	if (!row) return
 	return contactMethodOptions.find(item => item.value === row.contactMethod).name
 }
 
@@ -390,13 +390,13 @@ const showConvertToCustomer = () => {
 	convertToCustomerRef.value.showConvertToCustomerDialog()
 }
 
-// After the client conversion done, change the state of the selected clue stored in Pinia to 1-Converted to client, and refresh the page
+// After the client conversion done, change the state of the selected clue stored in Pinia to 1-Converted to client, and redirect to CustomerManagement page
 const updateSelectedClue = () => {
 	clueStore.setSelectedClue({
 		...clueStore.selectedClue,
 		state: 1,
 	})
-	window.location.reload()
+	router.push({ name: "customer" })
 }
 </script>
 

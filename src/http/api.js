@@ -119,4 +119,8 @@ export default {
 	async getCustomerList(params) {
 		return await request.get("/customer/list", params)
 	},
+	// Query customer list without pagination
+	async getCustomerListWithoutPagination() {
+		return await request.get("/customer/all")
+	},
 }

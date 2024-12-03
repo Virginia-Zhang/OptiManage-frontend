@@ -1,10 +1,10 @@
 <!-- Customer management page -->
 <template>
 	<div class="btn-group">
-		<el-button type="primary" :icon="DocumentCopy" @click="batchExport"
-			>批量导出（Excel）</el-button
+		<el-button type="primary" :icon="DocumentCopy" @click="exportAll"
+			>全部导出（Excel）</el-button
 		>
-		<el-button type="success" :icon="DocumentCopy" @click="selectAndExport"
+		<el-button type="success" :icon="DocumentCopy" @click="exportSelected"
 			>选择导出（Excel）</el-button
 		>
 	</div>
@@ -93,12 +93,15 @@ import {
 	PAGE_SIZE,
 	genderOptions,
 	needLoanOptions,
+	customerExcelHeaders,
 } from "@/constants/constants"
 import api from "@/http/api"
 import { useProductStore } from "@/stores/productStore"
 
 import { Search, MapLocation, DocumentCopy } from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
+import * as XLSX from "xlsx"
+import dayjs from "dayjs"
 
 const productStore = useProductStore()
 
@@ -116,8 +119,8 @@ const currentPage = ref(1)
 // Number of items displayed per page
 const pageSize = ref(PAGE_SIZE)
 
-// The ids of the customers to be exported
-const exportedIds = []
+// The customer data to be exported
+const exportedCustomers = []
 
 // Search parameters
 let params = {
@@ -170,10 +173,131 @@ onMounted(() => {
 })
 
 const handleSelectionChange = selectedClues => {
-	exportedIds.length = 0
+	exportedCustomers.length = 0
 	selectedClues.forEach(item => {
-		exportedIds.push(item.id)
+		exportedCustomers.push(item)
 	})
+}
+
+/**
+ *	Process the values ​​of specific fields when exporting excel according to mapping rules, including gender, needLoan, source, region
+	gender: 1-male, 2-female, other-unknown
+	needLoan: 0-no need, 1-need, other-unknown
+	source: id in clueSourceOptions, corresponding to sourceName
+	region: id in regionData, corresponding to regionName
+ */
+//
+const mapGender = gender => {
+	return gender === 1 ? "男性" : gender === 2 ? "女性" : "--"
+}
+
+const mapNeedLoan = needLoan => {
+	return needLoan === 0 ? "不需要" : needLoan === 1 ? "需要" : "--"
+}
+
+const mapSource = sourceId => {
+	const source = clueSourceOptions.find(option => option.id === sourceId)
+	return source ? source.name : "--"
+}
+
+const mapRegion = regionId => {
+	const region = regionData.find(r => r.id === regionId)
+	return region ? region.name : "--"
+}
+
+// Export incoming customer data to excel
+const exportExcel = customerData => {
+	// Dynamically generate formatted data
+	const formattedData = customerData.map(item => {
+		const formattedItem = {}
+
+		// Traverse the mapped fields and map the actual data fields to the header names
+		customerExcelHeaders.forEach(field => {
+			const key = field.key
+			let value = item[key]
+
+			// Perform value conversions for specific fields
+			switch (key) {
+				case "gender":
+					value = mapGender(value) // Mapping gender
+					break
+				case "needLoan":
+					value = mapNeedLoan(value) // Map whether need loan
+					break
+				case "source":
+					value = mapSource(value) // Map customer sources
+					break
+				case "region":
+					value = mapRegion(value) // Map region
+					break
+				default:
+					// Other fields will not be processed
+					break
+			}
+
+			formattedItem[field.label] = value // Fill into formatted items
+		})
+
+		return formattedItem
+	})
+
+	// Convert data to worksheet
+	const ws = XLSX.utils.json_to_sheet(formattedData)
+
+	// Create a new workbook
+	const wb = XLSX.utils.book_new()
+	// Add a worksheet to a workbook
+	XLSX.utils.book_append_sheet(wb, ws, "Customer Data")
+
+	// Use dayjs to get the current date and format the file name
+	const fileName = `Customer Data ${dayjs().format("YYYYMMDD")}.xlsx`
+
+	// Export Excel file
+	XLSX.writeFile(wb, fileName)
+}
+
+// Export all customer data
+const exportAll = async () => {
+	// A confirmation box pops up, asking the user to confirm exporting all customer data.
+	ElMessageBox.confirm("确认导出全部客户数据吗？", "提示", {
+		confirmButtonText: "确定",
+		cancelButtonText: "取消",
+		type: "warning",
+	}).then(async () => {
+		// Query all customer data without pagination
+		const result = await api.getCustomerListWithoutPagination()
+		// Export data to excel
+		if (result.code == 200 && result.data?.length > 0) {
+			exportExcel(result.data)
+		}
+	})
+}
+
+// Export selected customer data
+const exportSelected = () => {
+	// If no data is selected, a pop-up window shows to prompt the user
+	if (exportedCustomers.length === 0) {
+		messageTip("warning", "请先选择要导出的数据！")
+		return
+	}
+	// A confirmation box pops up, asking user to confirm exporting the selected data.
+	ElMessageBox.confirm("确认导出选中的数据吗？", "提示", {
+		confirmButtonText: "确定",
+		cancelButtonText: "取消",
+		type: "warning",
+	})
+		.then(() => {
+			// Export selected data
+			exportExcel(exportedCustomers)
+			// Clear the selected customers array
+			exportedCustomers.length = 0
+			customerTableRef.value.clearSelection()
+		})
+		.catch(() => {
+			// Click Cancel to clear the selected customers array
+			exportedCustomers.length = 0
+			customerTableRef.value.clearSelection()
+		})
 }
 </script>
 

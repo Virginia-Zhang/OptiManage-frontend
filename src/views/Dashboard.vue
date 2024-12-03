@@ -68,8 +68,8 @@
 </template>
 
 <script setup>
-import { ref, shallowRef, onMounted } from "vue"
-import { useRouter } from "vue-router"
+import { ref, shallowRef, onMounted, computed } from "vue"
+import { useRouter, useRoute } from "vue-router"
 import {
 	ElMenu,
 	ElButton,
@@ -94,6 +94,7 @@ import { useMarketingStore } from "@/stores/marketingStore"
 import { useProductStore } from "@/stores/productStore"
 import { useClueStore } from "@/stores/clueStore"
 
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const marketingStore = useMarketingStore()
@@ -101,10 +102,15 @@ const productStore = useProductStore()
 const clueStore = useClueStore()
 
 const isCollapsed = ref(false)
-const activeMenu = ref("")
 const userName = ref("")
 // Logout button state control
 const logoutLoading = ref(false)
+
+// The active menu item
+const activeMenu = computed(() => {
+	// Split route.path by "-" and take the first element to ensure that it matches the index value in menuDataList.
+	return route.path.split("-")[0]
+})
 
 // Use shallowRef to ensure that menuData is only responsive on the first layer, and will not perform responsiveness on the icon component object in depth to avoid system warnings.
 const menuDataList = shallowRef([])

@@ -217,3 +217,24 @@ export const contactMethodOptions = [
 	{ name: "邮件", value: 4 },
 	{ name: "其他", value: 5 },
 ]
+
+// Mapping of the custom headers of the exported customer data excel and the keys in the customer data
+export const customerExcelHeaders = [
+	{ label: "负责人", key: "ownerAct" },
+	{ label: "所属线索ID", key: "clueId" },
+	{ label: "客户姓名", key: "fullName" },
+	{ label: "客户性别", key: "gender" },
+	{ label: "客户手机", key: "phone" },
+	{ label: "客户邮箱", key: "email" },
+	{ label: "其他联系方式", key: "otherContactDetails" },
+	{ label: "客户年龄", key: "age" },
+	{ label: "客户职业", key: "job" },
+	{ label: "客户年收入", key: "yearIncome" },
+	{ label: "客户住址", key: "address" },
+	{ label: "是否贷款", key: "needLoan" },
+	{ label: "意向产品", key: "intentionProductName" },
+	{ label: "客户来源", key: "source" },
+	{ label: "描述", key: "description" },
+	{ label: "下次联系时间", key: "nextContactTime" },
+	{ label: "地区", key: "region" },
+]

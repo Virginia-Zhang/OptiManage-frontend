@@ -113,7 +113,6 @@ const convertToCustomer = () => {
 					// Convert to customer done, trigger updateSelectedClue method in the parent component, update the selected clue data, and refresh the page
 					emits("updateSelectedClue")
 					handleCancel(convertToCustomerFormRef.value)
-					// emits("getClueRemarkList")
 				} else {
 					messageTip("error", res.msg || "转换失败!请重试！")
 				}

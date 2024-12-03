@@ -161,13 +161,13 @@
 	<!-- AddMarketing component -->
 	<AddMarketing
 		ref="addMarketingRef"
-		:ownerOptions="ownerOptions"
+		:ownerOptions="ownerOptionsList"
 		@getMarketingList="getMarketingList"
 	/>
 	<!-- EditMarketing component -->
 	<EditMarketing
 		ref="editMarketingRef"
-		:ownerOptions="ownerOptions"
+		:ownerOptions="ownerOptionsList"
 		:activity="activity"
 		@getMarketingList="getMarketingList"
 	/>
