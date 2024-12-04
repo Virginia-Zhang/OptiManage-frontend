@@ -1,15 +1,10 @@
-<!-- Edit marketing clue/lead remark pop-up window -->
+<!-- Edit customer remark pop-up window -->
 <template>
-	<el-dialog
-		title="编辑市场线索备注"
-		v-model="dialogVisible"
-		width="60%"
-		:before-close="handleClose"
-	>
-		<el-form :model="editClueRemarkForm" ref="editClueRemarkFormRef" :rules="rules">
+	<el-dialog title="编辑客户备注" v-model="dialogVisible" width="60%" :before-close="handleClose">
+		<el-form :model="editCustomerRemarkForm" ref="editCustomerRemarkFormRef" :rules="rules">
 			<el-form-item prop="noteContent" label="跟踪内容">
 				<el-input
-					v-model="editClueRemarkForm.noteContent"
+					v-model="editCustomerRemarkForm.noteContent"
 					type="textarea"
 					:rows="8"
 					placeholder="请输入跟踪内容"
@@ -17,7 +12,7 @@
 			</el-form-item>
 			<el-form-item prop="contactMethod" label="跟踪方式">
 				<el-select
-					v-model="editClueRemarkForm.contactMethod"
+					v-model="editCustomerRemarkForm.contactMethod"
 					placeholder="请选择跟踪方式"
 					width="200px"
 					clearable
@@ -34,8 +29,11 @@
 		<!-- Cancel and OK buttons -->
 		<template #footer>
 			<div class="dialog-footer">
-				<el-button @click="handleCancel(editClueRemarkFormRef)">取消</el-button>
-				<el-button type="primary" @click="editClueRemark" :disabled="editClueRemarkLoading"
+				<el-button @click="handleCancel(editCustomerRemarkFormRef)">取消</el-button>
+				<el-button
+					type="primary"
+					@click="editCustomerRemark"
+					:disabled="editCustomerRemarkLoading"
 					>确定</el-button
 				>
 			</div>
@@ -51,11 +49,11 @@ import { messageTip } from "@/utils/utils"
 import { contactMethodOptions } from "@/constants/constants"
 
 const dialogVisible = ref(false)
-const editClueRemarkForm = ref({
+const editCustomerRemarkForm = ref({
 	noteContent: null,
 	contactMethod: null,
 })
-const editClueRemarkFormRef = ref(null)
+const editCustomerRemarkFormRef = ref(null)
 const rules = ref({
 	noteContent: [
 		{ required: true, message: "请输入备注内容", trigger: "blur" },
@@ -67,38 +65,38 @@ const rules = ref({
 const props = defineProps(["remark"])
 
 watchEffect(() => {
-	// When the marketing clue information changes, update the form data
-	Object.assign(editClueRemarkForm.value, props.remark)
+	// When the customer information changes, update the form data
+	Object.assign(editCustomerRemarkForm.value, props.remark)
 })
 
 // Control pop-up window display
-const showEditClueRemarkDialog = () => {
+const showEditCustomerRemarkDialog = () => {
 	dialogVisible.value = !dialogVisible.value
 }
 // Expose showAddUserDialog function to parent component
 defineExpose({
-	showEditClueRemarkDialog,
+	showEditCustomerRemarkDialog,
 })
-// Obtain getClueRemarkList method from the parent component
-const emits = defineEmits(["getClueRemarkList"])
+// Obtain getCustomerRemarkList method from the parent component
+const emits = defineEmits(["getCustomerRemarkList"])
 // Add state control to confirm button
-const editClueRemarkLoading = ref(false)
+const editCustomerRemarkLoading = ref(false)
 
-const editClueRemark = () => {
-	editClueRemarkFormRef.value.validate(async valid => {
+const editCustomerRemark = () => {
+	editCustomerRemarkFormRef.value.validate(async valid => {
 		if (valid) {
-			editClueRemarkLoading.value = true
+			editCustomerRemarkLoading.value = true
 			try {
-				const res = await api.editClueRemark(editClueRemarkForm.value)
+				const res = await api.editCustomerRemark(editCustomerRemarkForm.value)
 				if (res.code === 200 && res.data == 1) {
 					messageTip("success", "修改成功!")
-					handleCancel(editClueRemarkFormRef.value)
-					emits("getClueRemarkList")
+					handleCancel(editCustomerRemarkFormRef.value)
+					emits("getCustomerRemarkList")
 				} else {
 					messageTip("error", res.msg || "修改失败!请重试！")
 				}
 			} finally {
-				editClueRemarkLoading.value = false
+				editCustomerRemarkLoading.value = false
 			}
 		}
 	})
@@ -110,6 +108,8 @@ const handleCancel = formEl => {
 }
 
 const handleClose = () => {
-	handleCancel(editClueRemarkFormRef.value)
+	handleCancel(editCustomerRemarkFormRef.value)
 }
 </script>
+
+<style scoped lang="scss"></style>

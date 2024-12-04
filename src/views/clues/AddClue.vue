@@ -331,7 +331,7 @@ const handleRegionClear = () => {
 	addClueForm.value.source = null
 }
 
-const submitClue = async () => {
+const submitClue = () => {
 	addClueFormRef.value.validate(async valid => {
 		if (!valid) return
 		// If the state is 1 -Transferred customer, check whether the fields of intentionProduct, description, and nextContactTime are not empty. If empty, prompt the user.

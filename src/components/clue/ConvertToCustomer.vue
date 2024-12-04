@@ -90,7 +90,7 @@ const products = computed(() => {
 const showConvertToCustomerDialog = () => {
 	dialogVisible.value = !dialogVisible.value
 }
-// Expose showAddUserDialog function to parent component
+// Expose the function to parent component
 defineExpose({
 	showConvertToCustomerDialog,
 })

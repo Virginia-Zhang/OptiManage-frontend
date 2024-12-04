@@ -93,6 +93,7 @@ import { useUserStore } from "@/stores/userStore"
 import { useMarketingStore } from "@/stores/marketingStore"
 import { useProductStore } from "@/stores/productStore"
 import { useClueStore } from "@/stores/clueStore"
+import { useCustomerStore } from "@/stores/customerStore"
 
 const route = useRoute()
 const router = useRouter()
@@ -100,6 +101,7 @@ const userStore = useUserStore()
 const marketingStore = useMarketingStore()
 const productStore = useProductStore()
 const clueStore = useClueStore()
+const customerStore = useCustomerStore()
 
 const isCollapsed = ref(false)
 const userName = ref("")
@@ -133,6 +135,7 @@ const handleCommand = async command => {
 			marketingStore.clearAll()
 			productStore.clearAll()
 			clueStore.clearAll()
+			customerStore.clearAll()
 			// After 2 seconds, jump to the login page
 			setTimeout(() => {
 				router.push("/")

@@ -1,7 +1,16 @@
 <!-- Marketing lead/clue management page -->
 <template>
 	<!-- Search form -->
-	<el-form :inline="true" :model="searchForm" class="demo-form-inline">
+	<el-form
+		:inline="true"
+		:model="searchForm"
+		class="demo-form-inline"
+		:rules="rules"
+		ref="searchFormRef"
+	>
+		<el-form-item label="线索ID" prop="id">
+			<el-input v-model="searchForm.id" placeholder="请输入线索ID" type="number" clearable />
+		</el-form-item>
 		<el-form-item label="负责人" v-if="showOwnerSearch">
 			<el-select
 				v-model="searchForm.owners"
@@ -284,6 +293,7 @@ const clueStore = useClueStore()
 const router = useRouter()
 
 const searchForm = ref({
+	id: null,
 	activities: null,
 	fullName: null,
 	gender: null,
@@ -294,6 +304,22 @@ const searchForm = ref({
 	sources: null,
 	regions: null,
 })
+const searchFormRef = ref(null)
+
+const rules = {
+	// Check whether the input value is a positive integer
+	id: [
+		{
+			validator: (rule, value, callback) => {
+				if (value != null && !/^[1-9]\d*$/.test(value)) {
+					return callback(new Error("请输入正整数"))
+				}
+				callback()
+			},
+			trigger: "blur",
+		},
+	],
+}
 
 // Get the list of owners options
 const ownerOptionsList = ref([])
@@ -405,39 +431,43 @@ onMounted(() => {
 })
 
 const search = () => {
-	// Reset the current page number to 1
-	currentPage.value = 1
-	// Update the parameters
-	params.page = currentPage.value
-	params.owners =
-		searchForm.value.owners && searchForm.value.owners.length
-			? searchForm.value.owners.join(",")
-			: null
-	params.activities =
-		searchForm.value.activities && searchForm.value.activities.length
-			? searchForm.value.activities.join(",")
-			: null
-	params.fullName = searchForm.value.fullName
-	params.gender = searchForm.value.gender
-	params.needLoan = searchForm.value.needLoan
-	params.intentionState = searchForm.value.intentionState
-	params.intentionProducts =
-		searchForm.value.intentionProducts && searchForm.value.intentionProducts.length
-			? searchForm.value.intentionProducts.join(",")
-			: null
-	params.states =
-		searchForm.value.states && searchForm.value.states.length
-			? searchForm.value.states.join(",")
-			: null
-	params.sources =
-		searchForm.value.sources && searchForm.value.sources.length
-			? searchForm.value.sources.join(",")
-			: null
-	params.regions =
-		searchForm.value.regions && searchForm.value.regions.length
-			? searchForm.value.regions.join(",")
-			: null
-	getClueList(params)
+	searchFormRef.value.validate(valid => {
+		if (!valid) return
+		// Reset the current page number to 1
+		currentPage.value = 1
+		// Update the parameters
+		params.page = currentPage.value
+		params.id = searchForm.value.id
+		params.owners =
+			searchForm.value.owners && searchForm.value.owners.length
+				? searchForm.value.owners.join(",")
+				: null
+		params.activities =
+			searchForm.value.activities && searchForm.value.activities.length
+				? searchForm.value.activities.join(",")
+				: null
+		params.fullName = searchForm.value.fullName
+		params.gender = searchForm.value.gender
+		params.needLoan = searchForm.value.needLoan
+		params.intentionState = searchForm.value.intentionState
+		params.intentionProducts =
+			searchForm.value.intentionProducts && searchForm.value.intentionProducts.length
+				? searchForm.value.intentionProducts.join(",")
+				: null
+		params.states =
+			searchForm.value.states && searchForm.value.states.length
+				? searchForm.value.states.join(",")
+				: null
+		params.sources =
+			searchForm.value.sources && searchForm.value.sources.length
+				? searchForm.value.sources.join(",")
+				: null
+		params.regions =
+			searchForm.value.regions && searchForm.value.regions.length
+				? searchForm.value.regions.join(",")
+				: null
+		getClueList(params)
+	})
 }
 
 const reset = () => {

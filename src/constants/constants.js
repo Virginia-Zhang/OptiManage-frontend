@@ -238,3 +238,13 @@ export const customerExcelHeaders = [
 	{ label: "下次联系时间", key: "nextContactTime" },
 	{ label: "地区", key: "region" },
 ]
+
+// Transaction stage options
+export const transactionStageOptions = [
+	{ name: "创建交易", value: 1 },
+	{ name: "确认清单", value: 2 },
+	{ name: "交付定金", value: 3 },
+	{ name: "产品检验", value: 4 },
+	{ name: "付款成交", value: 5 },
+	{ name: "交易取消", value: 6 },
+]

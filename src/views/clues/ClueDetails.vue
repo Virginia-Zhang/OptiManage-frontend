@@ -230,6 +230,7 @@ const remarkRules = {
 			message: "请输入跟踪记录",
 			trigger: "blur",
 		},
+		{ max: 5000, message: "跟踪记录不能超过5000字", trigger: "blur" },
 	],
 	contactMethod: [
 		{

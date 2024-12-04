@@ -127,6 +127,14 @@ const router = createRouter({
 						title: "客户管理",
 					},
 				},
+				{
+					path: "customer-details/:id",
+					name: "customer-details",
+					component: () => import("@/views/customer/CustomerDetails.vue"),
+					meta: {
+						title: "客户详情",
+					},
+				},
 			],
 		},
 		// 404 page

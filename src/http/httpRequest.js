@@ -7,6 +7,7 @@ import { useUserStore } from "@/stores/userStore"
 import { useMarketingStore } from "@/stores/marketingStore"
 import { useProductStore } from "@/stores/productStore"
 import { useClueStore } from "@/stores/clueStore"
+import { useCustomerStore } from "@/stores/customerStore"
 
 const AxiosUtil = axios.create({
 	baseURL: config.baseApi,
@@ -49,10 +50,12 @@ AxiosUtil.interceptors.response.use(
 			const marketingStore = useMarketingStore()
 			const productStore = useProductStore()
 			const clueStore = useClueStore()
+			const customerStore = useCustomerStore()
 			userStore.clearUserData()
 			marketingStore.clearAll()
 			productStore.clearAll()
 			clueStore.clearAll()
+			customerStore.clearAll()
 			setTimeout(() => {
 				router.push("/")
 			}, 2000)

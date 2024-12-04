@@ -1,5 +1,120 @@
 <!-- Customer management page -->
 <template>
+	<!-- Search form -->
+	<el-form
+		:inline="true"
+		:model="searchForm"
+		class="demo-form-inline"
+		:rules="rules"
+		ref="searchFormRef"
+	>
+		<el-form-item label="客户ID" prop="id">
+			<el-input v-model="searchForm.id" placeholder="请输入客户ID" type="number" clearable />
+		</el-form-item>
+		<el-form-item label="负责人" v-if="showOwnerSearch">
+			<el-select
+				v-model="searchForm.owners"
+				placeholder="请选择负责人"
+				multiple
+				collapse-tags
+				collapse-tags-tooltip
+				:max-collapse-tags="3"
+				clearable
+			>
+				<el-option
+					v-for="item in ownerOptionsList"
+					:key="item.id"
+					:label="item.loginAct"
+					:value="item.id"
+				/>
+			</el-select>
+		</el-form-item>
+		<el-form-item label="客户姓名">
+			<el-input v-model="searchForm.fullName" placeholder="请输入客户姓名" clearable />
+		</el-form-item>
+		<el-form-item label="客户性别">
+			<el-select v-model="searchForm.gender" placeholder="请选择客户性别" clearable>
+				<el-option
+					v-for="item in genderOptions"
+					:key="item.value"
+					:label="item.name"
+					:value="item.value"
+				/>
+			</el-select>
+		</el-form-item>
+		<el-form-item label="是否贷款">
+			<el-select v-model="searchForm.needLoan" placeholder="请选择是否贷款" clearable>
+				<el-option
+					v-for="item in needLoanOptions"
+					:key="item.value"
+					:label="item.name"
+					:value="item.value"
+				/>
+			</el-select>
+		</el-form-item>
+		<el-form-item label="意向产品">
+			<el-select
+				v-model="searchForm.intentionProducts"
+				placeholder="请选择意向产品"
+				multiple
+				collapse-tags
+				collapse-tags-tooltip
+				:max-collapse-tags="3"
+				style="width: 400px"
+				clearable
+			>
+				<el-option
+					v-for="item in productOptions"
+					:key="item.id"
+					:label="item.name"
+					:value="item.id"
+				/>
+			</el-select>
+		</el-form-item>
+		<el-form-item label="来源">
+			<el-select
+				v-model="searchForm.sources"
+				placeholder="请选择来源"
+				multiple
+				collapse-tags
+				collapse-tags-tooltip
+				:max-collapse-tags="3"
+				clearable
+			>
+				<el-option
+					v-for="item in clueSourceOptions"
+					:key="item.id"
+					:label="item.name"
+					:value="item.id"
+				/>
+			</el-select>
+		</el-form-item>
+		<el-form-item label="地区">
+			<el-select
+				v-model="searchForm.regions"
+				placeholder="请选择地区"
+				multiple
+				collapse-tags
+				collapse-tags-tooltip
+				:max-collapse-tags="3"
+				clearable
+			>
+				<template #prefix>
+					<el-icon><MapLocation /></el-icon>
+				</template>
+				<el-option
+					v-for="item in regionData"
+					:key="item.id"
+					:label="item.name"
+					:value="item.id"
+				/>
+			</el-select>
+		</el-form-item>
+		<el-form-item>
+			<el-button type="primary" :icon="Search" @click="search">搜索</el-button>
+			<el-button :icon="Refresh" @click="reset">重置</el-button>
+		</el-form-item>
+	</el-form>
 	<div class="btn-group">
 		<el-button type="primary" :icon="DocumentCopy" @click="exportAll"
 			>全部导出（Excel）</el-button
@@ -83,7 +198,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, watchEffect } from "vue"
 import { useRouter } from "vue-router"
 
 import { showOwnerSearch, getOwnerList, formatTime, messageTip } from "@/utils/utils"
@@ -97,15 +212,50 @@ import {
 } from "@/constants/constants"
 import api from "@/http/api"
 import { useProductStore } from "@/stores/productStore"
+import { useMarketingStore } from "@/stores/marketingStore"
+import { useCustomerStore } from "@/stores/customerStore"
 
-import { Search, MapLocation, DocumentCopy } from "@element-plus/icons-vue"
+import { Search, MapLocation, DocumentCopy, Refresh } from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
 import * as XLSX from "xlsx"
 import dayjs from "dayjs"
 
 const productStore = useProductStore()
+const marketingStore = useMarketingStore()
+const customerStore = useCustomerStore()
 
 const router = useRouter()
+
+const searchForm = ref({
+	id: null,
+	fullName: null,
+	gender: null,
+	needLoan: null,
+	intentionProducts: null,
+	sources: null,
+	regions: null,
+})
+const searchFormRef = ref({})
+
+const rules = {
+	// Check whether the input value is a positive integer
+	id: [
+		{
+			validator: (rule, value, callback) => {
+				if (value != null && !/^[1-9]\d*$/.test(value)) {
+					return callback(new Error("请输入正整数"))
+				}
+				callback()
+			},
+			trigger: "blur",
+		},
+	],
+}
+
+// Get the list of owners options
+const ownerOptionsList = ref([])
+// Get the list of products options
+const productOptions = ref([])
 
 // Customer Table instance
 const customerTableRef = ref(null)
@@ -170,6 +320,10 @@ const regionFormatter = (row, column, cellValue, index) => {
 
 onMounted(() => {
 	getCustomerList(params)
+	// Get the list of users who can be selected as the owner of the clues
+	getOwnerList()
+	// Get the list of products
+	getProductOptionList()
 })
 
 const handleSelectionChange = selectedClues => {
@@ -299,9 +453,70 @@ const exportSelected = () => {
 			customerTableRef.value.clearSelection()
 		})
 }
+
+// Get owner options list from Pinia
+watchEffect(() => {
+	ownerOptionsList.value = marketingStore.ownerOptions
+})
+
+// Get product options
+const getProductOptionList = async () => {
+	const res = await api.getProductOptionList()
+	productOptions.value = res.data
+	productStore.setProductOptions(res.data)
+}
+
+const search = () => {
+	searchFormRef.value.validate(valid => {
+		if (!valid) return
+		// Reset the current page number to 1
+		currentPage.value = 1
+		// Update the parameters
+		params.page = currentPage.value
+		params.id = searchForm.value.id
+		params.owners =
+			searchForm.value.owners && searchForm.value.owners.length
+				? searchForm.value.owners.join(",")
+				: null
+		params.fullName = searchForm.value.fullName
+		params.gender = searchForm.value.gender
+		params.needLoan = searchForm.value.needLoan
+		params.intentionProducts =
+			searchForm.value.intentionProducts && searchForm.value.intentionProducts.length
+				? searchForm.value.intentionProducts.join(",")
+				: null
+		params.sources =
+			searchForm.value.sources && searchForm.value.sources.length
+				? searchForm.value.sources.join(",")
+				: null
+		params.regions =
+			searchForm.value.regions && searchForm.value.regions.length
+				? searchForm.value.regions.join(",")
+				: null
+		getCustomerList(params)
+	})
+}
+
+const reset = () => {
+	searchForm.value = {}
+}
+
+const showCustomerDetails = row => {
+	customerStore.setSelectedCustomer(row)
+	router.push({ name: "customer-details", params: { id: row.id } })
+}
 </script>
 
 <style scoped lang="scss">
+.demo-form-inline {
+	.el-input {
+		--el-input-width: 220px;
+	}
+	.el-select {
+		--el-select-width: 220px;
+	}
+}
+
 .btn-group {
 	display: flex;
 	justify-content: flex-start;

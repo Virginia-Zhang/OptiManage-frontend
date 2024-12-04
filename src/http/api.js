@@ -123,4 +123,25 @@ export default {
 	async getCustomerListWithoutPagination() {
 		return await request.get("/customer/all")
 	},
+	// Add customer remark
+	async addCustomerRemark(data) {
+		return await request.post("/customerRemark/", data)
+	},
+	// Query customer remark list
+	async getCustomerRemarkList(params) {
+		return await request.get("/customerRemark/list", params)
+	},
+	// Edit customer remark
+	async editCustomerRemark(data) {
+		return await request.put("/customerRemark/", data)
+	},
+	// Delete customer remark by id
+	async deleteCustomerRemarkById(id) {
+		// Id is included in dynamic routing parameters
+		return await request.delete("/customerRemark/" + id)
+	},
+	// Create transaction
+	async createTransaction(data) {
+		return await request.post("/tran/", data)
+	},
 }
