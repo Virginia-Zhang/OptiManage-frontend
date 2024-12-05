@@ -1,5 +1,41 @@
 <!-- User Management component -->
 <template>
+	<!-- Search form -->
+	<el-form :inline="true" :model="searchForm" class="demo-form-inline" ref="searchFormRef">
+		<el-form-item label="账号">
+			<el-input v-model="searchForm.loginAct" placeholder="请输入账号" clearable />
+		</el-form-item>
+		<el-form-item label="姓名">
+			<el-input v-model="searchForm.name" placeholder="请输入姓名" clearable />
+		</el-form-item>
+		<el-form-item label="地区">
+			<el-select
+				v-model="searchForm.regions"
+				placeholder="请选择地区"
+				multiple
+				collapse-tags
+				collapse-tags-tooltip
+				:max-collapse-tags="3"
+				clearable
+			>
+				<template #prefix>
+					<el-icon><MapLocation /></el-icon>
+				</template>
+				<el-option
+					v-for="item in regionData"
+					:key="item.id"
+					:label="item.name"
+					:value="item.id"
+				/>
+			</el-select>
+		</el-form-item>
+		<el-form-item>
+			<el-button type="primary" :icon="Search" @click="search" :loading="searchLoading"
+				>搜索</el-button
+			>
+			<el-button :icon="Refresh" @click="reset">重置</el-button>
+		</el-form-item>
+	</el-form>
 	<div class="btn-group">
 		<el-button type="primary" :icon="Plus" @click="addUser">添加用户</el-button>
 		<el-button type="danger" :icon="Delete" @click="batchDelete">批量删除</el-button>
@@ -72,8 +108,16 @@ import { regionData, PAGE_SIZE } from "@/constants/constants"
 import EditUser from "@/components/user/EditUser.vue"
 import { messageTip, formatTime } from "@/utils/utils"
 
-import { Plus, Delete } from "@element-plus/icons-vue"
+import { Plus, Delete, MapLocation, Search, Refresh } from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
+
+const searchForm = ref({
+	loginAct: null,
+	name: null,
+	regions: null,
+})
+const searchFormRef = ref({})
+const searchLoading = ref(false)
 
 const currentPage = ref(1)
 const pageSize = ref(PAGE_SIZE)
@@ -202,9 +246,37 @@ const batchDelete = () => {
 onMounted(() => {
 	getUserList(params)
 })
+
+const search = async () => {
+	// Reset the current page number to 1
+	currentPage.value = 1
+	params.page = currentPage.value
+	params.regions =
+		searchForm.value.regions && searchForm.value.regions.length
+			? searchForm.value.regions.join(",")
+			: null
+	params.loginAct = searchForm.value.loginAct
+	params.name = searchForm.value.name
+	searchLoading.value = true
+	await getUserList(params)
+	searchLoading.value = false
+}
+
+const reset = () => {
+	searchForm.value = {}
+}
 </script>
 
 <style scoped lang="scss">
+.demo-form-inline {
+	.el-input {
+		--el-input-width: 220px;
+	}
+	.el-select {
+		--el-select-width: 220px;
+	}
+}
+
 .btn-group {
 	display: flex;
 	justify-content: flex-start;

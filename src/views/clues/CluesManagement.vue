@@ -158,13 +158,21 @@
 			</el-select>
 		</el-form-item>
 		<el-form-item>
-			<el-button type="primary" :icon="Search" @click="search">搜索</el-button>
+			<el-button type="primary" :icon="Search" @click="search" :loading="searchLoading"
+				>搜索</el-button
+			>
 			<el-button :icon="Refresh" @click="reset">重置</el-button>
 		</el-form-item>
 	</el-form>
 	<div class="btn-group">
 		<el-button type="primary" :icon="Plus" @click="addClue">录入线索</el-button>
 		<el-button type="danger" :icon="Delete" @click="batchDelete">批量删除</el-button>
+		<el-button type="success" :icon="DocumentCopy" @click="exportAll"
+			>全部导出（Excel）</el-button
+		>
+		<el-button type="info" :icon="DocumentCopy" @click="exportSelected"
+			>选择导出（Excel）</el-button
+		>
 	</div>
 	<!-- Table area to display the list of marketing clues -->
 	<el-table
@@ -277,14 +285,17 @@ import {
 	genderOptions,
 	needLoanOptions,
 	intentionStateOptions,
+	clueExcelHeaders,
 } from "@/constants/constants"
 import api from "@/http/api"
 import { useMarketingStore } from "@/stores/marketingStore"
 import { useProductStore } from "@/stores/productStore"
 import { useClueStore } from "@/stores/clueStore"
 
-import { Search, Plus, Delete, MapLocation, Refresh } from "@element-plus/icons-vue"
+import { Search, Plus, Delete, MapLocation, Refresh, DocumentCopy } from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
+import * as XLSX from "xlsx"
+import dayjs from "dayjs"
 
 const marketingStore = useMarketingStore()
 const productStore = useProductStore()
@@ -305,6 +316,7 @@ const searchForm = ref({
 	regions: null,
 })
 const searchFormRef = ref(null)
+const searchLoading = ref(false)
 
 const rules = {
 	// Check whether the input value is a positive integer
@@ -342,6 +354,8 @@ const pageSize = ref(PAGE_SIZE)
 
 // The ids of the clues to be deleted
 const deletedIds = []
+// The clue data to be exported
+const exportedClues = []
 
 // Get owner options list from Pinia
 watchEffect(() => {
@@ -431,7 +445,7 @@ onMounted(() => {
 })
 
 const search = () => {
-	searchFormRef.value.validate(valid => {
+	searchFormRef.value.validate(async valid => {
 		if (!valid) return
 		// Reset the current page number to 1
 		currentPage.value = 1
@@ -466,7 +480,9 @@ const search = () => {
 			searchForm.value.regions && searchForm.value.regions.length
 				? searchForm.value.regions.join(",")
 				: null
-		getClueList(params)
+		searchLoading.value = true
+		await getClueList(params)
+		searchLoading.value = false
 	})
 }
 
@@ -487,8 +503,10 @@ const editClue = row => {
 
 const handleSelectionChange = selectedClues => {
 	deletedIds.length = 0
+	exportedClues.length = 0
 	selectedClues.forEach(item => {
 		deletedIds.push(item.id)
+		exportedClues.push(item)
 	})
 }
 
@@ -531,6 +549,145 @@ const batchDelete = () => {
 const showClueDetails = row => {
 	clueStore.setSelectedClue(row)
 	router.push({ name: "clues-details", params: { id: row.id } })
+}
+
+/**
+ *	Process the values ​​of specific fields when exporting excel according to mapping rules, including gender, needLoan, intentionState, state, source, region
+	gender: 1-male, 2-female, other-unknown
+	needLoan: 0-no need, 1-need, other-unknown
+	intentionState: value in intentionStateOptions, corresponding to intentionStateName
+	state: id in clueStateOptions, corresponding to stateName
+	source: id in clueSourceOptions, corresponding to sourceName
+	region: id in regionData, corresponding to regionName
+ */
+//
+const mapGender = gender => {
+	return gender === 1 ? "男性" : gender === 2 ? "女性" : "--"
+}
+
+const mapNeedLoan = needLoan => {
+	return needLoan === 0 ? "不需要" : needLoan === 1 ? "需要" : "--"
+}
+
+const mapIntentionState = intentionStateValue => {
+	const intentionState = intentionStateOptions.find(item => item.value === intentionStateValue)
+	return intentionState ? intentionState.name : "--"
+}
+
+const mapState = stateId => {
+	const state = clueStateOptions.find(option => option.id === stateId)
+	return state ? state.name : "--"
+}
+
+const mapSource = sourceId => {
+	const source = clueSourceOptions.find(option => option.id === sourceId)
+	return source ? source.name : "--"
+}
+
+const mapRegion = regionId => {
+	const region = regionData.find(r => r.id === regionId)
+	return region ? region.name : "--"
+}
+
+// Export incoming clue data to excel
+const exportExcel = clueData => {
+	// Dynamically generate formatted data
+	const formattedData = clueData.map(item => {
+		const formattedItem = {}
+
+		// Traverse the mapped fields and map the actual data fields to the header names
+		clueExcelHeaders.forEach(field => {
+			const key = field.key
+			let value = item[key]
+
+			// Perform value conversions for specific fields
+			switch (key) {
+				case "gender":
+					value = mapGender(value) // Mapping gender
+					break
+				case "needLoan":
+					value = mapNeedLoan(value) // Map whether need loan
+					break
+				case "intentionState":
+					value = mapIntentionState(value) // Map intention state
+					break
+				case "state":
+					value = mapState(value) // Map clue state
+					break
+				case "source":
+					value = mapSource(value) // Map clue sources
+					break
+				case "region":
+					value = mapRegion(value) // Map region
+					break
+				default:
+					// Other fields will not be processed
+					break
+			}
+
+			formattedItem[field.label] = value // Fill into formatted items
+		})
+
+		return formattedItem
+	})
+
+	// Convert data to worksheet
+	const ws = XLSX.utils.json_to_sheet(formattedData)
+
+	// Create a new workbook
+	const wb = XLSX.utils.book_new()
+	// Add a worksheet to a workbook
+	XLSX.utils.book_append_sheet(wb, ws, "marketing lead Data")
+
+	// Use dayjs to get the current date and format the file name
+	const fileName = `Marketing lead Data ${dayjs().format("YYYYMMDD")}.xlsx`
+
+	// Export Excel file
+	XLSX.writeFile(wb, fileName)
+}
+
+// Export all clue data
+const exportAll = async () => {
+	// A confirmation box pops up, asking the user to confirm exporting all clue data.
+	ElMessageBox.confirm("确认导出全部市场线索数据吗？", "提示", {
+		confirmButtonText: "确定",
+		cancelButtonText: "取消",
+		type: "warning",
+	}).then(async () => {
+		// Query all clue data without pagination
+		const result = await api.getClueListWithoutPagination()
+		// Export data to excel
+		if (result.code == 200 && result.data?.length > 0) {
+			exportExcel(result.data)
+		}
+	})
+}
+
+// Export selected clue data
+const exportSelected = () => {
+	// If no data is selected, a pop-up window shows to prompt the user
+	if (exportedClues.length === 0) {
+		messageTip("warning", "请先选择要导出的数据！")
+		return
+	}
+	// A confirmation box pops up, asking user to confirm exporting the selected data.
+	ElMessageBox.confirm("确认导出选中的数据吗？", "提示", {
+		confirmButtonText: "确定",
+		cancelButtonText: "取消",
+		type: "warning",
+	})
+		.then(() => {
+			// Export selected data
+			exportExcel(exportedClues)
+			// Clear the selected clues array
+			exportedClues.length = 0
+			clueTableRef.value.clearSelection()
+		})
+		.catch(() => {
+			// Click Cancel to clear the selected clues array
+			exportedClues.length = 0
+			clueTableRef.value.clearSelection()
+		})
 }
 </script>
 

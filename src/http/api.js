@@ -144,4 +144,12 @@ export default {
 	async createTransaction(data) {
 		return await request.post("/tran/", data)
 	},
+	// Query marketing activity list without pagination
+	async getActivityListWithoutPagination() {
+		return await request.get("/activity/all")
+	},
+	// Query marketing clue/lead list without pagination
+	async getClueListWithoutPagination() {
+		return await request.get("/clue/all")
+	},
 }

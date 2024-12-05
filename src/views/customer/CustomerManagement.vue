@@ -111,7 +111,9 @@
 			</el-select>
 		</el-form-item>
 		<el-form-item>
-			<el-button type="primary" :icon="Search" @click="search">搜索</el-button>
+			<el-button type="primary" :icon="Search" @click="search" :loading="searchLoading"
+				>搜索</el-button
+			>
 			<el-button :icon="Refresh" @click="reset">重置</el-button>
 		</el-form-item>
 	</el-form>
@@ -236,6 +238,7 @@ const searchForm = ref({
 	regions: null,
 })
 const searchFormRef = ref({})
+const searchLoading = ref(false)
 
 const rules = {
 	// Check whether the input value is a positive integer
@@ -326,9 +329,9 @@ onMounted(() => {
 	getProductOptionList()
 })
 
-const handleSelectionChange = selectedClues => {
+const handleSelectionChange = selectedCustomers => {
 	exportedCustomers.length = 0
-	selectedClues.forEach(item => {
+	selectedCustomers.forEach(item => {
 		exportedCustomers.push(item)
 	})
 }
@@ -467,7 +470,7 @@ const getProductOptionList = async () => {
 }
 
 const search = () => {
-	searchFormRef.value.validate(valid => {
+	searchFormRef.value.validate(async valid => {
 		if (!valid) return
 		// Reset the current page number to 1
 		currentPage.value = 1
@@ -493,7 +496,9 @@ const search = () => {
 			searchForm.value.regions && searchForm.value.regions.length
 				? searchForm.value.regions.join(",")
 				: null
-		getCustomerList(params)
+		searchLoading.value = true
+		await getCustomerList(params)
+		searchLoading.value = false
 	})
 }
 

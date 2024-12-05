@@ -80,13 +80,21 @@
 			</el-select>
 		</el-form-item>
 		<el-form-item>
-			<el-button type="primary" :icon="Search" @click="search">搜索</el-button>
+			<el-button type="primary" :icon="Search" @click="search" :loading="searchLoading"
+				>搜索</el-button
+			>
 			<el-button :icon="Refresh" @click="reset">重置</el-button>
 		</el-form-item>
 	</el-form>
 	<div class="btn-group">
 		<el-button type="primary" :icon="Plus" @click="addMarketing">录入市场活动</el-button>
 		<el-button type="danger" :icon="Delete" @click="batchDelete">批量删除</el-button>
+		<el-button type="success" :icon="DocumentCopy" @click="exportAll"
+			>全部导出（Excel）</el-button
+		>
+		<el-button type="info" :icon="DocumentCopy" @click="exportSelected"
+			>选择导出（Excel）</el-button
+		>
 	</div>
 	<!-- Table area to display the list of marketing campaigns -->
 	<el-table
@@ -183,6 +191,7 @@ import {
 	budgetRangeJPY,
 	PAGE_SIZE,
 	regionData,
+	activityExcelHeaders,
 } from "@/constants/constants"
 import { showOwnerSearch, formatTime, messageTip, getOwnerList } from "@/utils/utils"
 import api from "@/http/api"
@@ -190,8 +199,18 @@ import AddMarketing from "@/components/marketing/AddMarketing.vue"
 import EditMarketing from "@/components/marketing/EditMarketing.vue"
 import { useMarketingStore } from "@/stores/marketingStore"
 
-import { Search, Refresh, MapLocation, Plus, Delete, Coin } from "@element-plus/icons-vue"
+import {
+	Search,
+	Refresh,
+	MapLocation,
+	Plus,
+	Delete,
+	Coin,
+	DocumentCopy,
+} from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
+import * as XLSX from "xlsx"
+import dayjs from "dayjs"
 
 const router = useRouter()
 const marketingStore = useMarketingStore()
@@ -204,6 +223,7 @@ const searchForm = ref({
 	currencyUnit: null,
 	regions: null,
 })
+const searchLoading = ref(false)
 
 // A computed attribute, displays different options based on the currency unit selected by the user.
 const budgetOptions = computed(() => {
@@ -249,6 +269,8 @@ const activity = ref({})
 
 // The ids of the activities to be deleted
 const deletedIds = []
+// The list of activities to be exported
+const exportedActivities = []
 
 // Search parameters
 let params = {
@@ -299,8 +321,10 @@ const showEditMarketing = row => {
 
 const handleSelectionChange = selectedActivities => {
 	deletedIds.length = 0
+	exportedActivities.length = 0
 	selectedActivities.forEach(item => {
 		deletedIds.push(item.id)
+		exportedActivities.push(item)
 	})
 }
 
@@ -350,7 +374,7 @@ const timeFormatter = (row, column, cellValue, index) => {
 	return formatTime(cellValue)
 }
 
-const search = () => {
+const search = async () => {
 	// Clear the searching parameters last time
 	currentPage.value = 1
 	params = {
@@ -404,11 +428,108 @@ const search = () => {
 		messageTip("warning", "请选择活动预算，或清空货币单位！")
 		return
 	}
-	getMarketingList(params)
+	searchLoading.value = true
+	await getMarketingList(params)
+	searchLoading.value = false
 }
 
 const reset = () => {
 	searchForm.value = {}
+}
+
+const mapRegion = regionId => {
+	const region = regionData.find(r => r.id === regionId)
+	return region ? region.name : "--"
+}
+
+// Export incoming activity data to excel
+const exportExcel = activityData => {
+	// Dynamically generate formatted data
+	const formattedData = activityData.map(item => {
+		const formattedItem = {}
+
+		// Traverse the mapped fields and map the actual data fields to the header names
+		activityExcelHeaders.forEach(field => {
+			const key = field.key
+			let value = item[key]
+
+			// Perform value conversions for specific fields
+			switch (key) {
+				case "region":
+					value = mapRegion(value) // Map region
+					break
+				case "createTime":
+				case "editTime":
+					value = formatTime(value)
+					break
+				default:
+					// Other fields will not be processed
+					break
+			}
+
+			formattedItem[field.label] = value // Fill into formatted items
+		})
+
+		return formattedItem
+	})
+
+	// Convert data to worksheet
+	const ws = XLSX.utils.json_to_sheet(formattedData)
+
+	// Create a new workbook
+	const wb = XLSX.utils.book_new()
+	// Add a worksheet to a workbook
+	XLSX.utils.book_append_sheet(wb, ws, "Marketing Campaign Data")
+
+	// Use dayjs to get the current date and format the file name
+	const fileName = `Marketing Campaign Data ${dayjs().format("YYYYMMDD")}.xlsx`
+
+	// Export Excel file
+	XLSX.writeFile(wb, fileName)
+}
+
+// Export all activity data
+const exportAll = async () => {
+	// A confirmation box pops up, asking the user to confirm exporting all activity data.
+	ElMessageBox.confirm("确认导出全部市场活动数据吗？", "提示", {
+		confirmButtonText: "确定",
+		cancelButtonText: "取消",
+		type: "warning",
+	}).then(async () => {
+		// Query all activity data without pagination
+		const result = await api.getActivityListWithoutPagination()
+		// Export data to excel
+		if (result.code == 200 && result.data?.length > 0) {
+			exportExcel(result.data)
+		}
+	})
+}
+
+// Export selected activity data
+const exportSelected = () => {
+	// If no data is selected, a pop-up window shows to prompt the user
+	if (exportedActivities.length === 0) {
+		messageTip("warning", "请先选择要导出的数据！")
+		return
+	}
+	// A confirmation box pops up, asking user to confirm exporting the selected data.
+	ElMessageBox.confirm("确认导出选中的数据吗？", "提示", {
+		confirmButtonText: "确定",
+		cancelButtonText: "取消",
+		type: "warning",
+	})
+		.then(() => {
+			// Export selected data
+			exportExcel(exportedActivities)
+			// Clear the selected activities array
+			exportedActivities.length = 0
+			marketingTableRef.value.clearSelection()
+		})
+		.catch(() => {
+			// Click Cancel to clear the selected activities array
+			exportedActivities.length = 0
+			marketingTableRef.value.clearSelection()
+		})
 }
 </script>
 
