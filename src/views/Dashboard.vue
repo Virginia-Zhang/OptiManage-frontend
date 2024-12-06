@@ -38,7 +38,7 @@
 					<el-dropdown @command="handleCommand">
 						<span class="el-dropdown-link">
 							<el-icon style="margin-right: 8px"><User /></el-icon>
-							<span>{{ userName }}</span>
+							<span>{{ userInfo.name }}</span>
 							<el-icon class="arrow-icon"><ArrowLeftIcon /></el-icon>
 						</span>
 						<template #dropdown>
@@ -103,8 +103,9 @@ const productStore = useProductStore()
 const clueStore = useClueStore()
 const customerStore = useCustomerStore()
 
+const { userInfo } = userStore
+
 const isCollapsed = ref(false)
-const userName = ref("")
 // Logout button state control
 const logoutLoading = ref(false)
 
@@ -165,14 +166,6 @@ const handleCommand = async command => {
 	}
 }
 
-// get user info
-const fetchUserInfo = async () => {
-	const res = await api.getUserInfo()
-	if (res.code === 200) {
-		userName.value = res.data.user.name
-	}
-}
-
 // Get roleList from storage and determine whether the user has an administrator role. If not, delete the "User Management" menu item in menuData to prevent users from accessing this module.
 const authorize = () => {
 	const roleList = getRoleList()
@@ -187,7 +180,6 @@ const authorize = () => {
 }
 
 onMounted(() => {
-	fetchUserInfo()
 	authorize()
 })
 </script>

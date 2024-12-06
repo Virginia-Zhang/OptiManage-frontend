@@ -62,7 +62,6 @@ const rules = {
 }
 
 // login submit
-
 const onSubmit = formEl => {
 	if (!formEl) return
 	formEl.validate(async valid => {
@@ -78,25 +77,25 @@ const onSubmit = formEl => {
 					if (form.value.rememberMe) {
 						// store token into local storage
 						storage.setItem("token", res.data.token, "local")
-						// store roleList, permissionList and preferredLanguage into Pinia and localStorage
+						// store roleList, permissionList and userInfo into Pinia and localStorage
 						userStore.setUserData({
 							roleList: res.data.roleList,
 							permissionList: res.data.permissionList,
-							preferredLanguage: res.data.preferredLanguage,
+							userInfo: res.data.userInfo,
 						})
-						storage.setItem("preferredLanguage", res.data.preferredLanguage, "local")
+						storage.setItem("userInfo", res.data.userInfo, "local")
 						storage.setItem("roleList", res.data.roleList, "local")
 						storage.setItem("permissionList", res.data.permissionList, "local")
 					} else {
 						// store token into session storage
 						storage.setItem("token", res.data.token, "session")
-						// store roleList, permissionList and preferredLanguage into Pinia and sessionStorage
+						// store roleList, permissionList and userInfo into Pinia and sessionStorage
 						userStore.setUserData({
 							roleList: res.data.roleList,
 							permissionList: res.data.permissionList,
-							preferredLanguage: res.data.preferredLanguage,
+							userInfo: res.data.userInfo,
 						})
-						storage.setItem("preferredLanguage", res.data.preferredLanguage, "session")
+						storage.setItem("userInfo", res.data.userInfo, "session")
 						storage.setItem("roleList", res.data.roleList, "session")
 						storage.setItem("permissionList", res.data.permissionList, "session")
 					}

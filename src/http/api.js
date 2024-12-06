@@ -9,10 +9,6 @@ export default {
 	async login(data) {
 		return await request.post("/login", data)
 	},
-	// Get user information
-	async getUserInfo() {
-		return await request.get("/user/info")
-	},
 	// Logout
 	async logout() {
 		return await request.post("/logout")

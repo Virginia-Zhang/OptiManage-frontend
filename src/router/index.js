@@ -1,7 +1,7 @@
 // Routing configuration
 import { createRouter, createWebHistory } from "vue-router"
 import storage from "@/utils/storage"
-import { messageTip } from "../utils/utils"
+import { messageTip, getRoleList } from "@/utils/utils"
 
 const router = createRouter({
 	history: createWebHistory(),
@@ -46,6 +46,17 @@ const router = createRouter({
 					meta: {
 						title: "用户管理",
 					},
+					//If the user is not an administrator, access to this page is not allowed
+					beforeEnter: (to, from) => {
+						const roleList = getRoleList()
+						if (roleList.indexOf("admin") === -1) {
+							messageTip("warning", "您没有权限访问此页面")
+							setTimeout(() => {
+								router.back()
+							}, 2000)
+							return false
+						}
+					},
 				},
 				{
 					path: "user-recycle",
@@ -53,6 +64,17 @@ const router = createRouter({
 					component: () => import("@/views/user/UserRecycleBin.vue"),
 					meta: {
 						title: "用户管理-回收站",
+					},
+					//If the user is not an administrator, access to this page is not allowed
+					beforeEnter: (to, from) => {
+						const roleList = getRoleList()
+						if (roleList.indexOf("admin") === -1) {
+							messageTip("warning", "您没有权限访问此页面")
+							setTimeout(() => {
+								router.back()
+							}, 2000)
+							return false
+						}
 					},
 				},
 				{

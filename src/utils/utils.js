@@ -32,7 +32,7 @@ export const clearStorage = () => {
 // Get preferredLanguage from Pinia, 1 is English, 2 is Chinese, 3 is Japanese
 export const getPreferredLanguage = () => {
 	const userStore = useUserStore()
-	return userStore?.preferredLanguage
+	return userStore?.userInfo.preferredLanguage
 }
 
 // Get roleList from Pinia
