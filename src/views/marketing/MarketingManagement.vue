@@ -87,12 +87,31 @@
 		</el-form-item>
 	</el-form>
 	<div class="btn-group">
-		<el-button type="primary" :icon="Plus" @click="addMarketing">录入市场活动</el-button>
-		<el-button type="danger" :icon="Delete" @click="batchDelete">批量删除</el-button>
-		<el-button type="success" :icon="DocumentCopy" @click="exportAll"
+		<el-button type="primary" :icon="Plus" @click="addMarketing" v-permission="'activity:add'"
+			>录入市场活动</el-button
+		>
+		<el-button
+			type="danger"
+			:icon="Delete"
+			@click="batchDelete"
+			v-permission="'activity:delete'"
+			v-if="marketingList.length"
+			>批量删除</el-button
+		>
+		<el-button
+			type="success"
+			:icon="DocumentCopy"
+			@click="exportAll"
+			v-permission="'activity:export'"
+			v-if="marketingList.length"
 			>全部导出（Excel）</el-button
 		>
-		<el-button type="info" :icon="DocumentCopy" @click="exportSelected"
+		<el-button
+			type="info"
+			:icon="DocumentCopy"
+			@click="exportSelected"
+			v-permission="'activity:export'"
+			v-if="marketingList.length"
 			>选择导出（Excel）</el-button
 		>
 	</div>
@@ -144,15 +163,27 @@
 			:formatter="timeFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column fixed="right" label="操作" min-width="210">
+		<el-table-column fixed="right" label="操作" :width="actionsBarWidth">
 			<template #default="scope">
-				<el-button type="primary" size="small" @click="showMarketingDetails(scope.row)"
+				<el-button
+					type="primary"
+					size="small"
+					@click="showMarketingDetails(scope.row)"
+					v-permission="'activity:details'"
 					>详情</el-button
 				>
-				<el-button type="success" size="small" @click="showEditMarketing(scope.row)"
+				<el-button
+					type="success"
+					size="small"
+					@click="showEditMarketing(scope.row)"
+					v-permission="'activity:edit'"
 					>编辑</el-button
 				>
-				<el-button type="danger" size="small" @click="deleteMarketings([scope.row.id])"
+				<el-button
+					type="danger"
+					size="small"
+					@click="deleteMarketings([scope.row.id])"
+					v-permission="'activity:delete'"
 					>删除</el-button
 				>
 			</template>
@@ -193,7 +224,13 @@ import {
 	regionData,
 	activityExcelHeaders,
 } from "@/constants/constants"
-import { showOwnerSearch, formatTime, messageTip, getOwnerList } from "@/utils/utils"
+import {
+	showOwnerSearch,
+	formatTime,
+	messageTip,
+	getOwnerList,
+	useCalculateActionsBarWidth,
+} from "@/utils/utils"
 import api from "@/http/api"
 import AddMarketing from "@/components/marketing/AddMarketing.vue"
 import EditMarketing from "@/components/marketing/EditMarketing.vue"
@@ -214,6 +251,9 @@ import dayjs from "dayjs"
 
 const router = useRouter()
 const marketingStore = useMarketingStore()
+const permissionItems = ["activity:details", "activity:edit", "activity:delete"]
+// Calculate the width of the actions bar
+const actionsBarWidth = useCalculateActionsBarWidth(permissionItems)
 
 // SearchForm data
 const searchForm = ref({
@@ -280,7 +320,7 @@ let params = {
 // Get the list of marketing campaigns
 const getMarketingList = async params => {
 	const res = await api.getActivityList(params)
-	if (res.code === 200) {
+	if (res?.code === 200) {
 		marketingList.value = res.data.rows
 		total.value = res.data.total
 	}
@@ -341,7 +381,7 @@ const deleteMarketings = ids => {
 				isDeletedValue: 1,
 			}
 			const res = await api.updateActivities(data)
-			if (res.code === 200) {
+			if (res?.code === 200) {
 				messageTip("success", "删除成功!")
 				currentPage.value = 1
 				params.page = currentPage.value

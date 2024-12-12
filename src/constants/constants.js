@@ -1,73 +1,61 @@
-import {
-	PieChart,
-	List,
-	User,
-	ShoppingCart,
-	Box,
-	Setting,
-	Notebook,
-	Avatar,
-	DeleteFilled,
-} from "@element-plus/icons-vue"
-
 // Menu list data in sidebar of Dashboard page
 export const menuData = [
 	{
 		index: "/dashboard/marketing",
 		title: "市场活动",
-		icon: PieChart,
+		icon: "PieChart",
 		children: [
-			{ index: "/dashboard/marketing", title: "市场活动", icon: PieChart },
-			{ index: "/dashboard/marketing-recycle", title: "回收站", icon: DeleteFilled },
+			{ index: "/dashboard/marketing", title: "市场活动", icon: "PieChart" },
+			{ index: "/dashboard/marketing/recycle", title: "回收站", icon: "DeleteFilled" },
 		],
 	},
 	{
 		index: "/dashboard/clues",
 		title: "线索管理",
-		icon: List,
+		icon: "List",
 		children: [
-			{ index: "/dashboard/clues", title: "线索管理", icon: List },
-			{ index: "/dashboard/clues-recycle", title: "回收站", icon: DeleteFilled },
+			{ index: "/dashboard/clues", title: "线索管理", icon: "List" },
+			{ index: "/dashboard/clues/recycle", title: "回收站", icon: "DeleteFilled" },
 		],
 	},
 	{
 		index: "/dashboard/customer",
 		title: "客户管理",
-		icon: Avatar,
-		children: [{ index: "/dashboard/customer", title: "客户管理", icon: Avatar }],
+		icon: "Avatar",
+		children: [{ index: "/dashboard/customer", title: "客户管理", icon: "Avatar" }],
 	},
 	{
 		index: "/dashboard/transaction",
 		title: "交易管理",
-		icon: ShoppingCart,
-		children: [{ index: "/dashboard/transaction", title: "交易管理", icon: ShoppingCart }],
+		icon: "ShoppingCart",
+		children: [{ index: "/dashboard/transaction", title: "交易管理", icon: "ShoppingCart" }],
 	},
 	{
 		index: "/dashboard/product",
 		title: "产品管理",
-		icon: Box,
-		children: [{ index: "/dashboard/product", title: "产品管理", icon: Box }],
+		icon: "Box",
+		children: [{ index: "/dashboard/product", title: "产品管理", icon: "Box" }],
 	},
 	{
 		index: "/dashboard/dictionary",
 		title: "字典管理",
-		icon: Notebook,
-		children: [{ index: "/dashboard/dictionary", title: "字典管理", icon: Notebook }],
+		icon: "Notebook",
+		children: [{ index: "/dashboard/dictionary", title: "字典管理", icon: "Notebook" }],
 	},
 	{
 		index: "/dashboard/user",
 		title: "用户管理",
-		icon: User,
+		icon: "User",
 		children: [
-			{ index: "/dashboard/user", title: "用户管理", icon: User },
-			{ index: "/dashboard/user-recycle", title: "回收站", icon: DeleteFilled },
+			{ index: "/dashboard/user", title: "用户管理", icon: "User" },
+			{ index: "/dashboard/user/recycle", title: "回收站", icon: "DeleteFilled" },
 		],
 	},
 	{
 		index: "/dashboard/system",
 		title: "系统管理",
-		icon: Setting,
-		children: [{ index: "/dashboard/system", title: "系统管理", icon: Setting }],
+		icon: "Setting",
+		children: [{ index: "/dashboard/system", title: "系统管理", icon: "Setting" }],
 	},
 ]
 
@@ -147,9 +135,9 @@ export const clueStateOptions = [
 export const clueSourceOptions = [
 	{ name: "易车网", id: 1, region: [1] },
 	{ name: "员工介绍", id: 2, region: [1] },
-	{ name: "官方网站", id: 3, region: [1] },
+	{ name: "官方网站/APP", id: 3, region: [1] },
 	{ name: "公众号", id: 4, region: [1] },
-	{ name: "门店参观", id: 5, region: [1] },
+	{ name: "线下展厅参观", id: 5, region: [1] },
 	{ name: "懂车帝", id: 6, region: [1] },
 	{ name: "朋友圈", id: 7, region: [1] },
 	{ name: "合作伙伴", id: 8, region: [1] },
@@ -162,7 +150,7 @@ export const clueSourceOptions = [
 	{ name: "其他", id: 15, region: [1] },
 	{ name: "カーセンサー (Car Sensor)", id: 16, region: [2] },
 	{ name: "社員紹介", id: 17, region: [2] },
-	{ name: "公式ウェブサイト", id: 18, region: [2] },
+	{ name: "公式ウェブサイト/アプリ", id: 18, region: [2] },
 	{ name: "Facebook/Instagram", id: 19, region: [2] },
 	{ name: "ショールーム訪問", id: 20, region: [2] },
 	{ name: "グーネット (Goo-net)", id: 21, region: [2] },
@@ -176,7 +164,7 @@ export const clueSourceOptions = [
 	{ name: "その他", id: 29, region: [2] },
 	{ name: "Autotrader", id: 30, region: [3] },
 	{ name: "Employee Referral", id: 31, region: [3, 4] },
-	{ name: "Official Website", id: 32, region: [3, 4] },
+	{ name: "Official Website/APP", id: 32, region: [3, 4] },
 	{ name: "Facebook/Instagram", id: 33, region: [3, 4] },
 	{ name: "Showroom Visit", id: 34, region: [3, 4] },
 	{ name: "Edmunds", id: 35, region: [3] },
@@ -288,4 +276,13 @@ export const transactionStageOptions = [
 	{ name: "产品检验", value: 4 },
 	{ name: "付款成交", value: 5 },
 	{ name: "交易取消", value: 6 },
+]
+
+// Role data list
+export const roleData = [
+	{ name: "管理员", id: 1 },
+	{ name: "销售员", id: 2 },
+	{ name: "销售经理", id: 3 },
+	{ name: "市场营销", id: 4 },
+	{ name: "财务", id: 5 },
 ]

@@ -197,7 +197,7 @@ const addMarketing = () => {
 		addMarketingLoading.value = true
 		try {
 			const res = await api.addActivity(addMarketingForm.value)
-			if (res.code === 200 && res.data == 1) {
+			if (res?.code === 200 && res?.data == 1) {
 				// Added successfully, close pop-up window, reset form data, and then refresh marketing list data
 				messageTip("success", "添加成功!")
 				handleCancel(addMarketingFormRef.value)

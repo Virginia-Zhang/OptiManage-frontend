@@ -118,10 +118,20 @@
 		</el-form-item>
 	</el-form>
 	<div class="btn-group">
-		<el-button type="primary" :icon="DocumentCopy" @click="exportAll"
+		<el-button
+			type="primary"
+			:icon="DocumentCopy"
+			@click="exportAll"
+			v-permission="'customer:export'"
+			v-if="customerList.length"
 			>全部导出（Excel）</el-button
 		>
-		<el-button type="success" :icon="DocumentCopy" @click="exportSelected"
+		<el-button
+			type="success"
+			:icon="DocumentCopy"
+			@click="exportSelected"
+			v-permission="'customer:export'"
+			v-if="customerList.length"
 			>选择导出（Excel）</el-button
 		>
 	</div>
@@ -181,9 +191,13 @@
 			:formatter="regionFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column fixed="right" label="操作" min-width="80">
+		<el-table-column fixed="right" label="操作" :width="actionsBarWidth">
 			<template #default="scope">
-				<el-button type="primary" size="small" @click="showCustomerDetails(scope.row)"
+				<el-button
+					type="primary"
+					size="small"
+					@click="showCustomerDetails(scope.row)"
+					v-permission="'customer:details'"
 					>详情</el-button
 				>
 			</template>
@@ -203,7 +217,13 @@
 import { ref, onMounted, watchEffect } from "vue"
 import { useRouter } from "vue-router"
 
-import { showOwnerSearch, getOwnerList, formatTime, messageTip } from "@/utils/utils"
+import {
+	showOwnerSearch,
+	getOwnerList,
+	formatTime,
+	messageTip,
+	useCalculateActionsBarWidth,
+} from "@/utils/utils"
 import {
 	clueSourceOptions,
 	regionData,
@@ -225,6 +245,8 @@ import dayjs from "dayjs"
 const productStore = useProductStore()
 const marketingStore = useMarketingStore()
 const customerStore = useCustomerStore()
+const permissionItems = ["customer:details"]
+const actionsBarWidth = useCalculateActionsBarWidth(permissionItems)
 
 const router = useRouter()
 
@@ -283,7 +305,7 @@ let params = {
 // Get the list of customers
 const getCustomerList = async params => {
 	const res = await api.getCustomerList(params)
-	if (res.code === 200) {
+	if (res?.code === 200) {
 		customerList.value = res.data.rows
 		total.value = res.data.total
 	}

@@ -47,7 +47,10 @@
 		<el-descriptions-item :label="selectedMarketingActivity.isDeleted ? '删除人' : '编辑人'">{{
 			selectedMarketingActivity.editByAct ? selectedMarketingActivity.editByAct : "--"
 		}}</el-descriptions-item>
-		<el-descriptions-item label="填写备注" v-if="!selectedMarketingActivity.isDeleted"
+		<el-descriptions-item
+			label="填写备注"
+			v-if="!selectedMarketingActivity.isDeleted"
+			v-permission="'activityRemark:add'"
 			>如有需要，请在下方输入活动备注</el-descriptions-item
 		>
 	</el-descriptions>
@@ -58,6 +61,7 @@
 		:rules="remarkRules"
 		style="margin-top: 20px"
 		v-if="!selectedMarketingActivity.isDeleted"
+		v-permission="'activityRemark:add'"
 	>
 		<el-form-item prop="noteContent">
 			<el-input
@@ -104,17 +108,27 @@
 			show-overflow-tooltip
 		/>
 		<el-table-column property="editByAct" label="编辑人" show-overflow-tooltip />
+		<!-- Because "activityRemark:edit" and "activityRemark:delete" are always together, we can directly use one of them to control the display of the entire actions bar -->
 		<el-table-column
 			fixed="right"
 			label="操作"
-			min-width="70"
+			:width="actionsBarWidth"
 			v-if="!selectedMarketingActivity.isDeleted"
+			v-permission="'activityRemark:edit'"
 		>
 			<template #default="scope">
-				<el-button type="success" size="small" @click="showEditMarketingRemark(scope.row)"
+				<el-button
+					type="success"
+					size="small"
+					@click="showEditMarketingRemark(scope.row)"
+					v-permission="'activityRemark:edit'"
 					>编辑</el-button
 				>
-				<el-button type="danger" size="small" @click="deleteMarketingRemark(scope.row.id)"
+				<el-button
+					type="danger"
+					size="small"
+					@click="deleteMarketingRemark(scope.row.id)"
+					v-permission="'activityRemark:delete'"
 					>删除</el-button
 				>
 			</template>
@@ -129,11 +143,7 @@
 		@current-change="handleCurrentChange"
 		style="margin-top: 20px"
 	/>
-	<el-button
-		type="primary"
-		@click="router.back()"
-		v-if="selectedMarketingActivity.isDeleted"
-		style="margin-top: 20px"
+	<el-button type="primary" @click="router.back()" v-if="showBackButton" style="margin-top: 20px"
 		>返回</el-button
 	>
 	<EditMarketingRemark
@@ -145,11 +155,12 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 
 import { useMarketingStore } from "@/stores/marketingStore"
-import { formatTime, messageTip } from "../../utils/utils"
+import { useUserStore } from "@/stores/userStore"
+import { formatTime, messageTip, useCalculateActionsBarWidth } from "@/utils/utils"
 import { regionData } from "@/constants/constants"
 import api from "@/http/api"
 import EditMarketingRemark from "@/components/marketing/EditMarketingRemark.vue"
@@ -158,9 +169,13 @@ import { ElMessageBox } from "element-plus"
 
 const router = useRouter()
 const marketingStore = useMarketingStore()
+const userStore = useUserStore()
+const permissionItems = ["activityRemark:edit", "activityRemark:delete"]
+const actionsBarWidth = useCalculateActionsBarWidth(permissionItems)
 
 // Get the currently selected marketing activity data from the marketing store
 const { selectedMarketingActivity } = marketingStore
+const { permissionList } = userStore
 
 // Remark form data
 const remarkForm = ref({
@@ -190,6 +205,11 @@ const editMarketingRemarkRef = ref(null)
 // Remark data, which is used as props passed to the editing component
 const remark = ref({})
 
+// If the current activity is deleted or the user's permissionList does not include "activityRemark:add", display the back button
+const showBackButton = computed(() => {
+	return selectedMarketingActivity.isDeleted || !permissionList.includes("activityRemark:add")
+})
+
 // Convert the value of region into the corresponding text and display it on the page
 const convertRegionToText = region => {
 	// Traverse regionData, find the corresponding text, and return
@@ -206,7 +226,7 @@ const submitRemark = () => {
 		submitRemarkLoading.value = true
 		try {
 			const res = await api.addActivityRemark(remarkForm.value)
-			if (res.code === 200 && res.data == 1) {
+			if (res?.code === 200 && res?.data == 1) {
 				messageTip("success", "添加备注成功!")
 				remarkFormRef.value.resetFields()
 				getMarketingRemarkList()
@@ -232,7 +252,7 @@ const getMarketingRemarkList = async () => {
 		pageSize: pageSize.value,
 		activityId: selectedMarketingActivity.id,
 	})
-	if (res.code === 200) {
+	if (res?.code === 200) {
 		remarkList.value = res.data.rows
 		total.value = res.data.total
 	}
@@ -266,7 +286,7 @@ const deleteMarketingRemark = id => {
 	}).then(async () => {
 		try {
 			const res = await api.deleteActivityRemarkById(id)
-			if (res.code === 200 && res.data == 1) {
+			if (res?.code === 200 && res?.data == 1) {
 				messageTip("success", "删除备注成功!")
 				getMarketingRemarkList()
 			} else {

@@ -75,7 +75,7 @@ const editMarketingRemark = () => {
 			editMarketingRemarkLoading.value = true
 			try {
 				const res = await api.editActivityRemark(editMarketingRemarkForm.value)
-				if (res.code === 200 && res.data == 1) {
+				if (res?.code === 200 && res?.data == 1) {
 					messageTip("success", "修改成功!")
 					handleCancel(editMarketingRemarkFormRef.value)
 					emits("getMarketingRemarkList")

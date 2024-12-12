@@ -365,9 +365,8 @@ const submitClue = async () => {
 		editClueForm.value.nextContactTime = formatTime(editClueForm.value.nextContactTime)
 		submitClueLoading.value = true
 		try {
-			console.log("editClueForm: ", editClueForm.value)
 			const res = await api.editClue(editClueForm.value)
-			if (res.code === 200 && res.data == 1) {
+			if (res?.code === 200 && res?.data == 1) {
 				messageTip("success", "编辑线索成功!")
 				setTimeout(() => {
 					router.back()

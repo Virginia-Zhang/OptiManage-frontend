@@ -1,7 +1,14 @@
 <!-- Marketing campaign/activity recycle bin page -->
 <template>
 	<div class="btn-group">
-		<el-button type="primary" :icon="RefreshRight" @click="batchRestore">批量恢复</el-button>
+		<el-button
+			type="primary"
+			:icon="RefreshRight"
+			@click="batchRestore"
+			v-permission="'activity:delete'"
+			v-if="marketingList.length"
+			>批量恢复</el-button
+		>
 	</div>
 	<!-- Table area to display the list of marketing campaigns -->
 	<el-table
@@ -51,12 +58,20 @@
 			:formatter="timeFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column fixed="right" label="操作" min-width="140">
+		<el-table-column fixed="right" label="操作" :width="actionsBarWidth">
 			<template #default="scope">
-				<el-button type="primary" size="small" @click="showMarketingDetails(scope.row)"
+				<el-button
+					type="primary"
+					size="small"
+					@click="showMarketingDetails(scope.row)"
+					v-permission="'activity:details'"
 					>详情</el-button
 				>
-				<el-button type="success" size="small" @click="restoreMarketings([scope.row.id])"
+				<el-button
+					type="success"
+					size="small"
+					@click="restoreMarketings([scope.row.id])"
+					v-permission="'activity:delete'"
 					>恢复</el-button
 				>
 			</template>
@@ -77,7 +92,7 @@ import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 
 import { PAGE_SIZE, regionData } from "@/constants/constants"
-import { formatTime, messageTip } from "@/utils/utils"
+import { formatTime, messageTip, useCalculateActionsBarWidth } from "@/utils/utils"
 import api from "@/http/api"
 import { useMarketingStore } from "@/stores/marketingStore"
 
@@ -86,6 +101,8 @@ import { ElMessageBox } from "element-plus"
 
 const router = useRouter()
 const marketingStore = useMarketingStore()
+const permissionItems = ["activity:details", "activity:delete"]
+const actionsBarWidth = useCalculateActionsBarWidth(permissionItems)
 
 // Marketing campaigns list data
 const marketingList = ref([])
@@ -111,7 +128,7 @@ const params = {
 // Get the list of deleted marketing campaigns
 const getMarketingList = async params => {
 	const res = await api.getActivityList(params)
-	if (res.code === 200) {
+	if (res?.code === 200) {
 		marketingList.value = res.data.rows
 		total.value = res.data.total
 	}
@@ -132,7 +149,7 @@ const showMarketingDetails = row => {
 	// Save selected marketing activity data to pinia
 	marketingStore.setSelectedMarketingActivity(row)
 	// Jump to the marketing activity details page, and carry the activity ID in the route
-	router.push({ name: "marketing-details", params: { id: row.id } })
+	router.push({ name: "marketing/recycle-details", params: { id: row.id } })
 }
 
 const handleSelectionChange = selectedActivities => {
@@ -155,7 +172,7 @@ const restoreMarketings = ids => {
 				isDeletedValue: 0,
 			}
 			const res = await api.updateActivities(data)
-			if (res.code === 200) {
+			if (res?.code === 200) {
 				messageTip("success", "恢复成功!")
 				currentPage.value = 1
 				params.page = currentPage.value

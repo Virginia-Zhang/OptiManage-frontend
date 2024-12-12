@@ -1,7 +1,7 @@
 // Routing configuration
 import { createRouter, createWebHistory } from "vue-router"
 import storage from "@/utils/storage"
-import { messageTip, getRoleList } from "@/utils/utils"
+import { messageTip, getPermissionList } from "@/utils/utils"
 
 const router = createRouter({
 	history: createWebHistory(),
@@ -48,33 +48,19 @@ const router = createRouter({
 					},
 					//If the user is not an administrator, access to this page is not allowed
 					beforeEnter: (to, from) => {
-						const roleList = getRoleList()
-						if (roleList.indexOf("admin") === -1) {
-							messageTip("warning", "您没有权限访问此页面")
-							setTimeout(() => {
-								router.back()
-							}, 2000)
-							return false
-						}
+						checkPermission("user:list")
 					},
 				},
 				{
-					path: "user-recycle",
-					name: "user-recycle",
+					path: "user/recycle",
+					name: "user/recycle",
 					component: () => import("@/views/user/UserRecycleBin.vue"),
 					meta: {
 						title: "用户管理-回收站",
 					},
 					//If the user is not an administrator, access to this page is not allowed
 					beforeEnter: (to, from) => {
-						const roleList = getRoleList()
-						if (roleList.indexOf("admin") === -1) {
-							messageTip("warning", "您没有权限访问此页面")
-							setTimeout(() => {
-								router.back()
-							}, 2000)
-							return false
-						}
+						checkPermission("user:list")
 					},
 				},
 				{
@@ -84,7 +70,12 @@ const router = createRouter({
 					meta: {
 						title: "市场活动",
 					},
+					// If the user's role does not include any of admin, marketing, and financing, access is not allowed.
+					beforeEnter: (to, from) => {
+						checkPermission("activity:list")
+					},
 				},
+				// Jump from the marketing campaign/activity management page to the marketing campaign/activity details page
 				{
 					path: "marketing-details/:id",
 					name: "marketing-details",
@@ -92,13 +83,34 @@ const router = createRouter({
 					meta: {
 						title: "市场活动详情",
 					},
+					// If the user does not have the "activity:details" permission, access is prohibited.
+					beforeEnter: (to, from) => {
+						checkPermission("activity:details")
+					},
+				},
+				// Jump from the marketing campaign/activity recycle bin page to the marketing campaign/activity details page
+				{
+					path: "marketing/recycle-details/:id",
+					name: "marketing/recycle-details",
+					component: () => import("@/views/marketing/MarketingDetails.vue"),
+					meta: {
+						title: "市场活动详情",
+					},
+					// If the user does not have the "activity:details" permission, access is prohibited.
+					beforeEnter: (to, from) => {
+						checkPermission("activity:details")
+					},
 				},
 				{
-					path: "marketing-recycle",
-					name: "marketing-recycle",
+					path: "marketing/recycle",
+					name: "marketing/recycle",
 					component: () => import("@/views/marketing/MarketingRecycleBin.vue"),
 					meta: {
 						title: "市场活动-回收站",
+					},
+					// If the user does not have the "activity:list" permission, access is prohibited.
+					beforeEnter: (to, from) => {
+						checkPermission("activity:list")
 					},
 				},
 				{
@@ -108,6 +120,10 @@ const router = createRouter({
 					meta: {
 						title: "线索管理",
 					},
+					// If the user does not have "clue:list" permission, access is prohibited
+					beforeEnter: (to, from) => {
+						checkPermission("clue:list")
+					},
 				},
 				{
 					path: "clues-add",
@@ -115,6 +131,10 @@ const router = createRouter({
 					component: () => import("@/views/clues/AddClue.vue"),
 					meta: {
 						title: "录入线索",
+					},
+					// If the user does not have "clue:add" permission, access is prohibited
+					beforeEnter: (to, from) => {
+						checkPermission("clue:add")
 					},
 				},
 				{
@@ -124,7 +144,12 @@ const router = createRouter({
 					meta: {
 						title: "编辑线索",
 					},
+					// If the user does not have "clue:edit" permission, access is prohibited
+					beforeEnter: (to, from) => {
+						checkPermission("clue:edit")
+					},
 				},
+				// Jump from the lead/clue management page to the lead/clue details page
 				{
 					path: "clues-details/:id",
 					name: "clues-details",
@@ -132,13 +157,34 @@ const router = createRouter({
 					meta: {
 						title: "线索详情",
 					},
+					// If the user does not have the "clue:details" permission, access is prohibited
+					beforeEnter: (to, from) => {
+						checkPermission("clue:details")
+					},
+				},
+				// Jump from the lead/clue recycle bin page to the lead/clue details page
+				{
+					path: "clues/recycle-details/:id",
+					name: "clues/recycle-details",
+					component: () => import("@/views/clues/ClueDetails.vue"),
+					meta: {
+						title: "线索详情",
+					},
+					// If the user does not have the "clue:details" permission, access is prohibited
+					beforeEnter: (to, from) => {
+						checkPermission("clue:details")
+					},
 				},
 				{
-					path: "clues-recycle",
-					name: "clues-recycle",
+					path: "clues/recycle",
+					name: "clues/recycle",
 					component: () => import("@/views/clues/CluesRecycleBin.vue"),
 					meta: {
 						title: "线索管理-回收站",
+					},
+					// If the user does not have the "clue:list" permission, access is prohibited.
+					beforeEnter: (to, from) => {
+						checkPermission("clue:list")
 					},
 				},
 				{
@@ -148,6 +194,10 @@ const router = createRouter({
 					meta: {
 						title: "客户管理",
 					},
+					// If the user does not have the "customer:list" permission, access is prohibited.
+					beforeEnter: (to, from) => {
+						checkPermission("customer:list")
+					},
 				},
 				{
 					path: "customer-details/:id",
@@ -155,6 +205,10 @@ const router = createRouter({
 					component: () => import("@/views/customer/CustomerDetails.vue"),
 					meta: {
 						title: "客户详情",
+					},
+					// If the user does not have the "customer:details" permission, access is prohibited.
+					beforeEnter: (to, from) => {
+						checkPermission("customer:details")
 					},
 				},
 			],
@@ -170,6 +224,18 @@ const router = createRouter({
 		},
 	],
 })
+
+// Check whether the user has permission to access the current route
+const checkPermission = permission => {
+	const permissionList = getPermissionList()
+	if (permissionList.indexOf(permission) === -1) {
+		messageTip("warning", "您没有权限访问此页面")
+		setTimeout(() => {
+			router.back()
+		}, 2000)
+		return false
+	}
+}
 
 // Route guard, determine whether the route the user wants to access exists; if exists, allow access, and modify the page title, otherwise jump to the 404 page
 router.beforeEach((to, from) => {

@@ -1,7 +1,14 @@
 <!-- Market Lead/Clue Recycle Bin -->
 <template>
 	<div class="btn-group">
-		<el-button type="primary" :icon="RefreshRight" @click="batchRestore">批量恢复</el-button>
+		<el-button
+			type="primary"
+			:icon="RefreshRight"
+			@click="batchRestore"
+			v-permission="'clue:delete'"
+			v-if="clueList.length"
+			>批量恢复</el-button
+		>
 	</div>
 	<!-- Table area to display the list of deleted marketing clues -->
 	<el-table
@@ -79,13 +86,22 @@
 			:formatter="regionFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column fixed="right" label="操作" min-width="140">
+		<el-table-column fixed="right" label="操作" :width="actionsBarWidth">
 			<template #default="scope">
-				<el-button type="primary" size="small" @click="showClueDetails(scope.row)"
+				<el-button
+					type="primary"
+					size="small"
+					@click="showClueDetails(scope.row)"
+					v-permission="'clue:details'"
 					>详情</el-button
 				>
-				<el-button type="success" size="small" @click="restoreClues([scope.row.id])"
-					>恢复</el-button
+				<el-button
+					type="success"
+					size="small"
+					@click="restoreClues([scope.row.id])"
+					v-permission="'clue:delete'"
+				>
+					恢复</el-button
 				>
 			</template>
 		</el-table-column>
@@ -104,7 +120,7 @@
 import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 
-import { formatTime, messageTip } from "@/utils/utils"
+import { formatTime, messageTip, useCalculateActionsBarWidth } from "@/utils/utils"
 import { regionData, PAGE_SIZE, clueStateOptions, clueSourceOptions } from "@/constants/constants"
 import api from "@/http/api"
 import { useClueStore } from "@/stores/clueStore"
@@ -113,8 +129,9 @@ import { RefreshRight } from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
 
 const clueStore = useClueStore()
-
 const router = useRouter()
+const permissionItems = ["clue:delete", "clue:details"]
+const actionsBarWidth = useCalculateActionsBarWidth(permissionItems)
 
 // Clue Table instance
 const clueTableRef = ref(null)
@@ -140,7 +157,7 @@ let params = {
 // Get the list of deleted marketing clues
 const getClueList = async params => {
 	const res = await api.getClueList(params)
-	if (res.code === 200) {
+	if (res?.code === 200) {
 		clueList.value = res.data.rows
 		total.value = res.data.total
 	}
@@ -214,7 +231,7 @@ const restoreClues = ids => {
 				isDeletedValue: 0,
 			}
 			const res = await api.updateClues(data)
-			if (res.code === 200) {
+			if (res?.code === 200) {
 				messageTip("success", "恢复成功!")
 				currentPage.value = 1
 				params.page = currentPage.value
@@ -239,7 +256,7 @@ const batchRestore = () => {
 // Show clue details
 const showClueDetails = row => {
 	clueStore.setSelectedClue(row)
-	router.push({ name: "clues-details", params: { id: row.id } })
+	router.push({ name: "clues/recycle-details", params: { id: row.id } })
 }
 </script>
 

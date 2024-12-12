@@ -65,7 +65,10 @@
 		<el-descriptions-item :label="selectedClue.isDeleted ? '删除人' : '编辑人'">{{
 			selectedClue.editByAct ? selectedClue.editByAct : "--"
 		}}</el-descriptions-item>
-		<el-descriptions-item label="填写线索备注" v-if="!selectedClue.isDeleted"
+		<el-descriptions-item
+			label="填写线索备注"
+			v-if="!selectedClue.isDeleted"
+			v-permission="'clueRemark:add'"
 			>如有需要，请在下方输入线索跟踪记录，并选择跟踪方式</el-descriptions-item
 		>
 	</el-descriptions>
@@ -76,6 +79,7 @@
 		:rules="remarkRules"
 		style="margin-top: 20px"
 		v-if="!selectedClue.isDeleted"
+		v-permission="'clueRemark:add'"
 	>
 		<el-form-item prop="noteContent">
 			<el-input
@@ -148,12 +152,26 @@
 			show-overflow-tooltip
 		/>
 		<el-table-column property="editByAct" label="编辑人" show-overflow-tooltip />
-		<el-table-column fixed="right" label="操作" min-width="115" v-if="!selectedClue.isDeleted">
+		<el-table-column
+			fixed="right"
+			label="操作"
+			min-width="115"
+			v-if="!selectedClue.isDeleted"
+			v-permission="'clueRemark:edit'"
+		>
 			<template #default="scope">
-				<el-button type="success" size="small" @click="showEditClueRemark(scope.row)"
+				<el-button
+					type="success"
+					size="small"
+					@click="showEditClueRemark(scope.row)"
+					v-permission="'clueRemark:edit'"
 					>编辑</el-button
 				>
-				<el-button type="danger" size="small" @click="deleteClueRemark(scope.row.id)"
+				<el-button
+					type="danger"
+					size="small"
+					@click="deleteClueRemark(scope.row.id)"
+					v-permission="'clueRemark:delete'"
 					>删除</el-button
 				>
 			</template>
@@ -168,11 +186,7 @@
 		@current-change="handleCurrentChange"
 		style="margin-top: 20px"
 	/>
-	<el-button
-		type="primary"
-		@click="router.back()"
-		v-if="selectedClue.isDeleted"
-		style="margin-top: 20px"
+	<el-button type="primary" @click="router.back()" v-if="showBackButton" style="margin-top: 20px"
 		>返回</el-button
 	>
 	<!-- Edit clue remark modal -->
@@ -191,10 +205,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { useRouter } from "vue-router"
 
 import { useClueStore } from "@/stores/clueStore"
+import { useUserStore } from "@/stores/userStore"
 import {
 	regionData,
 	intentionStateOptions,
@@ -211,9 +226,11 @@ import { ElMessageBox } from "element-plus"
 
 const router = useRouter()
 const clueStore = useClueStore()
+const userStore = useUserStore()
 
 // Get the selected marketing clue data from Pinia
 const { selectedClue } = clueStore
+const { permissionList } = userStore
 
 // Marketing clue/lead remark form
 const remarkForm = ref({
@@ -258,6 +275,11 @@ const remark = ref({})
 
 // ConvertToCustomer component reference
 const convertToCustomerRef = ref(null)
+
+// If the current clue is deleted or the user's permissionList does not include "clueRemark:add", display the back button
+const showBackButton = computed(() => {
+	return selectedClue.isDeleted || !permissionList.includes("clueRemark:add")
+})
 
 // Convert the value of region into the corresponding text and display it on the page
 const convertRegionToText = region => {
@@ -307,7 +329,7 @@ const submitRemark = () => {
 			// Add clueId to remarkForm
 			remarkForm.value.clueId = selectedClue.id
 			const res = await api.addClueRemark(remarkForm.value)
-			if (res.code === 200 && res.data == 1) {
+			if (res?.code === 200 && res?.data == 1) {
 				messageTip("success", "添加备注成功!")
 				remarkFormRef.value.resetFields()
 				getClueRemarkList()
@@ -345,7 +367,7 @@ const getClueRemarkList = async () => {
 		pageSize: pageSize.value,
 		clueId: selectedClue.id,
 	})
-	if (res.code === 200) {
+	if (res?.code === 200) {
 		remarkList.value = res.data.rows
 		total.value = res.data.total
 	}
@@ -373,7 +395,7 @@ const deleteClueRemark = id => {
 	}).then(async () => {
 		try {
 			const res = await api.deleteClueRemarkById(id)
-			if (res.code === 200 && res.data == 1) {
+			if (res?.code === 200 && res?.data == 1) {
 				messageTip("success", "删除成功!")
 				getClueRemarkList()
 			} else {

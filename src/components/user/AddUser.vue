@@ -35,6 +35,25 @@
 					/>
 				</el-select>
 			</el-form-item>
+			<el-form-item label="角色" prop="roleIds">
+				<!--Traverse roleOptions and generate options -->
+				<el-select
+					v-model="addUserForm.roleIds"
+					placeholder="请选择用户角色"
+					multiple
+					clearable
+				>
+					<template #prefix>
+						<el-icon><User /></el-icon>
+					</template>
+					<el-option
+						v-for="item in roleData"
+						:key="item.id"
+						:label="item.name"
+						:value="item.id"
+					/>
+				</el-select>
+			</el-form-item>
 		</el-form>
 		<!-- Cancel and OK buttons -->
 		<template #footer>
@@ -53,9 +72,9 @@ import { ref, reactive } from "vue"
 
 import api from "@/http/api"
 import { messageTip } from "@/utils/utils"
-import { regionData, PAGE_SIZE } from "@/constants/constants"
+import { regionData, PAGE_SIZE, roleData } from "@/constants/constants"
 
-import { MapLocation } from "@element-plus/icons-vue"
+import { MapLocation, User } from "@element-plus/icons-vue"
 
 // Variables that control the display and hiding of the pop-up window
 const dialogVisible = ref(false)
@@ -69,6 +88,7 @@ const addUserForm = ref({
 	email: null,
 	region: null,
 	preferredLanguage: null,
+	roleIds: null,
 })
 // Form validation rules
 const rules = reactive({
@@ -80,6 +100,7 @@ const rules = reactive({
 		{ type: "email", message: "请输入正确的邮箱地址", trigger: ["blur", "change"] },
 	],
 	region: [{ required: true, message: "请选择地区", trigger: "blur" }],
+	roleIds: [{ required: true, message: "请选择用户角色", trigger: "blur" }],
 })
 
 // Control pop-up window display
@@ -108,7 +129,7 @@ const addUser = () => {
 		addUserLoading.value = true
 		try {
 			const res = await api.addUser(addUserForm.value)
-			if (res.code === 200 && res.data == 1) {
+			if (res?.code === 200 && res?.data == 1) {
 				// Added successfully, close pop-up window, reset form data, and then refresh user list data
 				messageTip("success", "添加成功!")
 				handleCancel(addUserFormRef.value)

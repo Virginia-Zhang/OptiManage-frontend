@@ -10,6 +10,7 @@
 			<el-descriptions-item label="地区">{{
 				convertRegionToText(user.region)
 			}}</el-descriptions-item>
+			<el-descriptions-item label="角色">{{ roles }}</el-descriptions-item>
 			<el-descriptions-item label="账号未过期">{{
 				user.accountNoExpired ? "是" : "否"
 			}}</el-descriptions-item>
@@ -40,18 +41,37 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, watchEffect } from "vue"
 
-import { regionData } from "@/constants/constants"
+import { regionData, roleData } from "@/constants/constants"
 import { formatTime } from "@/utils/utils"
+import api from "@/http/api"
 
-defineProps({
+const props = defineProps({
 	// Receive user information passed by the parent component
 	user: Object,
 })
 
 // Variable that controls the visibility of pop-up window
 const dialogVisible = ref(false)
+// User's role list, which will be displayed on the page as a string
+const roles = ref("")
+
+// Get the current user's role list by user id
+const getRoleListByUserId = async userId => {
+	const res = await api.getRoleListByUserId({ userId })
+	if (res?.code === 200) {
+		return res.data
+	}
+}
+
+// Monitor the changes in props.user and dialogVisible. When the user clicks the details button to display the pop-up window, and props.user is not empty, call the getRoleListByUserId method to obtain the role list.
+watchEffect(async () => {
+	if (props.user && dialogVisible.value) {
+		const result = await getRoleListByUserId(props.user.id)
+		convertRolesToText(result)
+	}
+})
 
 // Control the visibility of pop-up window
 const toggleShowDialog = () => {
@@ -66,7 +86,7 @@ const handleClose = () => {
 	dialogVisible.value = false
 }
 
-// Convert the value of region into the corresponding text and display it on the page
+// Convert the value of region into the corresponding text and display on the page
 const convertRegionToText = region => {
 	// Traverse regionData, find the corresponding text, and return
 	for (const item of regionData) {
@@ -74,5 +94,11 @@ const convertRegionToText = region => {
 			return item.name
 		}
 	}
+}
+
+// Convert roles into the corresponding text and display on the page
+const convertRolesToText = roleList => {
+	// According to the id of each role in roles, find the corresponding name in roleData array, and then splice it into a string and return it
+	roles.value = roleList.map(role => roleData.find(item => item.id === role.id).name).join(", ")
 }
 </script>

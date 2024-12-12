@@ -88,7 +88,7 @@ const editCustomerRemark = () => {
 			editCustomerRemarkLoading.value = true
 			try {
 				const res = await api.editCustomerRemark(editCustomerRemarkForm.value)
-				if (res.code === 200 && res.data == 1) {
+				if (res?.code === 200 && res?.data == 1) {
 					messageTip("success", "修改成功!")
 					handleCancel(editCustomerRemarkFormRef.value)
 					emits("getCustomerRemarkList")

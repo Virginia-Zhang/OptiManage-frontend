@@ -1,7 +1,14 @@
 <!-- User recycle bin -->
 <template>
 	<div class="btn-group">
-		<el-button type="primary" :icon="RefreshRight" @click="batchRestore">批量恢复</el-button>
+		<el-button
+			type="primary"
+			:icon="RefreshRight"
+			@click="batchRestore"
+			v-permission="'user:delete'"
+			v-if="userList.length"
+			>批量恢复</el-button
+		>
 	</div>
 	<el-table
 		ref="userTableRef"
@@ -31,12 +38,20 @@
 			:formatter="timeFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column fixed="right" label="操作" min-width="140">
+		<el-table-column fixed="right" label="操作" :width="actionsBarWidth">
 			<template #default="scope">
-				<el-button type="primary" size="small" @click="showUserDetails(scope.row)"
+				<el-button
+					type="primary"
+					size="small"
+					@click="showUserDetails(scope.row)"
+					v-permission="'user:details'"
 					>详情</el-button
 				>
-				<el-button type="success" size="small" @click="restoreUsers([scope.row.id])"
+				<el-button
+					type="success"
+					size="small"
+					@click="restoreUsers([scope.row.id])"
+					v-permission="'user:delete'"
 					>恢复</el-button
 				>
 			</template>
@@ -58,12 +73,15 @@
 import { ref, onMounted } from "vue"
 
 import { PAGE_SIZE, regionData } from "@/constants/constants"
-import { formatTime, messageTip } from "@/utils/utils"
+import { formatTime, messageTip, useCalculateActionsBarWidth } from "@/utils/utils"
 import api from "@/http/api"
 import UserDetails from "@/components/user/UserDetails.vue"
 
 import { RefreshRight } from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
+
+const permissionItems = ["user:delete", "user:details"]
+const actionsBarWidth = useCalculateActionsBarWidth(permissionItems)
 
 // Ref to user table
 const userTableRef = ref(null)
@@ -95,7 +113,7 @@ const getUserList = async () => {
 	}
 	// Send request
 	const res = await api.getUserList(params)
-	if (res.code === 200) {
+	if (res?.code === 200) {
 		userList.value = res.data.rows
 		total.value = res.data.total
 	}
@@ -134,7 +152,7 @@ const restoreUsers = async ids => {
 				isDeletedValue: 1,
 			}
 			const res = await api.updateUsers(params)
-			if (res.code === 200) {
+			if (res?.code === 200) {
 				messageTip("success", "恢复成功!")
 				currentPage.value = 1
 				getUserList()

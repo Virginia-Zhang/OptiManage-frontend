@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref, shallowRef, onMounted, computed } from "vue"
+import { ref, onMounted } from "vue"
 import { useRouter, useRoute } from "vue-router"
 import {
 	ElMenu,
@@ -109,14 +109,23 @@ const isCollapsed = ref(false)
 // Logout button state control
 const logoutLoading = ref(false)
 
-// The active menu item
-const activeMenu = computed(() => {
-	// Split route.path by "-" and take the first element to ensure that it matches the index value in menuDataList.
-	return route.path.split("-")[0]
-})
+const activeMenu = ref("")
 
-// Use shallowRef to ensure that menuData is only responsive on the first layer, and will not perform responsiveness on the icon component object in depth to avoid system warnings.
-const menuDataList = shallowRef([])
+// The active menu item
+const getActiveMenu = () => {
+	// Get the first layer of the current page path. For example, the current page path is "/dashboard/marketing-details/1", then the first layer is "/dashboard/marketing".
+	const activePath = route.path.split("-")[0]
+	// When the user just enters the system, send a request to backend to automatically check whether the token is valid or not.
+	if (activePath == "/dashboard") {
+		api.getProductOptionList()
+	} else {
+		// When the user clicks on a menu, the corresponding menu item will be highlighted. Even if the user enters a sub-page (like "/dashboard/marketing-details/1") and refresh the page, the corresponding menu item will still be highlighted in the menu sidebar.
+		activeMenu.value = activePath
+	}
+}
+
+// Menu data in the sidebar
+const menuDataList = ref([])
 
 const toggleCollapse = () => {
 	isCollapsed.value = !isCollapsed.value
@@ -127,7 +136,7 @@ const handleCommand = async command => {
 		logoutLoading.value = true
 		// Send a logout request to the backend and delete the token in redis
 		const res = await api.logout()
-		if (res.code === 200) {
+		if (res?.code === 200) {
 			// Logout success, a pop-up window shows to tell logout is successful.
 			messageTip("success", "退出成功!")
 			// Clear data in localStorage or sessionStorage, and in Pinia
@@ -169,18 +178,35 @@ const handleCommand = async command => {
 // Get roleList from storage and determine whether the user has an administrator role. If not, delete the "User Management" menu item in menuData to prevent users from accessing this module.
 const authorize = () => {
 	const roleList = getRoleList()
-	if (roleList.indexOf("admin") === -1) {
-		// If user is not an administrator, delete the "User Management" menu item and assign it to menuDataList.
-		const newMenuData = menuData.filter(item => item.index !== "/dashboard/user")
+	// Deep copy menuData
+	let newMenuData = JSON.parse(JSON.stringify(menuData))
+	// If user is neither an administrator nor a financing staff, delete the "User Management" menu item and assign it to menuDataList.
+	if (roleList.indexOf("admin") === -1 && roleList.indexOf("financing") === -1) {
+		newMenuData = newMenuData.filter(item => item.index !== "/dashboard/user")
+		// If user does not have the role of "marketing", delete the "/dashboard/marketing" menu item in menuDataList to prevent user from accessing this page.
+		if (roleList.indexOf("marketing") === -1) {
+			newMenuData = newMenuData.filter(item => item.index !== "/dashboard/marketing")
+		}
+		// If user does not have the role of "saler" or "manager", delete the "/dashboard/clues", "/dashboard/customer", and "/dashboard/transaction" in menuDataList to prevent user from accessing these pages.
+		if (roleList.indexOf("saler") === -1 && roleList.indexOf("manager") === -1) {
+			newMenuData = newMenuData.filter(
+				item =>
+					item.index !== "/dashboard/clues" &&
+					item.index !== "/dashboard/customer" &&
+					item.index !== "/dashboard/transaction"
+			)
+		}
+		// Assign deep-copied newMenuData to menuDataList
 		menuDataList.value = newMenuData
 	} else {
-		// If user is an administrator, assign menuData directly to menuDataList.
-		menuDataList.value = menuData
+		// If user is an administrator or financing staff, deep copy menuData and assign it to menuDataList.
+		menuDataList.value = JSON.parse(JSON.stringify(menuData))
 	}
 }
 
 onMounted(() => {
 	authorize()
+	getActiveMenu()
 })
 </script>
 

@@ -67,12 +67,22 @@
 		<el-descriptions-item :label="selectedCustomer.isDeleted ? '删除人' : '编辑人'">{{
 			selectedCustomer.editByAct ? selectedCustomer.editByAct : "--"
 		}}</el-descriptions-item>
-		<el-descriptions-item label="填写客户备注" v-if="!selectedCustomer.isDeleted"
+		<el-descriptions-item
+			label="填写客户备注"
+			v-if="!selectedCustomer.isDeleted"
+			v-permission="'customerRemark:add'"
 			>如有需要，请在下方输入客户跟踪记录，并选择跟踪方式</el-descriptions-item
 		>
 	</el-descriptions>
 	<!-- Customer remark form-->
-	<el-form ref="remarkFormRef" :model="remarkForm" :rules="remarkRules" style="margin-top: 20px">
+	<el-form
+		ref="remarkFormRef"
+		:model="remarkForm"
+		:rules="remarkRules"
+		style="margin-top: 20px"
+		v-if="!selectedCustomer.isDeleted"
+		v-permission="'customerRemark:add'"
+	>
 		<el-form-item prop="noteContent">
 			<el-input
 				v-model="remarkForm.noteContent"
@@ -141,7 +151,13 @@
 			show-overflow-tooltip
 		/>
 		<el-table-column property="editByAct" label="编辑人" show-overflow-tooltip />
-		<el-table-column fixed="right" label="操作" min-width="115">
+		<el-table-column
+			fixed="right"
+			label="操作"
+			min-width="115"
+			v-if="!selectedCustomer.isDeleted"
+			v-permission="'customerRemark:edit'"
+		>
 			<template #default="scope">
 				<el-button type="success" size="small" @click="showEditCustomerRemark(scope.row)"
 					>编辑</el-button
@@ -161,6 +177,9 @@
 		@current-change="handleCurrentChange"
 		style="margin-top: 20px"
 	/>
+	<el-button type="primary" @click="router.back()" v-if="showBackButton" style="margin-top: 20px"
+		>返回</el-button
+	>
 	<!-- Edit customer remark modal -->
 	<EditCustomerRemark
 		ref="editCustomerRemarkRef"
@@ -172,10 +191,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { useRouter } from "vue-router"
 
 import { useCustomerStore } from "@/stores/customerStore"
+import { useUserStore } from "@/stores/userStore"
 import { regionData, clueSourceOptions, contactMethodOptions } from "@/constants/constants"
 import { formatTime, messageTip } from "@/utils/utils"
 import api from "@/http/api"
@@ -186,9 +206,11 @@ import { ElMessageBox } from "element-plus"
 
 const router = useRouter()
 const customerStore = useCustomerStore()
+const userStore = useUserStore()
 
 // Get the selected customer data from Pinia
 const { selectedCustomer } = customerStore
+const { permissionList } = userStore
 
 // Customer remark form
 const remarkForm = ref({
@@ -242,7 +264,7 @@ const submitRemark = () => {
 			// Add customerId to remarkForm
 			remarkForm.value.customerId = selectedCustomer.id
 			const res = await api.addCustomerRemark(remarkForm.value)
-			if (res.code === 200 && res.data == 1) {
+			if (res?.code === 200 && res?.data == 1) {
 				messageTip("success", "添加备注成功!")
 				remarkFormRef.value.resetFields()
 				getCustomerRemarkList()
@@ -300,7 +322,7 @@ const getCustomerRemarkList = async () => {
 		pageSize: pageSize.value,
 		customerId: selectedCustomer.id,
 	})
-	if (res.code === 200) {
+	if (res?.code === 200) {
 		remarkList.value = res.data.rows
 		total.value = res.data.total
 	}
@@ -328,7 +350,7 @@ const deleteCustomerRemark = id => {
 	}).then(async () => {
 		try {
 			const res = await api.deleteCustomerRemarkById(id)
-			if (res.code === 200 && res.data == 1) {
+			if (res?.code === 200 && res?.data == 1) {
 				messageTip("success", "删除成功!")
 				getCustomerRemarkList()
 			} else {
@@ -345,6 +367,11 @@ const showCreateTransaction = () => {
 	if (!createTransactionRef.value) return
 	createTransactionRef.value.showCreateTransactionDialog()
 }
+
+// If the current customer is deleted or the user's permissionList does not include "customerRemark:add", display the back button
+const showBackButton = computed(() => {
+	return selectedCustomer.isDeleted || !permissionList.includes("customerRemark:add")
+})
 </script>
 
 <style scoped lang="scss"></style>

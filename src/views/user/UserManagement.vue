@@ -37,8 +37,17 @@
 		</el-form-item>
 	</el-form>
 	<div class="btn-group">
-		<el-button type="primary" :icon="Plus" @click="addUser">添加用户</el-button>
-		<el-button type="danger" :icon="Delete" @click="batchDelete">批量删除</el-button>
+		<el-button type="primary" :icon="Plus" @click="addUser" v-permission="'user:add'"
+			>添加用户</el-button
+		>
+		<el-button
+			type="danger"
+			:icon="Delete"
+			@click="batchDelete"
+			v-permission="'user:delete'"
+			v-if="userList.length"
+			>批量删除</el-button
+		>
 	</div>
 	<el-table
 		ref="userTableRef"
@@ -68,16 +77,30 @@
 			:formatter="timeFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column fixed="right" label="操作" min-width="210">
+		<el-table-column fixed="right" label="操作" :width="actionsBarWidth">
 			<template #default="scope">
-				<el-button type="primary" size="small" @click="showUserDetails(scope.row)"
+				<el-button
+					type="primary"
+					size="small"
+					@click="showUserDetails(scope.row)"
+					v-permission="'user:details'"
 					>详情</el-button
 				>
-				<el-button type="success" size="small" @click="showEditUser(scope.row)"
-					>编辑</el-button
+				<el-button
+					type="success"
+					size="small"
+					@click="showEditUser(scope.row)"
+					v-permission="'user:edit'"
 				>
-				<el-button type="danger" size="small" @click="deleteUsers([scope.row.id])"
-					>删除</el-button
+					编辑</el-button
+				>
+				<el-button
+					type="danger"
+					size="small"
+					@click="deleteUsers([scope.row.id])"
+					v-permission="'user:delete'"
+				>
+					删除</el-button
 				>
 			</template>
 		</el-table-column>
@@ -106,10 +129,13 @@ import UserDetails from "@/components/user/UserDetails.vue"
 import AddUser from "@/components/user/AddUser.vue"
 import { regionData, PAGE_SIZE } from "@/constants/constants"
 import EditUser from "@/components/user/EditUser.vue"
-import { messageTip, formatTime } from "@/utils/utils"
+import { messageTip, formatTime, useCalculateActionsBarWidth } from "@/utils/utils"
 
 import { Plus, Delete, MapLocation, Search, Refresh } from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
+
+const permissionItems = ["user:edit", "user:delete", "user:details"]
+const actionsBarWidth = useCalculateActionsBarWidth(permissionItems)
 
 const searchForm = ref({
 	loginAct: null,
@@ -128,7 +154,7 @@ const userList = ref([])
 const deletedIds = []
 
 // The user object passed to UserDetails and EditUser dialog
-const user = ref({})
+const user = ref(null)
 // Ref to UserDetails dialog
 const userDetailsRef = ref(null)
 // Ref to AddUser dialog
@@ -156,7 +182,7 @@ const getUserList = async data => {
 	pageSize.value = data.pageSize
 	// Send request
 	const res = await api.getUserList(data)
-	if (res.code === 200) {
+	if (res?.code === 200) {
 		userList.value = res.data.rows
 		total.value = res.data.total
 	}
@@ -211,7 +237,7 @@ const deleteUsers = async ids => {
 				isDeletedValue: 0,
 			}
 			const res = await api.updateUsers(data)
-			if (res.code === 200) {
+			if (res?.code === 200) {
 				messageTip("success", "删除成功!")
 				currentPage.value = 1
 				params.page = currentPage.value

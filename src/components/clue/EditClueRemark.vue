@@ -90,7 +90,7 @@ const editClueRemark = () => {
 			editClueRemarkLoading.value = true
 			try {
 				const res = await api.editClueRemark(editClueRemarkForm.value)
-				if (res.code === 200 && res.data == 1) {
+				if (res?.code === 200 && res?.data == 1) {
 					messageTip("success", "修改成功!")
 					handleCancel(editClueRemarkFormRef.value)
 					emits("getClueRemarkList")

@@ -165,12 +165,31 @@
 		</el-form-item>
 	</el-form>
 	<div class="btn-group">
-		<el-button type="primary" :icon="Plus" @click="addClue">录入线索</el-button>
-		<el-button type="danger" :icon="Delete" @click="batchDelete">批量删除</el-button>
-		<el-button type="success" :icon="DocumentCopy" @click="exportAll"
+		<el-button type="primary" :icon="Plus" @click="addClue" v-permission="'clue:add'"
+			>录入线索</el-button
+		>
+		<el-button
+			type="danger"
+			:icon="Delete"
+			@click="batchDelete"
+			v-permission="'clue:delete'"
+			v-if="clueList.length"
+			>批量删除</el-button
+		>
+		<el-button
+			type="success"
+			:icon="DocumentCopy"
+			@click="exportAll"
+			v-permission="'clue:export'"
+			v-if="clueList.length"
 			>全部导出（Excel）</el-button
 		>
-		<el-button type="info" :icon="DocumentCopy" @click="exportSelected"
+		<el-button
+			type="info"
+			:icon="DocumentCopy"
+			@click="exportSelected"
+			v-permission="'clue:export'"
+			v-if="clueList.length"
 			>选择导出（Excel）</el-button
 		>
 	</div>
@@ -250,13 +269,27 @@
 			:formatter="regionFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column fixed="right" label="操作" min-width="210">
+		<el-table-column fixed="right" label="操作" :width="actionsBarWidth">
 			<template #default="scope">
-				<el-button type="primary" size="small" @click="showClueDetails(scope.row)"
+				<el-button
+					type="primary"
+					size="small"
+					@click="showClueDetails(scope.row)"
+					v-permission="'clue:details'"
 					>详情</el-button
 				>
-				<el-button type="success" size="small" @click="editClue(scope.row)">编辑</el-button>
-				<el-button type="danger" size="small" @click="deleteClues([scope.row.id])"
+				<el-button
+					type="success"
+					size="small"
+					@click="editClue(scope.row)"
+					v-permission="'clue:edit'"
+					>编辑</el-button
+				>
+				<el-button
+					type="danger"
+					size="small"
+					@click="deleteClues([scope.row.id])"
+					v-permission="'clue:delete'"
 					>删除</el-button
 				>
 			</template>
@@ -276,7 +309,13 @@
 import { ref, onMounted, watchEffect } from "vue"
 import { useRouter } from "vue-router"
 
-import { showOwnerSearch, getOwnerList, formatTime, messageTip } from "@/utils/utils"
+import {
+	showOwnerSearch,
+	getOwnerList,
+	formatTime,
+	messageTip,
+	useCalculateActionsBarWidth,
+} from "@/utils/utils"
 import {
 	clueStateOptions,
 	clueSourceOptions,
@@ -300,6 +339,8 @@ import dayjs from "dayjs"
 const marketingStore = useMarketingStore()
 const productStore = useProductStore()
 const clueStore = useClueStore()
+// Calculate the width of the action bar
+const actionsBarWidth = useCalculateActionsBarWidth(["clue:details", "clue:edit", "clue:delete"])
 
 const router = useRouter()
 
@@ -384,7 +425,7 @@ let params = {
 // Get the list of marketing clue
 const getClueList = async params => {
 	const res = await api.getClueList(params)
-	if (res.code === 200) {
+	if (res?.code === 200) {
 		clueList.value = res.data.rows
 		total.value = res.data.total
 	}
@@ -523,7 +564,7 @@ const deleteClues = ids => {
 				isDeletedValue: 1,
 			}
 			const res = await api.updateClues(data)
-			if (res.code === 200) {
+			if (res?.code === 200) {
 				messageTip("success", "删除成功!")
 				currentPage.value = 1
 				params.page = currentPage.value

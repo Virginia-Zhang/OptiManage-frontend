@@ -33,6 +33,20 @@
 					/>
 				</el-select>
 			</el-form-item>
+			<el-form-item label="角色" prop="roleIds">
+				<!--Traverse roleData and generate options -->
+				<el-select v-model="editUserForm.roleIds" multiple clearable>
+					<template #prefix>
+						<el-icon><User /></el-icon>
+					</template>
+					<el-option
+						v-for="item in roleData"
+						:key="item.id"
+						:label="item.name"
+						:value="item.id"
+					/>
+				</el-select>
+			</el-form-item>
 			<el-form-item label="账号是否过期" prop="accountNoExpired">
 				<el-select v-model="editUserForm.accountNoExpired">
 					<el-option label="是" :value="0"></el-option>
@@ -69,9 +83,9 @@ import { ref, watchEffect } from "vue"
 
 import api from "@/http/api"
 import { messageTip } from "@/utils/utils"
-import { regionData, PAGE_SIZE } from "@/constants/constants"
+import { regionData, PAGE_SIZE, roleData } from "@/constants/constants"
 
-import { MapLocation } from "@element-plus/icons-vue"
+import { MapLocation, User } from "@element-plus/icons-vue"
 
 const emits = defineEmits(["getUserList"])
 const props = defineProps({
@@ -80,9 +94,26 @@ const props = defineProps({
 })
 const editUserForm = ref({})
 
+const dialogVisible = ref(false)
+const editUserLoading = ref(false)
+
+// Get the current user's role list by user id
+const getRoleListByUserId = async userId => {
+	const res = await api.getRoleListByUserId({ userId })
+	if (res?.code === 200) {
+		const result = res.data
+		// Process the result array to make each item in it only have the id attribute.
+		editUserForm.value.roleIds = result.map(item => item.id)
+	}
+}
+
+// Monitor the changes in props.user and dialogVisible. When the user clicks the edit button to display the pop-up window, and props.user is not empty, assign props.user to editUserForm, and then call the getRoleListByUserId method to obtain the role list.
 watchEffect(() => {
-	// When the user information changes, update the form data
-	Object.assign(editUserForm.value, props.user)
+	if (props.user?.id && dialogVisible.value) {
+		// When the user information changes, update the form data
+		Object.assign(editUserForm.value, props.user)
+		getRoleListByUserId(props.user.id)
+	}
 })
 
 const editUserFormRef = ref(null)
@@ -96,12 +127,11 @@ const editUserFormRules = ref({
 		{ type: "email", message: "请输入正确的邮箱地址", trigger: ["blur", "change"] },
 	],
 	region: [{ required: true, message: "请输入地区", trigger: "blur" }],
+	roleIds: [{ required: true, message: "请选择角色", trigger: "blur" }],
 	accountNoExpired: [{ required: true, message: "请选择账号是否过期", trigger: "blur" }],
 	credentialsNoExpired: [{ required: true, message: "请选择密码是否过期", trigger: "blur" }],
 	accountNoLocked: [{ required: true, message: "请选择账号是否锁定", trigger: "blur" }],
 })
-const dialogVisible = ref(false)
-const editUserLoading = ref(false)
 
 // Control pop-up window display
 const showEditUserDialog = () => {
@@ -131,7 +161,7 @@ const editUser = async () => {
 	try {
 		const res = await api.editUser(editUserForm.value)
 		// Display the result message
-		if (res.code === 200 && res.data == 1) {
+		if (res?.code === 200 && res?.data == 1) {
 			messageTip("success", "编辑成功!")
 			handleCancel(editUserFormRef.value)
 			// Trigger the getUserList method of the parent component, pass the params, and display the user list starting from the first page

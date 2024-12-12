@@ -71,7 +71,7 @@ const onSubmit = formEl => {
 			try {
 				const res = await api.login(form.value)
 				// Login success, a pop-up window shows to tell login is successful.
-				if (res.code === 200) {
+				if (res?.code === 200) {
 					messageTip("success", "登录成功!")
 					// Save the result into local storage or session storage
 					if (form.value.rememberMe) {

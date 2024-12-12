@@ -205,7 +205,7 @@ const editMarketing = () => {
 		editMarketingLoading.value = true
 		try {
 			const res = await api.editActivity(editMarketingForm.value)
-			if (res.code === 200 && res.data == 1) {
+			if (res?.code === 200 && res?.data == 1) {
 				// edited successfully, close pop-up window, reset form data, and then refresh marketing list data
 				messageTip("success", "编辑成功!")
 				handleCancel(editMarketingFormRef.value)

@@ -120,7 +120,7 @@ const createTransaction = () => {
 		createTransactionLoading.value = true
 		try {
 			const res = await api.createTransaction(createTransactionForm.value)
-			if (res.code === 200 && res.data == 1) {
+			if (res?.code === 200 && res?.data == 1) {
 				messageTip("success", "创建成功!")
 				handleCancel(createTransactionFormRef.value)
 				// TODO: 等交易管理页面写完后，加上跳转至交易管理页面的功能

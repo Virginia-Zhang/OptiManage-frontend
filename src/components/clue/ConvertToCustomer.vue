@@ -108,7 +108,7 @@ const convertToCustomer = () => {
 			convertToCustomerForm.value.region = clueStore.selectedClue.region
 			try {
 				const res = await api.convertToCustomer(convertToCustomerForm.value)
-				if (res.code === 200 && res.data == 1) {
+				if (res?.code === 200 && res?.data == 1) {
 					messageTip("success", "转换成功!")
 					// Convert to customer done, trigger updateSelectedClue method in the parent component, update the selected clue data, and refresh the page
 					emits("updateSelectedClue")
