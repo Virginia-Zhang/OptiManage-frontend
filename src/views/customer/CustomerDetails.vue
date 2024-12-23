@@ -377,5 +377,3 @@ const showBackButton = computed(() => {
 	return selectedCustomer.isDeleted || !permissionList.includes("customerRemark:add")
 })
 </script>
-
-<style scoped lang="scss"></style>

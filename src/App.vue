@@ -1,6 +1,8 @@
 <script setup>
 import { watch, ref } from "vue"
-import { en, zhCn, ja } from "element-plus/es/locales.mjs"
+import zhCn from "element-plus/es/locale/lang/zh-cn"
+import ja from "element-plus/es/locale/lang/ja"
+import en from "element-plus/es/locale/lang/en"
 import { getPreferredLanguage } from "@/utils/utils"
 
 // Get user's preferredLanguage and dynamically set language of ElementPlus
@@ -34,5 +36,3 @@ watch(
 		<router-view />
 	</el-config-provider>
 </template>
-
-<style scoped></style>

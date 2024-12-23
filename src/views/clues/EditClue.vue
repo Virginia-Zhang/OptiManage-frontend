@@ -299,7 +299,6 @@ const rules = {
 	otherContactDetails: [
 		{ max: 500, message: "客户其他联系方式不能超过500个字符", trigger: "blur" },
 	],
-	// Age must be a number, decimals are also acceptable
 	age: [{ pattern: /^\d+$/, message: "客户年龄必须为整数", trigger: "blur" }],
 	job: [{ max: 64, message: "客户职业不能超过64个字符", trigger: "blur" }],
 	// Annual income must be a number, decimals are also acceptable

@@ -1,4 +1,4 @@
-<!-- campaign component -->
+<!-- Marketing Campaigns/Activities component -->
 <template>
 	<!-- Search form -->
 	<el-form :inline="true" :model="searchForm" class="demo-form-inline">

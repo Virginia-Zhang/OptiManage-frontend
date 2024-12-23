@@ -182,7 +182,14 @@ const needLoanFormatter = (row, column, cellValue, index) => {
 // Intention state formatter
 // 0 no intention, 1 has intention, 2 intention unknown
 const intentionStateFormatter = (row, column, cellValue, index) => {
-	return cellValue === 0 ? "无意向" : cellValue === 1 ? "有意向" : "意向不明"
+	switch (cellValue) {
+		case 0:
+			return "无意向"
+		case 1:
+			return "有意向"
+		default:
+			return "意向不明"
+	}
 }
 
 // Clue state formatter

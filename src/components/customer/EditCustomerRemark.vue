@@ -111,5 +111,3 @@ const handleClose = () => {
 	handleCancel(editCustomerRemarkFormRef.value)
 }
 </script>
-
-<style scoped lang="scss"></style>

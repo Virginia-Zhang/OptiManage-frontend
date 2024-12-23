@@ -87,7 +87,7 @@ import {
 import { Menu as MenuIcon, ArrowLeft as ArrowLeftIcon } from "@element-plus/icons-vue"
 import MenuItem from "@/components/MenuItem.vue"
 import api from "@/http/api"
-import { messageTip, clearStorage, getRoleList, getPermissionList } from "@/utils/utils"
+import { messageTip, clearStorage, getPermissionList } from "@/utils/utils"
 import { menuData } from "@/constants/constants"
 import { useUserStore } from "@/stores/userStore"
 import { useMarketingStore } from "@/stores/marketingStore"

@@ -423,5 +423,3 @@ const updateSelectedClue = () => {
 	router.push({ name: "customer" })
 }
 </script>
-
-<style scoped lang="scss"></style>

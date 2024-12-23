@@ -45,7 +45,6 @@ import { ref, watchEffect } from "vue"
 
 import { regionData, roleData } from "@/constants/constants"
 import { formatTime } from "@/utils/utils"
-import api from "@/http/api"
 
 const props = defineProps({
 	// Receive user information passed by the parent component

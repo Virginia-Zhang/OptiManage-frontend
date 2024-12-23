@@ -298,4 +298,3 @@ const deleteMarketingRemark = id => {
 	})
 }
 </script>
-<style scoped lang="scss"></style>

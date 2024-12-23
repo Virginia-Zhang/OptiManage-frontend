@@ -382,11 +382,25 @@ const handleSelectionChange = selectedCustomers => {
  */
 //
 const mapGender = gender => {
-	return gender === 1 ? "男性" : gender === 2 ? "女性" : "--"
+	switch (gender) {
+		case 1:
+			return "男性"
+		case 2:
+			return "女性"
+		default:
+			return "--"
+	}
 }
 
 const mapNeedLoan = needLoan => {
-	return needLoan === 0 ? "不需要" : needLoan === 1 ? "需要" : "--"
+	switch (needLoan) {
+		case 0:
+			return "不需要"
+		case 1:
+			return "需要"
+		default:
+			return "--"
+	}
 }
 
 const mapSource = sourceId => {

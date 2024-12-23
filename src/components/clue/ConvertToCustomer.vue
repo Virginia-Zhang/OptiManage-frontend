@@ -132,5 +132,3 @@ const handleClose = () => {
 	handleCancel(convertToCustomerFormRef.value)
 }
 </script>
-
-<style scoped lang="scss"></style>

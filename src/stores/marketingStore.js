@@ -2,14 +2,14 @@
 import { defineStore } from "pinia"
 import storage from "@/utils/storage"
 
-export const useMarketingStore = defineStore({
-	id: "marketing",
+export const useMarketingStore = defineStore("marketing", {
 	// First get the data locally and assign it to state
 	state: () => ({
 		// User's selected marketing activity
 		selectedMarketingActivity:
 			storage.getItem("selectedMarketingActivity", "local") ||
-			storage.getItem("selectedMarketingActivity", "session" || {}),
+			storage.getItem("selectedMarketingActivity", "session") ||
+			{},
 		// Owner options list
 		ownerOptions:
 			storage.getItem("ownerOptions", "local") ||

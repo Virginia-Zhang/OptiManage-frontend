@@ -2,8 +2,7 @@
 import { defineStore } from "pinia"
 import storage from "@/utils/storage"
 
-export const useClueStore = defineStore({
-	id: "clue",
+export const useClueStore = defineStore("clue", {
 	// First get the data locally and assign it to state
 	state: () => ({
 		// Selected marketing clue data

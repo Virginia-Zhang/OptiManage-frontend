@@ -244,7 +244,7 @@ const assignValueToCurrencyUnit = () => {
 	}
 }
 
-// 监听dialogVisible的变化，每当dialogVisible变为true时，执行assignValueToCurrencyUnit函数，为currencyUnit赋值
+// Monitor the changes of dialogVisible. Whenever dialogVisible switches to true, execute assignValueToCurrencyUnit function to assign a value to currencyUnit.
 watch(
 	() => dialogVisible.value,
 	newValue => {
