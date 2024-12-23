@@ -21,7 +21,7 @@
 			<el-form-item label="邮箱" prop="email">
 				<el-input v-model="addUserForm.email" placeholder="请输入邮箱" />
 			</el-form-item>
-			<el-form-item label="地区" prop="region">
+			<el-form-item label="地区" prop="region" v-if="showRegion">
 				<!--Traverse regionData and generate options -->
 				<el-select v-model="addUserForm.region" placeholder="请选择地区" clearable>
 					<template #prefix>
@@ -71,7 +71,7 @@
 import { ref, reactive } from "vue"
 
 import api from "@/http/api"
-import { messageTip } from "@/utils/utils"
+import { messageTip, showRegion, getRegion } from "@/utils/utils"
 import { regionData, PAGE_SIZE, roleData } from "@/constants/constants"
 
 import { MapLocation, User } from "@element-plus/icons-vue"
@@ -121,7 +121,11 @@ const addUser = () => {
 	// Verify whether form data is legal
 	addUserFormRef.value.validate(async valid => {
 		if (!valid) return
-		// Add the preferredLanguage field, and find the language in regionData based on the value of the region field.
+		// If the user is neither a super admin nor super financing staff, set the region field to the logged-in user's current region
+		if (!showRegion.value) {
+			addUserForm.value.region = getRegion()
+		}
+		// Add the preferredLanguage field, and find the language in regionData based on the user's region.
 		addUserForm.value.preferredLanguage = regionData.find(
 			item => item.id === addUserForm.value.region
 		).language

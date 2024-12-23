@@ -232,7 +232,7 @@ const checkPermission = permission => {
 		messageTip("warning", "您没有权限访问此页面")
 		setTimeout(() => {
 			router.back()
-		}, 2000)
+		}, 1000)
 		return false
 	}
 }

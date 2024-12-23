@@ -48,7 +48,7 @@
 					style="width: 100%"
 				/>
 			</el-form-item>
-			<el-form-item label="地区" prop="region">
+			<el-form-item label="地区" prop="region" v-if="showRegion">
 				<!--Traverse regionData and generate options -->
 				<!--Monitor option changes and dynamically load the currency unit of the activity budget based on the region value -->
 				<!--When the region value is cleared, clear the currency unit as well -->
@@ -100,10 +100,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from "vue"
+import { ref, reactive, computed, watch } from "vue"
 
 import api from "@/http/api"
-import { messageTip, getRoleList, formatTime } from "@/utils/utils"
+import { messageTip, getRoleList, formatTime, showRegion, getRegion } from "@/utils/utils"
 import { regionData, PAGE_SIZE } from "@/constants/constants"
 
 import { MapLocation } from "@element-plus/icons-vue"
@@ -141,7 +141,7 @@ const rules = reactive({
 	],
 	description: [
 		{ required: true, message: "请输入活动描述", trigger: "blur" },
-		{ max: 128, message: "活动描述长度不能超过1024个字符", trigger: "blur" },
+		{ max: 1024, message: "活动描述长度不能超过1024个字符", trigger: "blur" },
 	],
 })
 
@@ -193,6 +193,9 @@ const addMarketing = () => {
 		addMarketingForm.value.endTime = formatTime(addMarketingForm.value.endTime)
 		// Convert cost to number type
 		addMarketingForm.value.cost = Number(addMarketingForm.value.cost)
+		if (!addMarketingForm.value.region) {
+			addMarketingForm.value.region = getRegion()
+		}
 		// Open loading
 		addMarketingLoading.value = true
 		try {
@@ -229,6 +232,27 @@ const handleCancel = formEl => {
 const handleClose = () => {
 	handleCancel(addMarketingFormRef.value)
 }
+
+// If the user is not a super administrator or super financing staff, assign a value to the currencyUnit field in the form based on the user's region.
+const assignValueToCurrencyUnit = () => {
+	if (!showRegion.value) {
+		const userRegion = getRegion()
+		// Find currency unit corresponding to the user's region in regionData and assign it to the currency unit field in the search form
+		addMarketingForm.value.currencyUnit = regionData.find(
+			item => item.id === userRegion
+		).currencyUnit
+	}
+}
+
+// 监听dialogVisible的变化，每当dialogVisible变为true时，执行assignValueToCurrencyUnit函数，为currencyUnit赋值
+watch(
+	() => dialogVisible.value,
+	newValue => {
+		if (newValue) {
+			assignValueToCurrencyUnit()
+		}
+	}
+)
 </script>
 
 <style scoped lang="scss">

@@ -82,14 +82,14 @@
 				clearable
 			>
 				<el-option
-					v-for="item in clueSourceOptions"
+					v-for="item in clueSourceOptionsList"
 					:key="item.id"
 					:label="item.name"
 					:value="item.id"
 				/>
 			</el-select>
 		</el-form-item>
-		<el-form-item label="地区">
+		<el-form-item label="地区" v-if="showRegion">
 			<el-select
 				v-model="searchForm.regions"
 				placeholder="请选择地区"
@@ -223,6 +223,8 @@ import {
 	formatTime,
 	messageTip,
 	useCalculateActionsBarWidth,
+	showRegion,
+	getRegion,
 } from "@/utils/utils"
 import {
 	clueSourceOptions,
@@ -286,6 +288,8 @@ const productOptions = ref([])
 const customerTableRef = ref(null)
 // Customer list
 const customerList = ref([])
+// Get the list of clue sources options
+const clueSourceOptionsList = ref([])
 
 // total number of customers
 const total = ref(0)
@@ -296,6 +300,16 @@ const pageSize = ref(PAGE_SIZE)
 
 // The customer data to be exported
 const exportedCustomers = []
+
+// If the user is not a super administrator or super financing staff, only the list of lead/clue source options in the user's region will be displayed.
+const getClueSourceOptionList = () => {
+	const region = getRegion()
+	if (!showRegion.value) {
+		clueSourceOptionsList.value = clueSourceOptions.filter(item => item.region.includes(region))
+	} else {
+		clueSourceOptionsList.value = clueSourceOptions
+	}
+}
 
 // Search parameters
 let params = {
@@ -349,6 +363,7 @@ onMounted(() => {
 	getOwnerList()
 	// Get the list of products
 	getProductOptionList()
+	getClueSourceOptionList()
 })
 
 const handleSelectionChange = selectedCustomers => {

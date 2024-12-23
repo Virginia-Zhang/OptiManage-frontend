@@ -52,13 +52,16 @@
 				placeholder="请选择货币单位"
 				@change="() => (searchForm.budget = null)"
 				clearable
+				v-if="showRegion"
 			>
 				<el-option label="USD" value="USD" />
 				<el-option label="RMB" value="RMB" />
 				<el-option label="JPY" value="JPY" />
 			</el-select>
+			<!-- Show currency unit here when the user is neither a super admin nor a super financing staff -->
+			<span style="margin-left: 10px">{{ currencyUnit }}</span>
 		</el-form-item>
-		<el-form-item label="地区">
+		<el-form-item label="地区" v-if="showRegion">
 			<el-select
 				v-model="searchForm.regions"
 				placeholder="请选择地区"
@@ -230,6 +233,8 @@ import {
 	messageTip,
 	getOwnerList,
 	useCalculateActionsBarWidth,
+	showRegion,
+	getRegion,
 } from "@/utils/utils"
 import api from "@/http/api"
 import AddMarketing from "@/components/marketing/AddMarketing.vue"
@@ -312,6 +317,20 @@ const deletedIds = []
 // The list of activities to be exported
 const exportedActivities = []
 
+// Currency unit of the activity budget
+const currencyUnit = ref("")
+
+// If the user is not a super administrator or super financing staff, assign a value to the currencyUnit field in the search form based on the user's region.
+const assignValueToCurrencyUnit = () => {
+	if (!showRegion.value) {
+		const userRegion = getRegion()
+		// Find currency unit corresponding to the user's region in regionData and assign it to the currency unit field in the search form
+		searchForm.value.currencyUnit = currencyUnit.value = regionData.find(
+			item => item.id === userRegion
+		).currencyUnit
+	}
+}
+
 // Search parameters
 let params = {
 	page: currentPage.value,
@@ -329,6 +348,7 @@ const getMarketingList = async params => {
 onMounted(() => {
 	getMarketingList(params)
 	getOwnerList()
+	assignValueToCurrencyUnit()
 })
 
 const handleCurrentChange = val => {

@@ -48,7 +48,7 @@
 					style="width: 100%"
 				/>
 			</el-form-item>
-			<el-form-item label="地区" prop="region">
+			<el-form-item label="地区" prop="region" v-if="showRegion">
 				<!--Traverse regionData and generate options -->
 				<!--Monitor option changes and dynamically load the currency unit of the activity budget based on the region value -->
 				<!--When the region value is cleared, clear the currency unit as well -->
@@ -103,7 +103,7 @@
 import { ref, reactive, computed, watchEffect } from "vue"
 
 import api from "@/http/api"
-import { messageTip, getRoleList, formatTime, parseTime } from "@/utils/utils"
+import { messageTip, getRoleList, formatTime, parseTime, showRegion } from "@/utils/utils"
 import { regionData, PAGE_SIZE } from "@/constants/constants"
 
 import { MapLocation } from "@element-plus/icons-vue"
@@ -141,7 +141,7 @@ const rules = reactive({
 	],
 	description: [
 		{ required: true, message: "请输入活动描述", trigger: "blur" },
-		{ max: 128, message: "活动描述长度不能超过1024个字符", trigger: "blur" },
+		{ max: 1024, message: "活动描述长度不能超过1024个字符", trigger: "blur" },
 	],
 })
 

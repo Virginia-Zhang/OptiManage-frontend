@@ -1,7 +1,7 @@
 <!-- User details pop-up window -->
 <template>
 	<el-dialog v-model="dialogVisible" title="用户详情" width="30%" :before-close="handleClose">
-		<el-descriptions :column="1" :border="true">
+		<el-descriptions :column="1" :border="true" label-width="120px">
 			<el-descriptions-item label="ID">{{ user.id }}</el-descriptions-item>
 			<el-descriptions-item label="账号">{{ user.loginAct }}</el-descriptions-item>
 			<el-descriptions-item label="姓名">{{ user.name }}</el-descriptions-item>
@@ -57,19 +57,14 @@ const dialogVisible = ref(false)
 // User's role list, which will be displayed on the page as a string
 const roles = ref("")
 
-// Get the current user's role list by user id
-const getRoleListByUserId = async userId => {
-	const res = await api.getRoleListByUserId({ userId })
-	if (res?.code === 200) {
-		return res.data
-	}
-}
-
-// Monitor the changes in props.user and dialogVisible. When the user clicks the details button to display the pop-up window, and props.user is not empty, call the getRoleListByUserId method to obtain the role list.
+// Monitor the changes in props.user and dialogVisible. When the user clicks the details button to display the pop-up window, and props.user is not empty, convert the current json string to an array and find the name corresponding to the current role in roleData, and then concat the names of all roles into a string.
 watchEffect(async () => {
 	if (props.user && dialogVisible.value) {
-		const result = await getRoleListByUserId(props.user.id)
-		convertRolesToText(result)
+		// Convert the current json string to an array
+		const roleList = JSON.parse(props.user.roles)
+		// Find the name corresponding to the current role in roleData, and then concat the names of all roles into a string.
+		if (!roleList.length) return
+		roles.value = roleList.map(role => roleData.find(item => item.id === role).name).join(", ")
 	}
 })
 
@@ -94,11 +89,5 @@ const convertRegionToText = region => {
 			return item.name
 		}
 	}
-}
-
-// Convert roles into the corresponding text and display on the page
-const convertRolesToText = roleList => {
-	// According to the id of each role in roles, find the corresponding name in roleData array, and then splice it into a string and return it
-	roles.value = roleList.map(role => roleData.find(item => item.id === role.id).name).join(", ")
 }
 </script>

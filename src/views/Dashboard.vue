@@ -87,7 +87,7 @@ import {
 import { Menu as MenuIcon, ArrowLeft as ArrowLeftIcon } from "@element-plus/icons-vue"
 import MenuItem from "@/components/MenuItem.vue"
 import api from "@/http/api"
-import { messageTip, clearStorage, getRoleList } from "@/utils/utils"
+import { messageTip, clearStorage, getRoleList, getPermissionList } from "@/utils/utils"
 import { menuData } from "@/constants/constants"
 import { useUserStore } from "@/stores/userStore"
 import { useMarketingStore } from "@/stores/marketingStore"
@@ -175,20 +175,24 @@ const handleCommand = async command => {
 	}
 }
 
-// Get roleList from storage and determine whether the user has an administrator role. If not, delete the "User Management" menu item in menuData to prevent users from accessing this module.
+// Get the logged-in user's permission list and determine which menu items to display in the menu sidebar according to the permission list.
 const authorize = () => {
-	const roleList = getRoleList()
+	const permissionList = getPermissionList()
 	// Deep copy menuData
 	let newMenuData = JSON.parse(JSON.stringify(menuData))
-	// If user is neither an administrator nor a financing staff, delete the "User Management" menu item and assign it to menuDataList.
-	if (roleList.indexOf("admin") === -1 && roleList.indexOf("financing") === -1) {
+	// If user does not have the "user:list" permission, delete the "/dashboard/user" menu item to prevent user from accessing this page.
+	if (permissionList.indexOf("user:list") === -1) {
 		newMenuData = newMenuData.filter(item => item.index !== "/dashboard/user")
-		// If user does not have the role of "marketing", delete the "/dashboard/marketing" menu item in menuDataList to prevent user from accessing this page.
-		if (roleList.indexOf("marketing") === -1) {
+		// If user does not have the "marketing:list" permission, delete the "/dashboard/marketing" menu item to prevent user from accessing this page.
+		if (permissionList.indexOf("marketing:list") === -1) {
 			newMenuData = newMenuData.filter(item => item.index !== "/dashboard/marketing")
 		}
-		// If user does not have the role of "saler" or "manager", delete the "/dashboard/clues", "/dashboard/customer", and "/dashboard/transaction" in menuDataList to prevent user from accessing these pages.
-		if (roleList.indexOf("saler") === -1 && roleList.indexOf("manager") === -1) {
+		// If user does not have the "clue:list" and "customer:list" and "transaction:list" permissions, delete the "/dashboard/clues" menu item to prevent user from accessing these pages.
+		if (
+			permissionList.indexOf("clue:list") === -1 &&
+			permissionList.indexOf("customer:list") === -1 &&
+			permissionList.indexOf("transaction:list") === -1
+		) {
 			newMenuData = newMenuData.filter(
 				item =>
 					item.index !== "/dashboard/clues" &&

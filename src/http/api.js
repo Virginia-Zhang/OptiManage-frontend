@@ -148,8 +148,4 @@ export default {
 	async getClueListWithoutPagination() {
 		return await request.get("/clue/all")
 	},
-	// Query user's role list by user id
-	async getRoleListByUserId(params) {
-		return await request.get("/role/list", params)
-	},
 }

@@ -1,6 +1,6 @@
 <!-- Market clue/lead details page -->
 <template>
-	<el-descriptions title="市场线索详情" :column="1" :border="true">
+	<el-descriptions title="市场线索详情" :column="1" :border="true" label-width="120px">
 		<el-descriptions-item label="线索ID">{{ selectedClue.id }}</el-descriptions-item>
 		<el-descriptions-item label="地区">{{
 			convertRegionToText(selectedClue.region)
@@ -155,7 +155,7 @@
 		<el-table-column
 			fixed="right"
 			label="操作"
-			min-width="115"
+			:width="actionsBarWidth"
 			v-if="!selectedClue.isDeleted"
 			v-permission="'clueRemark:edit'"
 		>
@@ -217,7 +217,7 @@ import {
 	clueStateOptions,
 	contactMethodOptions,
 } from "@/constants/constants"
-import { formatTime, messageTip } from "@/utils/utils"
+import { formatTime, messageTip, useCalculateActionsBarWidth } from "@/utils/utils"
 import api from "@/http/api"
 import EditClueRemark from "@/components/clue/EditClueRemark.vue"
 import ConvertToCustomer from "@/components/clue/ConvertToCustomer.vue"
@@ -227,6 +227,7 @@ import { ElMessageBox } from "element-plus"
 const router = useRouter()
 const clueStore = useClueStore()
 const userStore = useUserStore()
+const actionsBarWidth = useCalculateActionsBarWidth(["clueRemark:edit", "clueRemark:delete"])
 
 // Get the selected marketing clue data from Pinia
 const { selectedClue } = clueStore

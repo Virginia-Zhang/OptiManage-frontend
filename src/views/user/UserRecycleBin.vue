@@ -32,10 +32,10 @@
 			show-overflow-tooltip
 		/>
 		<el-table-column
-			property="createTime"
-			label="创建时间"
+			property="roles"
+			label="角色"
 			width="180"
-			:formatter="timeFormatter"
+			:formatter="rolesFormatter"
 			show-overflow-tooltip
 		/>
 		<el-table-column fixed="right" label="操作" :width="actionsBarWidth">
@@ -72,8 +72,8 @@
 <script setup>
 import { ref, onMounted } from "vue"
 
-import { PAGE_SIZE, regionData } from "@/constants/constants"
-import { formatTime, messageTip, useCalculateActionsBarWidth } from "@/utils/utils"
+import { PAGE_SIZE, regionData, roleData } from "@/constants/constants"
+import { messageTip, useCalculateActionsBarWidth } from "@/utils/utils"
 import api from "@/http/api"
 import UserDetails from "@/components/user/UserDetails.vue"
 
@@ -134,9 +134,13 @@ const regionFormatter = (row, column, cellValue, index) => {
 	return region ? region.name : "未知地区"
 }
 
-// Format time
-const timeFormatter = (row, column, cellValue, index) => {
-	return formatTime(cellValue)
+// Format roles data
+const rolesFormatter = (row, column, cellValue, index) => {
+	// Convert the current json string to an array
+	const roleList = JSON.parse(cellValue)
+	// Find the name corresponding to the current role in roleData, and then concat the names of all roles into a string and return it.
+	if (roleList.length === 1 && roleList[0] == null) return
+	return roleList.map(role => roleData.find(item => item.id === role).name).join(", ")
 }
 
 // To restore the selected user, a pop-up window shows asking if you want to delete it. Click OK and then delete it.

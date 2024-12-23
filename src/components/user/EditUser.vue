@@ -19,7 +19,7 @@
 			<el-form-item label="邮箱" prop="email">
 				<el-input v-model="editUserForm.email" />
 			</el-form-item>
-			<el-form-item label="地区" prop="region">
+			<el-form-item label="地区" prop="region" v-if="showRegion">
 				<!--Traverse regionData and generate options -->
 				<el-select v-model="editUserForm.region" clearable>
 					<template #prefix>
@@ -82,7 +82,7 @@
 import { ref, watchEffect } from "vue"
 
 import api from "@/http/api"
-import { messageTip } from "@/utils/utils"
+import { messageTip, showRegion } from "@/utils/utils"
 import { regionData, PAGE_SIZE, roleData } from "@/constants/constants"
 
 import { MapLocation, User } from "@element-plus/icons-vue"
@@ -97,22 +97,11 @@ const editUserForm = ref({})
 const dialogVisible = ref(false)
 const editUserLoading = ref(false)
 
-// Get the current user's role list by user id
-const getRoleListByUserId = async userId => {
-	const res = await api.getRoleListByUserId({ userId })
-	if (res?.code === 200) {
-		const result = res.data
-		// Process the result array to make each item in it only have the id attribute.
-		editUserForm.value.roleIds = result.map(item => item.id)
-	}
-}
-
-// Monitor the changes in props.user and dialogVisible. When the user clicks the edit button to display the pop-up window, and props.user is not empty, assign props.user to editUserForm, and then call the getRoleListByUserId method to obtain the role list.
+// Monitor the changes in props.user and dialogVisible. When the user clicks the edit button to display the pop-up window, and props.user is not empty, assign props.user to editUserForm, and then convert roles(JSON string) to an array.
 watchEffect(() => {
 	if (props.user?.id && dialogVisible.value) {
-		// When the user information changes, update the form data
 		Object.assign(editUserForm.value, props.user)
-		getRoleListByUserId(props.user.id)
+		editUserForm.value.roleIds = JSON.parse(props.user.roles)
 	}
 })
 
@@ -156,6 +145,8 @@ const handleClose = () => {
 const editUser = async () => {
 	// Validate the form data
 	await editUserFormRef.value.validate()
+	// Remove the roles attribute from editUserForm
+	delete editUserForm.value.roles
 	editUserLoading.value = true
 	// Send the form data to the server
 	try {

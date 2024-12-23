@@ -8,7 +8,7 @@
 		<el-form-item label="姓名">
 			<el-input v-model="searchForm.name" placeholder="请输入姓名" clearable />
 		</el-form-item>
-		<el-form-item label="地区">
+		<el-form-item label="地区" v-if="showRegion">
 			<el-select
 				v-model="searchForm.regions"
 				placeholder="请选择地区"
@@ -71,10 +71,10 @@
 			show-overflow-tooltip
 		/>
 		<el-table-column
-			property="createTime"
-			label="创建时间"
+			property="roles"
+			label="角色"
 			width="180"
-			:formatter="timeFormatter"
+			:formatter="rolesFormatter"
 			show-overflow-tooltip
 		/>
 		<el-table-column fixed="right" label="操作" :width="actionsBarWidth">
@@ -127,9 +127,9 @@ import { ref, onMounted } from "vue"
 import api from "@/http/api"
 import UserDetails from "@/components/user/UserDetails.vue"
 import AddUser from "@/components/user/AddUser.vue"
-import { regionData, PAGE_SIZE } from "@/constants/constants"
+import { regionData, PAGE_SIZE, roleData } from "@/constants/constants"
 import EditUser from "@/components/user/EditUser.vue"
-import { messageTip, formatTime, useCalculateActionsBarWidth } from "@/utils/utils"
+import { messageTip, useCalculateActionsBarWidth, showRegion } from "@/utils/utils"
 
 import { Plus, Delete, MapLocation, Search, Refresh } from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
@@ -210,9 +210,13 @@ const regionFormatter = (row, column, cellValue, index) => {
 	return region ? region.name : "未知地区"
 }
 
-// Format time
-const timeFormatter = (row, column, cellValue, index) => {
-	return formatTime(cellValue)
+// Format roles data
+const rolesFormatter = (row, column, cellValue, index) => {
+	// Convert the current json string to an array
+	const roleList = JSON.parse(cellValue)
+	// Find the name corresponding to the current role in roleData, and then concat the names of all roles into a string and return it.
+	if (roleList.length === 1 && roleList[0] == null) return
+	return roleList.map(role => roleData.find(item => item.id === role).name).join(", ")
 }
 
 // Show edit user dialog

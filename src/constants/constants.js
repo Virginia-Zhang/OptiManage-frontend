@@ -285,4 +285,6 @@ export const roleData = [
 	{ name: "销售经理", id: 3 },
 	{ name: "市场营销", id: 4 },
 	{ name: "财务", id: 5 },
+	{ name: "超级管理员", id: 6 },
+	{ name: "超级财务", id: 7 },
 ]

@@ -1,6 +1,6 @@
 <!-- Marketing activity details page -->
 <template>
-	<el-descriptions title="市场活动详情" :column="1" :border="true">
+	<el-descriptions title="市场活动详情" :column="1" :border="true" label-width="120px">
 		<el-descriptions-item label="活动ID">{{
 			selectedMarketingActivity.id
 		}}</el-descriptions-item>

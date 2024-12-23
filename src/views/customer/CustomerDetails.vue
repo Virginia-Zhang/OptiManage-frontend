@@ -1,6 +1,6 @@
 <!-- Customer details page -->
 <template>
-	<el-descriptions title="客户详情" :column="1" :border="true">
+	<el-descriptions title="客户详情" :column="1" :border="true" label-width="120px">
 		<el-descriptions-item label="客户ID">{{ selectedCustomer.id }}</el-descriptions-item>
 		<el-descriptions-item label="所属线索ID">{{
 			selectedCustomer.clueId
@@ -154,7 +154,7 @@
 		<el-table-column
 			fixed="right"
 			label="操作"
-			min-width="115"
+			:width="actionsBarWidth"
 			v-if="!selectedCustomer.isDeleted"
 			v-permission="'customerRemark:edit'"
 		>
@@ -197,7 +197,7 @@ import { useRouter } from "vue-router"
 import { useCustomerStore } from "@/stores/customerStore"
 import { useUserStore } from "@/stores/userStore"
 import { regionData, clueSourceOptions, contactMethodOptions } from "@/constants/constants"
-import { formatTime, messageTip } from "@/utils/utils"
+import { formatTime, messageTip, useCalculateActionsBarWidth } from "@/utils/utils"
 import api from "@/http/api"
 import EditCustomerRemark from "@/components/customer/EditCustomerRemark.vue"
 import CreateTransaction from "@/components/customer/CreateTransaction.vue"
@@ -207,6 +207,10 @@ import { ElMessageBox } from "element-plus"
 const router = useRouter()
 const customerStore = useCustomerStore()
 const userStore = useUserStore()
+const actionsBarWidth = useCalculateActionsBarWidth([
+	"customerRemark:edit",
+	"customerRemark:delete",
+])
 
 // Get the selected customer data from Pinia
 const { selectedCustomer } = customerStore

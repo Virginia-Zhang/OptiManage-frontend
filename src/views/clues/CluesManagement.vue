@@ -129,14 +129,14 @@
 				clearable
 			>
 				<el-option
-					v-for="item in clueSourceOptions"
+					v-for="item in clueSourceOptionsList"
 					:key="item.id"
 					:label="item.name"
 					:value="item.id"
 				/>
 			</el-select>
 		</el-form-item>
-		<el-form-item label="地区">
+		<el-form-item label="地区" v-if="showRegion">
 			<el-select
 				v-model="searchForm.regions"
 				placeholder="请选择地区"
@@ -315,6 +315,8 @@ import {
 	formatTime,
 	messageTip,
 	useCalculateActionsBarWidth,
+	showRegion,
+	getRegion,
 } from "@/utils/utils"
 import {
 	clueStateOptions,
@@ -380,6 +382,8 @@ const ownerOptionsList = ref([])
 const activityOptions = ref([])
 // Get the list of products options
 const productOptions = ref([])
+// Get the list of clue sources options
+const clueSourceOptionsList = ref([])
 
 // Clue Table instance
 const clueTableRef = ref(null)
@@ -415,6 +419,19 @@ const getProductOptionList = async () => {
 	const res = await api.getProductOptionList()
 	productOptions.value = res.data
 	productStore.setProductOptions(res.data)
+}
+
+// If the user is not a super administrator or super financing staff, only the list of lead/clue source options in the user's region will be displayed.
+const getClueSourceOptionList = () => {
+	// Get the current user's region
+	const region = getRegion()
+	// If the user is not a super admin or super financing staff, filter out clue sources that do not belong to the current user's region
+	if (!showRegion.value) {
+		clueSourceOptionsList.value = clueSourceOptions.filter(item => item.region.includes(region))
+	} else {
+		// If the user is a super Admin or super financing staff, show all lead/clue source options
+		clueSourceOptionsList.value = clueSourceOptions
+	}
 }
 
 // Search parameters
@@ -482,6 +499,7 @@ onMounted(() => {
 	getActivityOptionList()
 	// Get the list of products
 	getProductOptionList()
+	getClueSourceOptionList()
 	getClueList(params)
 })
 

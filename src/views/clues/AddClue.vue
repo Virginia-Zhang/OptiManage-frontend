@@ -1,7 +1,7 @@
 <!-- Add marketing lead/clue page -->
 <template>
 	<el-form :model="addClueForm" label-width="100px" :rules="rules" ref="addClueFormRef">
-		<el-form-item label="地区" prop="region">
+		<el-form-item label="地区" prop="region" v-if="showRegion">
 			<el-select
 				v-model="addClueForm.region"
 				placeholder="请选择线索所在区域"
@@ -214,10 +214,10 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 
-import { showOwnerSearch, messageTip, formatTime } from "@/utils/utils"
+import { showOwnerSearch, messageTip, formatTime, showRegion, getRegion } from "@/utils/utils"
 import {
 	genderOptions,
 	needLoanOptions,
@@ -261,13 +261,13 @@ const addClueForm = ref({
 })
 const addClueFormRef = ref(null)
 
-// According to the region selected by the user, the owner options list of the corresponding region is displayed.
+// Owner options list displayed in the drop-down box
 const owners = ref([])
-// According to the region selected by the user, the activity options list of the corresponding region is displayed.
+// Activity options list displayed in the drop-down box
 const activities = ref([])
-// According to the region selected by the user, the product options list of the corresponding region is displayed.
+// Product options list displayed in the drop-down box
 const products = ref([])
-// According to the region selected by the user, the clue source options list of the corresponding region is displayed.
+// Clue source options list displayed in the drop-down box
 const clueSources = ref([])
 
 const submitClueLoading = ref(false)
@@ -309,13 +309,10 @@ const handleRegionChange = value => {
 		default:
 			addClueForm.value.currencyUnit = "thousand USD"
 	}
-	// According to the selected value, the items in the corresponding region are filtered out from the owner options and assigned to the owners array.
+	// Filter out the items in the corresponding region from the original options.
 	owners.value = ownerOptions.filter(item => item.region === value)
-	// According to the selected value, the items in the corresponding region are filtered out from the activity options and assigned to the activities array.
 	activities.value = activityOptions.filter(item => item.region === value)
-	// According to the selected value, select the items in the corresponding region from the product options and assign them to the products array.
 	products.value = productOptions.filter(item => item.region === value)
-	// According to the selected value, the items in the corresponding region are filtered out from the clue source options and assigned to the clue sources array.
 	clueSources.value = clueSourceOptions.filter(item => item.region.includes(value))
 }
 
@@ -366,6 +363,30 @@ const handleBack = () => {
 	addClueForm.value = {}
 	router.back()
 }
+
+// If the user is not a super administrator or super financing staff, assign value to the options lists and currency unit manually.
+const assignValueToOptions = () => {
+	if (!showRegion.value) {
+		owners.value = ownerOptions
+		activities.value = activityOptions
+		products.value = productOptions
+		clueSources.value = clueSourceOptions.filter(item => item.region.includes(getRegion()))
+		switch (getRegion()) {
+			case 1:
+				addClueForm.value.currencyUnit = "万元"
+				break
+			case 2:
+				addClueForm.value.currencyUnit = "万円"
+				break
+			default:
+				addClueForm.value.currencyUnit = "thousand USD"
+		}
+	}
+}
+
+onMounted(() => {
+	assignValueToOptions()
+})
 </script>
 
 <style scoped lang="scss">

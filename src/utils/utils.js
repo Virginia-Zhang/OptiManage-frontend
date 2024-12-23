@@ -57,10 +57,15 @@ export const parseTime = time => {
 	return dayjs(time).valueOf()
 }
 
-// A computed attribute, controls whether the person in charge search box is displayed or not. If the user is admin, returns true, otherwise returns false.
+// A computed attribute, controls whether the person in charge search box is displayed or not. If the user is a admin/financing/super admin/super financing, returns true, otherwise returns false.
 export const showOwnerSearch = computed(() => {
 	const roleList = getRoleList()
-	return roleList.indexOf("admin") !== -1
+	return (
+		roleList.includes("admin") ||
+		roleList.includes("financing") ||
+		roleList.includes("super admin") ||
+		roleList.includes("super financing")
+	)
 })
 
 // Get owner options list and assign it to ownerOptions in Pinia
@@ -116,4 +121,16 @@ export const useCalculateActionsBarWidth = permissionItems => {
 		return buttonWidth * displayedButtons
 	})
 	return computedWidth
+}
+
+// A computed attribute, controls whether the region search box or form item is displayed or not. If the user is super admin or super financing, returns true, otherwise returns false.
+export const showRegion = computed(() => {
+	const roleList = getRoleList()
+	return roleList.includes("super admin") || roleList.includes("super financing")
+})
+
+// Get logged-in user's region from Pinia
+export const getRegion = () => {
+	const userStore = useUserStore()
+	return userStore?.userInfo?.region
 }

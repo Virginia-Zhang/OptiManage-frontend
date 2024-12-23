@@ -1,7 +1,7 @@
 <!-- Edit marketing clues/leads page -->
 <template>
 	<el-form :model="editClueForm" label-width="100px" :rules="rules" ref="editClueFormRef">
-		<el-form-item label="地区" prop="region">
+		<el-form-item label="地区" prop="region" v-if="showRegion">
 			<el-select
 				v-model="editClueForm.region"
 				placeholder="请选择线索所在区域"
@@ -219,7 +219,7 @@
 import { computed, ref, watchEffect } from "vue"
 import { useRouter } from "vue-router"
 
-import { showOwnerSearch, messageTip, formatTime } from "@/utils/utils"
+import { showOwnerSearch, messageTip, formatTime, showRegion } from "@/utils/utils"
 import {
 	genderOptions,
 	needLoanOptions,
@@ -325,13 +325,10 @@ const handleRegionChange = value => {
 		default:
 			editClueForm.value.currencyUnit = "thousand USD"
 	}
-	// According to the selected value, the items in the corresponding region are filtered out from the owner options and assigned to the owners array.
+	// According to the new region value, filter out the items in the corresponding region from the original options.
 	owners.value = ownerOptions.filter(item => item.region === value)
-	// According to the selected value, the items in the corresponding region are filtered out from the activity options and assigned to the activities array.
 	activities.value = activityOptions.filter(item => item.region === value)
-	// According to the selected value, select the items in the corresponding region from the product options and assign them to the products array.
 	products.value = productOptions.filter(item => item.region === value)
-	// According to the selected value, the items in the corresponding region are filtered out from the clue source options and assigned to the clue sources array.
 	clueSources.value = clueSourceOptions.filter(item => item.region.includes(value))
 }
 
