@@ -8,7 +8,7 @@
 			ref="addMarketingFormRef"
 			:rules="rules"
 		>
-			<el-form-item label="负责人" prop="ownerId" v-if="showOwnerSearch">
+			<el-form-item label="负责人" prop="ownerId" v-if="showOwner">
 				<el-select
 					v-model="addMarketingForm.ownerId"
 					placeholder="请选择负责人"
@@ -103,7 +103,14 @@
 import { ref, reactive, computed, watch } from "vue"
 
 import api from "@/http/api"
-import { messageTip, getRoleList, formatTime, showRegion, getRegion } from "@/utils/utils"
+import {
+	messageTip,
+	getRoleList,
+	formatTime,
+	showRegion,
+	getRegion,
+	showOwner,
+} from "@/utils/utils"
 import { regionData, PAGE_SIZE } from "@/constants/constants"
 
 import { MapLocation } from "@element-plus/icons-vue"
@@ -145,11 +152,6 @@ const rules = reactive({
 	],
 })
 
-// A computed attribute, controls whether the person in charge search box is displayed or not. If the user is admin, returns true, otherwise returns false.
-const showOwnerSearch = computed(() => {
-	const roleList = getRoleList()
-	return roleList.indexOf("admin") !== -1
-})
 // Control pop-up window display
 const showAddMarketingDialog = () => {
 	dialogVisible.value = !dialogVisible.value
@@ -158,7 +160,7 @@ const showAddMarketingDialog = () => {
 defineExpose({
 	showAddMarketingDialog,
 })
-// Obtain getUserList method from the parent component
+// Obtain getMarketingList method from the parent component
 const emits = defineEmits(["getMarketingList"])
 // Add state control to confirm button
 const addMarketingLoading = ref(false)

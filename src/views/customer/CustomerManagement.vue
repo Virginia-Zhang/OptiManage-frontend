@@ -11,7 +11,7 @@
 		<el-form-item label="客户ID" prop="id">
 			<el-input v-model="searchForm.id" placeholder="请输入客户ID" type="number" clearable />
 		</el-form-item>
-		<el-form-item label="负责人" v-if="showOwnerSearch">
+		<el-form-item label="负责人" v-if="showOwner">
 			<el-select
 				v-model="searchForm.owners"
 				placeholder="请选择负责人"
@@ -143,11 +143,19 @@
 		stripe
 		style="width: 100%"
 		@selection-change="handleSelectionChange"
+		v-loading="customerListLoading"
+		v-if="customerList.length > 0 || customerListLoading"
 	>
 		<el-table-column type="selection" width="55" fixed="left" />
 		<el-table-column type="index" width="60" fixed="left" />
 		<el-table-column property="ownerAct" label="负责人" width="150" show-overflow-tooltip />
-		<el-table-column property="fullName" label="姓名" width="150" show-overflow-tooltip />
+		<el-table-column
+			property="fullName"
+			label="姓名"
+			width="150"
+			:formatter="emptyFormatter"
+			show-overflow-tooltip
+		/>
 		<el-table-column
 			property="gender"
 			label="性别"
@@ -155,8 +163,20 @@
 			:formatter="genderFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column property="phone" label="手机" width="160" show-overflow-tooltip />
-		<el-table-column property="email" label="邮箱" width="220" show-overflow-tooltip />
+		<el-table-column
+			property="phone"
+			label="手机"
+			width="160"
+			:formatter="emptyFormatter"
+			show-overflow-tooltip
+		/>
+		<el-table-column
+			property="email"
+			label="邮箱"
+			width="220"
+			:formatter="emptyFormatter"
+			show-overflow-tooltip
+		/>
 		<el-table-column
 			property="needLoan"
 			label="是否贷款"
@@ -168,12 +188,13 @@
 			property="intentionProductName"
 			label="意向产品"
 			width="180"
+			:formatter="emptyFormatter"
 			show-overflow-tooltip
 		/>
 		<el-table-column
 			property="source"
 			label="来源"
-			width="150"
+			width="180"
 			:formatter="sourceFormatter"
 			show-overflow-tooltip
 		/>
@@ -187,7 +208,7 @@
 		<el-table-column
 			property="region"
 			label="地区"
-			width="100"
+			width="90"
 			:formatter="regionFormatter"
 			show-overflow-tooltip
 		/>
@@ -203,6 +224,11 @@
 			</template>
 		</el-table-column>
 	</el-table>
+	<el-empty
+		v-if="customerList.length === 0 && !customerListLoading"
+		description="没有数据"
+		style="margin-top: 20px"
+	/>
 	<el-pagination
 		background
 		layout="prev, pager, next"
@@ -210,6 +236,7 @@
 		:total="total"
 		:current-page="currentPage"
 		@current-change="handleCurrentChange"
+		v-if="customerList.length"
 	/>
 </template>
 
@@ -218,13 +245,14 @@ import { ref, onMounted, watchEffect } from "vue"
 import { useRouter } from "vue-router"
 
 import {
-	showOwnerSearch,
+	showOwner,
 	getOwnerList,
 	formatTime,
 	messageTip,
 	useCalculateActionsBarWidth,
 	showRegion,
 	getRegion,
+	emptyFormatter,
 } from "@/utils/utils"
 import {
 	clueSourceOptions,
@@ -288,6 +316,7 @@ const productOptions = ref([])
 const customerTableRef = ref(null)
 // Customer list
 const customerList = ref([])
+const customerListLoading = ref(false)
 // Get the list of clue sources options
 const clueSourceOptionsList = ref([])
 
@@ -318,7 +347,9 @@ let params = {
 }
 // Get the list of customers
 const getCustomerList = async params => {
+	customerListLoading.value = true
 	const res = await api.getCustomerList(params)
+	customerListLoading.value = false
 	if (res?.code === 200) {
 		customerList.value = res.data.rows
 		total.value = res.data.total
@@ -333,16 +364,19 @@ const handleCurrentChange = val => {
 
 // Gender formatter
 const genderFormatter = (row, column, cellValue, index) => {
+	if (!cellValue) return "--"
 	return cellValue === 1 ? "男" : "女"
 }
 
 // Whether the loan is needed
 const needLoanFormatter = (row, column, cellValue, index) => {
+	if (!cellValue) return "--"
 	return cellValue === 1 ? "需要" : "不需要"
 }
 
 // Clue source formatter
 const sourceFormatter = (row, column, cellValue, index) => {
+	if (!cellValue) return "--"
 	const source = clueSourceOptions.find(item => item.id === cellValue)
 	return source ? source.name : "未知来源"
 }

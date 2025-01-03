@@ -20,7 +20,7 @@
 				/>
 			</el-select>
 		</el-form-item>
-		<el-form-item label="负责人" prop="ownerId" v-if="showOwnerSearch">
+		<el-form-item label="负责人" prop="ownerId" v-if="showOwner">
 			<el-select
 				v-model="editClueForm.ownerId"
 				placeholder="请选择负责人"
@@ -219,7 +219,7 @@
 import { computed, ref, watchEffect } from "vue"
 import { useRouter } from "vue-router"
 
-import { showOwnerSearch, messageTip, formatTime, showRegion } from "@/utils/utils"
+import { showOwner, messageTip, formatTime, showRegion } from "@/utils/utils"
 import {
 	genderOptions,
 	needLoanOptions,

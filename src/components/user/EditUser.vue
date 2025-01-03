@@ -101,7 +101,11 @@ const editUserLoading = ref(false)
 watchEffect(() => {
 	if (props.user?.id && dialogVisible.value) {
 		Object.assign(editUserForm.value, props.user)
-		editUserForm.value.roleIds = JSON.parse(props.user.roles)
+		if (JSON.parse(props.user.roles)[0] == null) {
+			editUserForm.value.roleIds = []
+		} else {
+			editUserForm.value.roleIds = JSON.parse(props.user.roles)
+		}
 	}
 })
 
@@ -155,13 +159,8 @@ const editUser = async () => {
 		if (res?.code === 200 && res?.data == 1) {
 			messageTip("success", "编辑成功!")
 			handleCancel(editUserFormRef.value)
-			// Trigger the getUserList method of the parent component, pass the params, and display the user list starting from the first page
-			const params = {
-				page: 1,
-				pageSize: PAGE_SIZE,
-				isDeleted: 1,
-			}
-			emits("getUserList", params)
+			// Trigger the getUserList method of the parent component
+			emits("getUserList")
 		} else {
 			messageTip("error", res.msg || "编辑失败!请重试！")
 		}

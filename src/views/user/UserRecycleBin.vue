@@ -17,6 +17,8 @@
 		stripe
 		style="width: 100%"
 		@selection-change="handleSelectionChange"
+		v-loading="userListLoading"
+		v-if="userList.length > 0 || userListLoading"
 	>
 		<el-table-column type="selection" width="55" fixed="left" />
 		<el-table-column type="index" width="60" fixed="left" />
@@ -57,6 +59,11 @@
 			</template>
 		</el-table-column>
 	</el-table>
+	<el-empty
+		v-if="userList.length === 0 && !userListLoading"
+		description="没有数据"
+		style="margin-top: 20px"
+	/>
 	<el-pagination
 		background
 		layout="prev, pager, next"
@@ -64,6 +71,7 @@
 		:total="total"
 		:current-page="currentPage"
 		@current-change="handleCurrentChange"
+		v-if="userList.length"
 	/>
 	<!-- User details dialog -->
 	<UserDetails ref="userDetailsRef" :user="user" />
@@ -91,6 +99,7 @@ const pageSize = ref(PAGE_SIZE)
 const total = ref(0)
 
 const userList = ref([])
+const userListLoading = ref(false)
 // The ids of the users to be restored
 const restoredIds = []
 
@@ -111,8 +120,10 @@ const getUserList = async () => {
 		pageSize: pageSize.value,
 		isDeleted: 0,
 	}
+	userListLoading.value = true
 	// Send request
 	const res = await api.getUserList(params)
+	userListLoading.value = false
 	if (res?.code === 200) {
 		userList.value = res.data.rows
 		total.value = res.data.total

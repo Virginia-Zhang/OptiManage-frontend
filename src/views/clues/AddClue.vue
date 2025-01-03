@@ -20,7 +20,7 @@
 				/>
 			</el-select>
 		</el-form-item>
-		<el-form-item label="负责人" prop="ownerId" v-if="showOwnerSearch">
+		<el-form-item label="负责人" prop="ownerId" v-if="showOwner">
 			<el-select
 				v-model="addClueForm.ownerId"
 				placeholder="请选择负责人"
@@ -217,7 +217,7 @@
 import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 
-import { showOwnerSearch, messageTip, formatTime, showRegion, getRegion } from "@/utils/utils"
+import { showOwner, messageTip, formatTime, showRegion, getRegion } from "@/utils/utils"
 import {
 	genderOptions,
 	needLoanOptions,
@@ -331,6 +331,10 @@ const handleRegionClear = () => {
 const submitClue = () => {
 	addClueFormRef.value.validate(async valid => {
 		if (!valid) return
+		// 如果addClueForm没有region的话，则添加region
+		if (!addClueForm.value.region) {
+			addClueForm.value.region = getRegion()
+		}
 		// If the state is 1 -Transferred customer, check whether the fields of intentionProduct, description, and nextContactTime are not empty. If empty, prompt the user.
 		if (addClueForm.value.state === 1) {
 			if (!addClueForm.value.intentionProduct) {

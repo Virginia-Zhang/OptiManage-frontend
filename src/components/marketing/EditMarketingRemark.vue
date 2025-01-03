@@ -60,11 +60,10 @@ watchEffect(() => {
 const showEditMarketingRemarkDialog = () => {
 	dialogVisible.value = !dialogVisible.value
 }
-// Expose showAddUserDialog function to parent component
 defineExpose({
 	showEditMarketingRemarkDialog,
 })
-// Obtain getUserList method from the parent component
+// Obtain getMarketingList method from the parent component
 const emits = defineEmits(["getMarketingRemarkList"])
 // Add state control to confirm button
 const editMarketingRemarkLoading = ref(false)

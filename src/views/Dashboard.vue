@@ -184,7 +184,7 @@ const authorize = () => {
 	if (permissionList.indexOf("user:list") === -1) {
 		newMenuData = newMenuData.filter(item => item.index !== "/dashboard/user")
 		// If user does not have the "marketing:list" permission, delete the "/dashboard/marketing" menu item to prevent user from accessing this page.
-		if (permissionList.indexOf("marketing:list") === -1) {
+		if (permissionList.indexOf("activity:list") === -1) {
 			newMenuData = newMenuData.filter(item => item.index !== "/dashboard/marketing")
 		}
 		// If user does not have the "clue:list" and "customer:list" and "transaction:list" permissions, delete the "/dashboard/clues" menu item to prevent user from accessing these pages.

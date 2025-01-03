@@ -18,11 +18,13 @@
 		stripe
 		style="width: 100%"
 		@selection-change="handleSelectionChange"
+		v-loading="marketingListLoading"
+		v-if="marketingList.length > 0 || marketingListLoading"
 	>
 		<el-table-column type="selection" width="55" fixed="left" />
 		<el-table-column type="index" width="60" fixed="left" />
 		<el-table-column property="ownerAct" label="负责人" width="150" show-overflow-tooltip />
-		<el-table-column property="name" label="活动名称" width="180" show-overflow-tooltip />
+		<el-table-column property="name" label="活动名称" width="250" show-overflow-tooltip />
 		<el-table-column
 			property="startTime"
 			label="开始时间"
@@ -33,7 +35,7 @@
 		<el-table-column
 			property="endTime"
 			label="结束时间"
-			width="220"
+			width="180"
 			:formatter="timeFormatter"
 			show-overflow-tooltip
 		/>
@@ -41,13 +43,13 @@
 		<el-table-column
 			property="currencyUnit"
 			label="货币单位"
-			width="100"
+			width="90"
 			show-overflow-tooltip
 		/>
 		<el-table-column
 			property="region"
 			label="地区"
-			width="120"
+			width="80"
 			:formatter="regionFormatter"
 			show-overflow-tooltip
 		/>
@@ -77,6 +79,11 @@
 			</template>
 		</el-table-column>
 	</el-table>
+	<el-empty
+		v-if="marketingList.length === 0 && !marketingListLoading"
+		description="没有数据"
+		style="margin-top: 20px"
+	/>
 	<el-pagination
 		background
 		layout="prev, pager, next"
@@ -84,6 +91,7 @@
 		:total="total"
 		:current-page="currentPage"
 		@current-change="handleCurrentChange"
+		v-if="marketingList.length"
 	/>
 </template>
 
@@ -106,6 +114,7 @@ const actionsBarWidth = useCalculateActionsBarWidth(permissionItems)
 
 // Marketing campaigns list data
 const marketingList = ref([])
+const marketingListLoading = ref(false)
 // Marketing table instance
 const marketingTableRef = ref(null)
 
@@ -127,7 +136,9 @@ const params = {
 }
 // Get the list of deleted marketing campaigns
 const getMarketingList = async params => {
+	marketingListLoading.value = true
 	const res = await api.getActivityList(params)
+	marketingListLoading.value = false
 	if (res?.code === 200) {
 		marketingList.value = res.data.rows
 		total.value = res.data.total

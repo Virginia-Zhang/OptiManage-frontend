@@ -2,7 +2,7 @@
 <template>
 	<!-- Search form -->
 	<el-form :inline="true" :model="searchForm" class="demo-form-inline">
-		<el-form-item label="负责人" v-if="showOwnerSearch">
+		<el-form-item label="负责人" v-if="showOwner">
 			<el-select
 				v-model="searchForm.owners"
 				placeholder="请选择负责人"
@@ -126,11 +126,13 @@
 		stripe
 		style="width: 100%"
 		@selection-change="handleSelectionChange"
+		v-loading="marketingListLoading"
+		v-if="marketingList.length > 0 || marketingListLoading"
 	>
 		<el-table-column type="selection" width="55" fixed="left" />
 		<el-table-column type="index" width="60" fixed="left" />
 		<el-table-column property="ownerAct" label="负责人" width="150" show-overflow-tooltip />
-		<el-table-column property="name" label="活动名称" width="180" show-overflow-tooltip />
+		<el-table-column property="name" label="活动名称" width="250" show-overflow-tooltip />
 		<el-table-column
 			property="startTime"
 			label="开始时间"
@@ -141,7 +143,7 @@
 		<el-table-column
 			property="endTime"
 			label="结束时间"
-			width="220"
+			width="180"
 			:formatter="timeFormatter"
 			show-overflow-tooltip
 		/>
@@ -149,13 +151,13 @@
 		<el-table-column
 			property="currencyUnit"
 			label="货币单位"
-			width="100"
+			width="90"
 			show-overflow-tooltip
 		/>
 		<el-table-column
 			property="region"
 			label="地区"
-			width="120"
+			width="80"
 			:formatter="regionFormatter"
 			show-overflow-tooltip
 		/>
@@ -192,6 +194,11 @@
 			</template>
 		</el-table-column>
 	</el-table>
+	<el-empty
+		v-if="marketingList.length === 0 && !marketingListLoading"
+		description="没有数据"
+		style="margin-top: 20px"
+	/>
 	<el-pagination
 		background
 		layout="prev, pager, next"
@@ -199,6 +206,7 @@
 		:total="total"
 		:current-page="currentPage"
 		@current-change="handleCurrentChange"
+		v-if="marketingList.length"
 	/>
 	<!-- AddMarketing component -->
 	<AddMarketing
@@ -228,7 +236,7 @@ import {
 	activityExcelHeaders,
 } from "@/constants/constants"
 import {
-	showOwnerSearch,
+	showOwner,
 	formatTime,
 	messageTip,
 	getOwnerList,
@@ -294,6 +302,7 @@ watchEffect(() => {
 
 // Marketing campaigns list data
 const marketingList = ref([])
+const marketingListLoading = ref(false)
 // Marketing table instance
 const marketingTableRef = ref(null)
 
@@ -337,8 +346,10 @@ let params = {
 	pageSize: pageSize.value,
 }
 // Get the list of marketing campaigns
-const getMarketingList = async params => {
-	const res = await api.getActivityList(params)
+const getMarketingList = async (data = params) => {
+	marketingListLoading.value = true
+	const res = await api.getActivityList(data)
+	marketingListLoading.value = false
 	if (res?.code === 200) {
 		marketingList.value = res.data.rows
 		total.value = res.data.total
@@ -479,14 +490,11 @@ const search = async () => {
 		endCost = endCost ? Number(endCost.replaceAll(",", "")) : null
 		params.startCost = startCost
 		params.endCost = endCost
-	} else if (searchForm.value.budget && !searchForm.value.currencyUnit) {
-		// If the user only selects the budget, but not the currencyUnit, then the budget is invalid.
-		messageTip("warning", "请选择货币单位，或清空活动预算！")
-		return
-	} else if (!searchForm.value.budget && searchForm.value.currencyUnit) {
-		// If the user only selects the currencyUnit, but not the budget, then the budget is invalid.
-		messageTip("warning", "请选择活动预算，或清空货币单位！")
-		return
+	} else if (!searchForm.value.budget || !searchForm.value.currencyUnit) {
+		// If the user does not select the budget or currencyUnit, set the startCost, endCost and currencyUnit to null
+		params.startCost = null
+		params.endCost = null
+		params.currencyUnit = null
 	}
 	searchLoading.value = true
 	await getMarketingList(params)

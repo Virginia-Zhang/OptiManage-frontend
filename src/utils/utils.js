@@ -48,7 +48,7 @@ export const getPermissionList = () => {
 
 // Format time
 export const formatTime = time => {
-	if (!time) return ""
+	if (!time) return "--"
 	return dayjs(time).format("YYYY-MM-DD HH:mm:ss")
 }
 
@@ -57,20 +57,22 @@ export const parseTime = time => {
 	return dayjs(time).valueOf()
 }
 
-// A computed attribute, controls whether the person in charge search box is displayed or not. If the user is a admin/financing/super admin/super financing, returns true, otherwise returns false.
-export const showOwnerSearch = computed(() => {
+// A computed attribute, controls whether the person in charge search box//form item is displayed or not. If the user is a admin/financing/super admin/super financing/sales manager/marketing manager, returns true, otherwise returns false.
+export const showOwner = computed(() => {
 	const roleList = getRoleList()
 	return (
 		roleList.includes("admin") ||
 		roleList.includes("financing") ||
 		roleList.includes("super admin") ||
-		roleList.includes("super financing")
+		roleList.includes("super financing") ||
+		roleList.includes("sales manager") ||
+		roleList.includes("marketing manager")
 	)
 })
 
 // Get owner options list and assign it to ownerOptions in Pinia
 export const getOwnerList = async () => {
-	if (!showOwnerSearch.value) return
+	if (!showOwner.value) return
 	const res = await api.getOwnerList()
 	const marketingStore = useMarketingStore()
 	if (res?.code === 200) {
@@ -133,4 +135,10 @@ export const showRegion = computed(() => {
 export const getRegion = () => {
 	const userStore = useUserStore()
 	return userStore?.userInfo?.region
+}
+
+// Formatter for empty cell in forms
+export const emptyFormatter = (row, column, cellValue, index) => {
+	if (!cellValue) return "--"
+	return cellValue
 }

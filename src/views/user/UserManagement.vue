@@ -56,13 +56,27 @@
 		stripe
 		style="width: 100%"
 		@selection-change="handleSelectionChange"
+		v-loading="userListLoading"
+		v-if="userList.length > 0 || userListLoading"
 	>
 		<el-table-column type="selection" width="55" fixed="left" />
 		<el-table-column type="index" width="60" fixed="left" />
 		<el-table-column property="loginAct" label="账号" width="180" show-overflow-tooltip />
 		<el-table-column property="name" label="姓名" width="180" show-overflow-tooltip />
-		<el-table-column property="phone" label="手机" width="180" show-overflow-tooltip />
-		<el-table-column property="email" label="邮箱" width="220" show-overflow-tooltip />
+		<el-table-column
+			property="phone"
+			label="手机"
+			width="180"
+			:formatter="emptyFormatter"
+			show-overflow-tooltip
+		/>
+		<el-table-column
+			property="email"
+			label="邮箱"
+			:formatter="emptyFormatter"
+			width="220"
+			show-overflow-tooltip
+		/>
 		<el-table-column
 			property="region"
 			label="地区"
@@ -105,6 +119,12 @@
 			</template>
 		</el-table-column>
 	</el-table>
+	<!-- When the table has no data, display the el-empty component -->
+	<el-empty
+		v-if="userList.length === 0 && !userListLoading"
+		description="没有数据"
+		style="margin-top: 20px"
+	/>
 	<el-pagination
 		background
 		layout="prev, pager, next"
@@ -112,6 +132,7 @@
 		:total="total"
 		:current-page="currentPage"
 		@current-change="handleCurrentChange"
+		v-if="userList.length > 0"
 	/>
 	<!-- User details dialog -->
 	<UserDetails ref="userDetailsRef" :user="user" />
@@ -129,7 +150,7 @@ import UserDetails from "@/components/user/UserDetails.vue"
 import AddUser from "@/components/user/AddUser.vue"
 import { regionData, PAGE_SIZE, roleData } from "@/constants/constants"
 import EditUser from "@/components/user/EditUser.vue"
-import { messageTip, useCalculateActionsBarWidth, showRegion } from "@/utils/utils"
+import { messageTip, useCalculateActionsBarWidth, showRegion, emptyFormatter } from "@/utils/utils"
 
 import { Plus, Delete, MapLocation, Search, Refresh } from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
@@ -150,6 +171,7 @@ const pageSize = ref(PAGE_SIZE)
 const total = ref(0)
 
 const userList = ref([])
+const userListLoading = ref(false)
 // The ids of the users to be deleted
 const deletedIds = []
 
@@ -177,11 +199,13 @@ const handleCurrentChange = val => {
 }
 
 // Query user list by page
-const getUserList = async data => {
+const getUserList = async (data = params) => {
 	currentPage.value = data.page
 	pageSize.value = data.pageSize
+	userListLoading.value = true
 	// Send request
 	const res = await api.getUserList(data)
+	userListLoading.value = false
 	if (res?.code === 200) {
 		userList.value = res.data.rows
 		total.value = res.data.total
@@ -287,13 +311,20 @@ const search = async () => {
 			: null
 	params.loginAct = searchForm.value.loginAct
 	params.name = searchForm.value.name
-	searchLoading.value = true
-	await getUserList(params)
-	searchLoading.value = false
+	try {
+		searchLoading.value = true
+		await getUserList(params)
+	} catch (error) {
+		console.error("Error searching users:", error)
+	} finally {
+		searchLoading.value = false
+	}
 }
 
 const reset = () => {
-	searchForm.value = {}
+	searchForm.value.loginAct = null
+	searchForm.value.name = null
+	searchForm.value.regions = null
 }
 </script>
 

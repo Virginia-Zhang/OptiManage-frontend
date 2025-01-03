@@ -18,6 +18,8 @@
 		stripe
 		style="width: 100%"
 		@selection-change="handleSelectionChange"
+		v-loading="clueListLoading"
+		v-if="clueList.length > 0 || clueListLoading"
 	>
 		<el-table-column type="selection" width="55" fixed="left" />
 		<el-table-column type="index" width="60" fixed="left" />
@@ -26,18 +28,37 @@
 			property="activityName"
 			label="所属活动"
 			width="260"
+			:formatter="emptyFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column property="fullName" label="姓名" width="150" show-overflow-tooltip />
+		<el-table-column
+			property="fullName"
+			label="姓名"
+			width="150"
+			:formatter="emptyFormatter"
+			show-overflow-tooltip
+		/>
 		<el-table-column
 			property="gender"
 			label="性别"
-			width="100"
+			width="80"
 			:formatter="genderFormatter"
 			show-overflow-tooltip
 		/>
-		<el-table-column property="phone" label="手机" width="180" show-overflow-tooltip />
-		<el-table-column property="email" label="邮箱" width="220" show-overflow-tooltip />
+		<el-table-column
+			property="phone"
+			label="手机"
+			width="150"
+			:formatter="emptyFormatter"
+			show-overflow-tooltip
+		/>
+		<el-table-column
+			property="email"
+			label="邮箱"
+			width="220"
+			:formatter="emptyFormatter"
+			show-overflow-tooltip
+		/>
 		<el-table-column
 			property="needLoan"
 			label="是否贷款"
@@ -56,6 +77,7 @@
 			property="intentionProductName"
 			label="意向产品"
 			width="200"
+			:formatter="emptyFormatter"
 			show-overflow-tooltip
 		/>
 		<el-table-column
@@ -68,7 +90,7 @@
 		<el-table-column
 			property="source"
 			label="线索来源"
-			width="120"
+			width="180"
 			:formatter="sourceFormatter"
 			show-overflow-tooltip
 		/>
@@ -82,7 +104,7 @@
 		<el-table-column
 			property="region"
 			label="地区"
-			width="120"
+			width="90"
 			:formatter="regionFormatter"
 			show-overflow-tooltip
 		/>
@@ -113,6 +135,7 @@
 		:total="total"
 		:current-page="currentPage"
 		@current-change="handleCurrentChange"
+		v-if="clueList.length"
 	/>
 </template>
 
@@ -120,7 +143,7 @@
 import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 
-import { formatTime, messageTip, useCalculateActionsBarWidth } from "@/utils/utils"
+import { formatTime, messageTip, useCalculateActionsBarWidth, emptyFormatter } from "@/utils/utils"
 import { regionData, PAGE_SIZE, clueStateOptions, clueSourceOptions } from "@/constants/constants"
 import api from "@/http/api"
 import { useClueStore } from "@/stores/clueStore"
@@ -137,6 +160,7 @@ const actionsBarWidth = useCalculateActionsBarWidth(permissionItems)
 const clueTableRef = ref(null)
 // Clue list
 const clueList = ref([])
+const clueListLoading = ref(false)
 
 // total number of clues
 const total = ref(0)
@@ -156,7 +180,9 @@ let params = {
 }
 // Get the list of deleted marketing clues
 const getClueList = async params => {
+	clueListLoading.value = true
 	const res = await api.getClueList(params)
+	clueListLoading.value = false
 	if (res?.code === 200) {
 		clueList.value = res.data.rows
 		total.value = res.data.total
@@ -171,17 +197,20 @@ const handleCurrentChange = val => {
 
 // Gender formatter
 const genderFormatter = (row, column, cellValue, index) => {
+	if (!cellValue) return "--"
 	return cellValue === 1 ? "男" : "女"
 }
 
 // Whether the loan is needed
 const needLoanFormatter = (row, column, cellValue, index) => {
+	if (!cellValue) return "--"
 	return cellValue === 1 ? "需要" : "不需要"
 }
 
 // Intention state formatter
 // 0 no intention, 1 has intention, 2 intention unknown
 const intentionStateFormatter = (row, column, cellValue, index) => {
+	if (!cellValue) return "--"
 	switch (cellValue) {
 		case 0:
 			return "无意向"
@@ -194,12 +223,14 @@ const intentionStateFormatter = (row, column, cellValue, index) => {
 
 // Clue state formatter
 const stateFormatter = (row, column, cellValue, index) => {
+	if (!cellValue) return "--"
 	const state = clueStateOptions.find(item => item.id === cellValue)
 	return state ? state.name : "未知状态"
 }
 
 // Clue source formatter
 const sourceFormatter = (row, column, cellValue, index) => {
+	if (!cellValue) return "--"
 	const source = clueSourceOptions.find(item => item.id === cellValue)
 	return source ? source.name : "未知来源"
 }

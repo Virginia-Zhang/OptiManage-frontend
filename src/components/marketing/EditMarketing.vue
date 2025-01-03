@@ -8,7 +8,7 @@
 			ref="editMarketingFormRef"
 			:rules="rules"
 		>
-			<el-form-item label="负责人" prop="ownerId" v-if="showOwnerSearch">
+			<el-form-item label="负责人" prop="ownerId" v-if="showOwner">
 				<el-select
 					v-model="editMarketingForm.ownerId"
 					placeholder="请选择负责人"
@@ -103,8 +103,15 @@
 import { ref, reactive, computed, watchEffect } from "vue"
 
 import api from "@/http/api"
-import { messageTip, getRoleList, formatTime, parseTime, showRegion } from "@/utils/utils"
-import { regionData, PAGE_SIZE } from "@/constants/constants"
+import {
+	messageTip,
+	getRoleList,
+	formatTime,
+	parseTime,
+	showRegion,
+	showOwner,
+} from "@/utils/utils"
+import { regionData } from "@/constants/constants"
 
 import { MapLocation } from "@element-plus/icons-vue"
 
@@ -150,11 +157,6 @@ watchEffect(() => {
 	Object.assign(editMarketingForm.value, props.activity)
 })
 
-// A computed attribute, controls whether the person in charge search box is displayed or not. If the user is admin, returns true, otherwise returns false.
-const showOwnerSearch = computed(() => {
-	const roleList = getRoleList()
-	return roleList.indexOf("admin") !== -1
-})
 // Control pop-up window display
 const showEditMarketingDialog = () => {
 	dialogVisible.value = !dialogVisible.value
@@ -163,7 +165,7 @@ const showEditMarketingDialog = () => {
 defineExpose({
 	showEditMarketingDialog,
 })
-// Obtain getUserList method from the parent component
+// Obtain getMarketingList method from the parent component
 const emits = defineEmits(["getMarketingList"])
 // Add state control to confirm button
 const editMarketingLoading = ref(false)
@@ -209,12 +211,8 @@ const editMarketing = () => {
 				// edited successfully, close pop-up window, reset form data, and then refresh marketing list data
 				messageTip("success", "编辑成功!")
 				handleCancel(editMarketingFormRef.value)
-				// Trigger the getMarketingList method of the parent component, pass the params, and display the marketing activity list starting from the first page
-				const params = {
-					page: 1,
-					pageSize: PAGE_SIZE,
-				}
-				emits("getMarketingList", params)
+				// Trigger the getMarketingList method of the parent component
+				emits("getMarketingList")
 			} else {
 				messageTip("error", res.msg || "添加失败!请重试！")
 			}

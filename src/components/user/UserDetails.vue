@@ -5,12 +5,12 @@
 			<el-descriptions-item label="ID">{{ user.id }}</el-descriptions-item>
 			<el-descriptions-item label="账号">{{ user.loginAct }}</el-descriptions-item>
 			<el-descriptions-item label="姓名">{{ user.name }}</el-descriptions-item>
-			<el-descriptions-item label="手机">{{ user.phone }}</el-descriptions-item>
-			<el-descriptions-item label="邮箱">{{ user.email }}</el-descriptions-item>
+			<el-descriptions-item label="手机">{{ user.phone || "--" }}</el-descriptions-item>
+			<el-descriptions-item label="邮箱">{{ user.email || "--" }}</el-descriptions-item>
 			<el-descriptions-item label="地区">{{
 				convertRegionToText(user.region)
 			}}</el-descriptions-item>
-			<el-descriptions-item label="角色">{{ roles }}</el-descriptions-item>
+			<el-descriptions-item label="角色">{{ roles || "--" }}</el-descriptions-item>
 			<el-descriptions-item label="账号未过期">{{
 				user.accountNoExpired ? "是" : "否"
 			}}</el-descriptions-item>
@@ -26,12 +26,14 @@
 			<el-descriptions-item label="创建时间">{{
 				formatTime(user.createTime)
 			}}</el-descriptions-item>
-			<el-descriptions-item label="创建人">{{ user.createByAct }}</el-descriptions-item>
+			<el-descriptions-item label="创建人">{{
+				user.createByAct || "--"
+			}}</el-descriptions-item>
 			<el-descriptions-item :label="user.accountEnabled ? '编辑时间' : '删除时间'">{{
 				formatTime(user.editTime)
 			}}</el-descriptions-item>
 			<el-descriptions-item :label="user.accountEnabled ? '编辑人' : '删除人'">{{
-				user.editByAct
+				user.editByAct || "--"
 			}}</el-descriptions-item>
 			<el-descriptions-item label="最近登录时间">{{
 				formatTime(user.lastLoginTime)
@@ -62,7 +64,7 @@ watchEffect(async () => {
 		// Convert the current json string to an array
 		const roleList = JSON.parse(props.user.roles)
 		// Find the name corresponding to the current role in roleData, and then concat the names of all roles into a string.
-		if (!roleList.length) return
+		if (!roleList.length || roleList[0] == null) return
 		roles.value = roleList.map(role => roleData.find(item => item.id === role).name).join(", ")
 	}
 })
