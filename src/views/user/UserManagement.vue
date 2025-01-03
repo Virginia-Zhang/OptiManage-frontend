@@ -29,6 +29,27 @@
 				/>
 			</el-select>
 		</el-form-item>
+		<el-form-item label="角色">
+			<el-select
+				v-model="searchForm.roleList"
+				placeholder="请选择角色"
+				multiple
+				collapse-tags
+				collapse-tags-tooltip
+				:max-collapse-tags="3"
+				clearable
+			>
+				<template #prefix>
+					<el-icon><User /></el-icon>
+				</template>
+				<el-option
+					v-for="item in roleData"
+					:key="item.id"
+					:label="item.name"
+					:value="item.id"
+				/>
+			</el-select>
+		</el-form-item>
 		<el-form-item>
 			<el-button type="primary" :icon="Search" @click="search" :loading="searchLoading"
 				>搜索</el-button
@@ -59,10 +80,10 @@
 		v-loading="userListLoading"
 		v-if="userList.length > 0 || userListLoading"
 	>
-		<el-table-column type="selection" width="55" fixed="left" />
-		<el-table-column type="index" width="60" fixed="left" />
+		<el-table-column type="selection" width="50" fixed="left" />
+		<el-table-column type="index" width="50" fixed="left" />
 		<el-table-column property="loginAct" label="账号" width="180" show-overflow-tooltip />
-		<el-table-column property="name" label="姓名" width="180" show-overflow-tooltip />
+		<el-table-column property="name" label="姓名" width="150" show-overflow-tooltip />
 		<el-table-column
 			property="phone"
 			label="手机"
@@ -80,7 +101,7 @@
 		<el-table-column
 			property="region"
 			label="地区"
-			width="120"
+			width="90"
 			:formatter="regionFormatter"
 			show-overflow-tooltip
 		/>
@@ -143,25 +164,36 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, watchEffect } from "vue"
+import { useRoute, useRouter } from "vue-router"
 
 import api from "@/http/api"
 import UserDetails from "@/components/user/UserDetails.vue"
 import AddUser from "@/components/user/AddUser.vue"
 import { regionData, PAGE_SIZE, roleData } from "@/constants/constants"
 import EditUser from "@/components/user/EditUser.vue"
-import { messageTip, useCalculateActionsBarWidth, showRegion, emptyFormatter } from "@/utils/utils"
+import {
+	messageTip,
+	useCalculateActionsBarWidth,
+	showRegion,
+	emptyFormatter,
+	convertStrArrToNumArr,
+} from "@/utils/utils"
 
-import { Plus, Delete, MapLocation, Search, Refresh } from "@element-plus/icons-vue"
+import { Plus, Delete, MapLocation, Search, Refresh, User } from "@element-plus/icons-vue"
 import { ElMessageBox } from "element-plus"
 
 const permissionItems = ["user:edit", "user:delete", "user:details"]
 const actionsBarWidth = useCalculateActionsBarWidth(permissionItems)
 
+const route = useRoute()
+const router = useRouter()
+
 const searchForm = ref({
 	loginAct: null,
 	name: null,
 	regions: null,
+	roleList: null,
 })
 const searchFormRef = ref({})
 const searchLoading = ref(false)
@@ -187,14 +219,42 @@ const editUserRef = ref(null)
 const userTableRef = ref(null)
 
 // Default query params, query all undeleted users
-const params = {
+let params = {
 	page: currentPage.value,
 	pageSize: pageSize.value,
 	isDeleted: 1,
 }
+// Check whether the current page path contains query parameters. If so, assign the query parameters to params.
+watchEffect(() => {
+	if (route.query) {
+		params = { ...params, ...route.query }
+		params.page = Number(params.page)
+		params.pageSize = Number(params.pageSize)
+		params.isDeleted = Number(params.isDeleted)
+		// When there are search parameters in the URL, backfill the search form
+		if (route.query.loginAct) {
+			searchForm.value.loginAct = route.query.loginAct
+		}
+		if (route.query.name) {
+			searchForm.value.name = route.query.name
+		}
+		if (route.query.regions) {
+			const regionArr = route.query.regions.split(",")
+			searchForm.value.regions = convertStrArrToNumArr(regionArr)
+		}
+		if (route.query.roleList) {
+			const roleArr = route.query.roleList.split(",")
+			searchForm.value.roleList = convertStrArrToNumArr(roleArr)
+		}
+	}
+})
 const handleCurrentChange = val => {
 	currentPage.value = val
 	params.page = currentPage.value
+	router.replace({
+		// Only add attributes whose value in params is not null to the query object.
+		query: Object.fromEntries(Object.entries(params).filter(([key, value]) => value !== null)),
+	})
 	getUserList(params)
 }
 
@@ -298,7 +358,7 @@ const batchDelete = () => {
 }
 
 onMounted(() => {
-	getUserList(params)
+	getUserList()
 })
 
 const search = async () => {
@@ -311,20 +371,27 @@ const search = async () => {
 			: null
 	params.loginAct = searchForm.value.loginAct
 	params.name = searchForm.value.name
-	try {
-		searchLoading.value = true
-		await getUserList(params)
-	} catch (error) {
-		console.error("Error searching users:", error)
-	} finally {
-		searchLoading.value = false
-	}
+	params.roleList =
+		searchForm.value.roleList && searchForm.value.roleList.length
+			? searchForm.value.roleList.join(",")
+			: null
+	// Get the current page path and add params to the url
+	const currentPath = route.path
+	router.push({
+		path: currentPath,
+		// Do not add attributes with null value to the query object
+		query: Object.fromEntries(Object.entries(params).filter(([key, value]) => value !== null)),
+	})
+	searchLoading.value = true
+	await getUserList(params)
+	searchLoading.value = false
 }
 
 const reset = () => {
 	searchForm.value.loginAct = null
 	searchForm.value.name = null
 	searchForm.value.regions = null
+	searchForm.value.roleList = null
 }
 </script>
 

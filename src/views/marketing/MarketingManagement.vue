@@ -129,8 +129,8 @@
 		v-loading="marketingListLoading"
 		v-if="marketingList.length > 0 || marketingListLoading"
 	>
-		<el-table-column type="selection" width="55" fixed="left" />
-		<el-table-column type="index" width="60" fixed="left" />
+		<el-table-column type="selection" width="50" fixed="left" />
+		<el-table-column type="index" width="50" fixed="left" />
 		<el-table-column property="ownerAct" label="负责人" width="150" show-overflow-tooltip />
 		<el-table-column property="name" label="活动名称" width="250" show-overflow-tooltip />
 		<el-table-column
@@ -225,7 +225,7 @@
 
 <script setup>
 import { computed, onMounted, ref, watchEffect } from "vue"
-import { useRouter } from "vue-router"
+import { useRouter, useRoute } from "vue-router"
 
 import {
 	budgetRangeRMB,
@@ -238,11 +238,13 @@ import {
 import {
 	showOwner,
 	formatTime,
+	parseTime,
 	messageTip,
 	getOwnerList,
 	useCalculateActionsBarWidth,
 	showRegion,
 	getRegion,
+	convertStrArrToNumArr,
 } from "@/utils/utils"
 import api from "@/http/api"
 import AddMarketing from "@/components/marketing/AddMarketing.vue"
@@ -263,6 +265,7 @@ import * as XLSX from "xlsx"
 import dayjs from "dayjs"
 
 const router = useRouter()
+const route = useRoute()
 const marketingStore = useMarketingStore()
 const permissionItems = ["activity:details", "activity:edit", "activity:delete"]
 // Calculate the width of the actions bar
@@ -345,6 +348,44 @@ let params = {
 	page: currentPage.value,
 	pageSize: pageSize.value,
 }
+// Check whether the current page path contains query parameters. If so, assign the query parameters to params.
+watchEffect(() => {
+	if (route.query) {
+		params = { ...params, ...route.query }
+		// When there are search parameters in the URL, backfill the search form
+		if (route.query.ownerIds) {
+			const ownerArr = route.query.ownerIds.split(",")
+			searchForm.value.owners = convertStrArrToNumArr(ownerArr)
+		}
+		if (route.query.name) {
+			searchForm.value.name = route.query.name
+		}
+		if (route.query.startTime && route.query.endTime) {
+			searchForm.value.timeRange = [
+				parseTime(route.query.startTime),
+				parseTime(route.query.endTime),
+			]
+		}
+		if (route.query.startCost && route.query.endCost) {
+			// Convert startCost and endCost to numeric types, and add a comma separator every 3 digits starting from the end of the number.
+			const start = Number(route.query.startCost).toLocaleString("en-US")
+			const end = Number(route.query.endCost).toLocaleString("en-US")
+			// Concat budget
+			searchForm.value.budget = `${start}-${end}`
+		}
+		if (route.query.startCost && !route.query.endCost) {
+			searchForm.value.budget = `${Number(route.query.startCost).toLocaleString("en-US")}+`
+		}
+		if (route.query.currencyUnit) {
+			searchForm.value.currencyUnit = route.query.currencyUnit
+		}
+		if (route.query.regions) {
+			const regionArr = route.query.regions.split(",")
+			searchForm.value.regions = convertStrArrToNumArr(regionArr)
+		}
+	}
+})
+
 // Get the list of marketing campaigns
 const getMarketingList = async (data = params) => {
 	marketingListLoading.value = true
@@ -357,7 +398,7 @@ const getMarketingList = async (data = params) => {
 }
 
 onMounted(() => {
-	getMarketingList(params)
+	getMarketingList()
 	getOwnerList()
 	assignValueToCurrencyUnit()
 })
@@ -365,7 +406,11 @@ onMounted(() => {
 const handleCurrentChange = val => {
 	currentPage.value = val
 	params.page = currentPage.value
-	getMarketingList(params)
+	router.replace({
+		// Only add attributes whose value in params is not null to the query object.
+		query: Object.fromEntries(Object.entries(params).filter(([key, value]) => value !== null)),
+	})
+	getMarketingList()
 }
 
 // Add campaign
@@ -496,13 +541,25 @@ const search = async () => {
 		params.endCost = null
 		params.currencyUnit = null
 	}
+	// Get the current page path and add params to the url
+	const currentPath = route.path
+	router.push({
+		path: currentPath,
+		// Do not add attributes with null value to the query object
+		query: Object.fromEntries(Object.entries(params).filter(([key, value]) => value !== null)),
+	})
 	searchLoading.value = true
 	await getMarketingList(params)
 	searchLoading.value = false
 }
 
 const reset = () => {
-	searchForm.value = {}
+	searchForm.value.owners = null
+	searchForm.value.name = null
+	searchForm.value.regions = null
+	searchForm.value.currencyUnit = null
+	searchForm.value.timeRange = []
+	searchForm.value.budget = null
 }
 
 const mapRegion = regionId => {

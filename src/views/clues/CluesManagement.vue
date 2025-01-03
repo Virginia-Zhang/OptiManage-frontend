@@ -207,8 +207,8 @@
 		<template #empty>
 			<el-empty description="没有数据" v-if="!clueListLoading" />
 		</template>
-		<el-table-column type="selection" width="55" fixed="left" />
-		<el-table-column type="index" width="60" fixed="left" />
+		<el-table-column type="selection" width="50" fixed="left" />
+		<el-table-column type="index" width="50" fixed="left" />
 		<el-table-column property="ownerAct" label="负责人" width="150" show-overflow-tooltip />
 		<el-table-column
 			property="activityName"
@@ -332,8 +332,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watchEffect, nextTick } from "vue"
-import { useRouter } from "vue-router"
+import { ref, onMounted, watchEffect } from "vue"
+import { useRouter, useRoute } from "vue-router"
 
 import {
 	showOwner,
@@ -344,6 +344,7 @@ import {
 	showRegion,
 	getRegion,
 	emptyFormatter,
+	convertStrArrToNumArr,
 } from "@/utils/utils"
 import {
 	clueStateOptions,
@@ -372,6 +373,7 @@ const clueStore = useClueStore()
 const actionsBarWidth = useCalculateActionsBarWidth(["clue:details", "clue:edit", "clue:delete"])
 
 const router = useRouter()
+const route = useRoute()
 
 const searchForm = ref({
 	id: null,
@@ -467,6 +469,52 @@ let params = {
 	page: currentPage.value,
 	pageSize: pageSize.value,
 }
+// Check whether the current page path contains query parameters. If so, assign the query parameters to params.
+watchEffect(() => {
+	if (route.query) {
+		params = { ...params, ...route.query }
+		// When there are search parameters in the URL, backfill the search form
+		if (route.query.id) {
+			searchForm.value.id = route.query.id
+		}
+		if (route.query.owners) {
+			const ownerArr = route.query.owners.split(",")
+			searchForm.value.owners = convertStrArrToNumArr(ownerArr)
+		}
+		if (route.query.activities) {
+			const activityArr = route.query.activities.split(",")
+			searchForm.value.activities = convertStrArrToNumArr(activityArr)
+		}
+		if (route.query.fullName) {
+			searchForm.value.fullName = route.query.fullName
+		}
+		if (route.query.gender) {
+			searchForm.value.gender = Number(route.query.gender)
+		}
+		if (route.query.needLoan) {
+			searchForm.value.needLoan = Number(route.query.needLoan)
+		}
+		if (route.query.intentionState) {
+			searchForm.value.intentionState = Number(route.query.intentionState)
+		}
+		if (route.query.intentionProducts) {
+			const productArr = route.query.intentionProducts.split(",")
+			searchForm.value.intentionProducts = convertStrArrToNumArr(productArr)
+		}
+		if (route.query.states) {
+			const stateArr = route.query.states.split(",")
+			searchForm.value.states = convertStrArrToNumArr(stateArr)
+		}
+		if (route.query.sources) {
+			const sourceArr = route.query.sources.split(",")
+			searchForm.value.sources = convertStrArrToNumArr(sourceArr)
+		}
+		if (route.query.regions) {
+			const regionArr = route.query.regions.split(",")
+			searchForm.value.regions = convertStrArrToNumArr(regionArr)
+		}
+	}
+})
 // Get the list of marketing clues
 const getClueList = async params => {
 	clueListLoading.value = true
@@ -486,6 +534,10 @@ const getClueList = async params => {
 const handleCurrentChange = val => {
 	currentPage.value = val
 	params.page = currentPage.value
+	router.replace({
+		// Only add attributes whose value in params is not null to the query object.
+		query: Object.fromEntries(Object.entries(params).filter(([key, value]) => value !== null)),
+	})
 	getClueList(params)
 }
 
@@ -586,7 +638,15 @@ const search = () => {
 			searchForm.value.regions && searchForm.value.regions.length
 				? searchForm.value.regions.join(",")
 				: null
-
+		// Get the current page path and add params to the url
+		const currentPath = route.path
+		router.push({
+			path: currentPath,
+			// Do not add attributes with null value to the query object
+			query: Object.fromEntries(
+				Object.entries(params).filter(([key, value]) => value !== null)
+			),
+		})
 		searchLoading.value = true
 		await getClueList(params)
 		searchLoading.value = false
@@ -594,7 +654,17 @@ const search = () => {
 }
 
 const reset = () => {
-	searchForm.value = {}
+	searchForm.value.id = null
+	searchForm.value.owners = null
+	searchForm.value.activities = null
+	searchForm.value.fullName = null
+	searchForm.value.gender = null
+	searchForm.value.needLoan = null
+	searchForm.value.intentionState = null
+	searchForm.value.intentionProducts = null
+	searchForm.value.states = null
+	searchForm.value.sources = null
+	searchForm.value.regions = null
 }
 
 // Add a new marketing clue/lead

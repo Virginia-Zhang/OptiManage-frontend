@@ -142,3 +142,10 @@ export const emptyFormatter = (row, column, cellValue, index) => {
 	if (!cellValue) return "--"
 	return cellValue
 }
+
+// Convert string array to number array
+export const convertStrArrToNumArr = arr => {
+	return arr.map(item => {
+		return Number(item)
+	})
+}

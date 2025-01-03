@@ -146,8 +146,8 @@
 		v-loading="customerListLoading"
 		v-if="customerList.length > 0 || customerListLoading"
 	>
-		<el-table-column type="selection" width="55" fixed="left" />
-		<el-table-column type="index" width="60" fixed="left" />
+		<el-table-column type="selection" width="50" fixed="left" />
+		<el-table-column type="index" width="50" fixed="left" />
 		<el-table-column property="ownerAct" label="负责人" width="150" show-overflow-tooltip />
 		<el-table-column
 			property="fullName"
@@ -242,7 +242,7 @@
 
 <script setup>
 import { ref, onMounted, watchEffect } from "vue"
-import { useRouter } from "vue-router"
+import { useRouter, useRoute } from "vue-router"
 
 import {
 	showOwner,
@@ -253,6 +253,7 @@ import {
 	showRegion,
 	getRegion,
 	emptyFormatter,
+	convertStrArrToNumArr,
 } from "@/utils/utils"
 import {
 	clueSourceOptions,
@@ -279,6 +280,7 @@ const permissionItems = ["customer:details"]
 const actionsBarWidth = useCalculateActionsBarWidth(permissionItems)
 
 const router = useRouter()
+const route = useRoute()
 
 const searchForm = ref({
 	id: null,
@@ -345,6 +347,41 @@ let params = {
 	page: currentPage.value,
 	pageSize: pageSize.value,
 }
+// Check whether the current page path contains query parameters. If so, assign the query parameters to params.
+watchEffect(() => {
+	if (route.query) {
+		params = { ...params, ...route.query }
+		// When there are search parameters in the URL, backfill the search form
+		if (route.query.id) {
+			searchForm.value.id = route.query.id
+		}
+		if (route.query.owners) {
+			const ownerArr = route.query.owners.split(",")
+			searchForm.value.owners = convertStrArrToNumArr(ownerArr)
+		}
+		if (route.query.fullName) {
+			searchForm.value.fullName = route.query.fullName
+		}
+		if (route.query.gender) {
+			searchForm.value.gender = Number(route.query.gender)
+		}
+		if (route.query.needLoan) {
+			searchForm.value.needLoan = Number(route.query.needLoan)
+		}
+		if (route.query.intentionProducts) {
+			const productArr = route.query.intentionProducts.split(",")
+			searchForm.value.intentionProducts = convertStrArrToNumArr(productArr)
+		}
+		if (route.query.sources) {
+			const sourceArr = route.query.sources.split(",")
+			searchForm.value.sources = convertStrArrToNumArr(sourceArr)
+		}
+		if (route.query.regions) {
+			const regionArr = route.query.regions.split(",")
+			searchForm.value.regions = convertStrArrToNumArr(regionArr)
+		}
+	}
+})
 // Get the list of customers
 const getCustomerList = async params => {
 	customerListLoading.value = true
@@ -359,6 +396,10 @@ const getCustomerList = async params => {
 const handleCurrentChange = val => {
 	currentPage.value = val
 	params.page = currentPage.value
+	router.replace({
+		// Only add attributes whose value in params is not null to the query object.
+		query: Object.fromEntries(Object.entries(params).filter(([key, value]) => value !== null)),
+	})
 	getCustomerList(params)
 }
 
@@ -581,6 +622,15 @@ const search = () => {
 			searchForm.value.regions && searchForm.value.regions.length
 				? searchForm.value.regions.join(",")
 				: null
+		// Get the current page path and add params to the url
+		const currentPath = route.path
+		router.push({
+			path: currentPath,
+			// Do not add attributes with null value to the query object
+			query: Object.fromEntries(
+				Object.entries(params).filter(([key, value]) => value !== null)
+			),
+		})
 		searchLoading.value = true
 		await getCustomerList(params)
 		searchLoading.value = false
@@ -588,7 +638,14 @@ const search = () => {
 }
 
 const reset = () => {
-	searchForm.value = {}
+	searchForm.value.id = null
+	searchForm.value.owners = null
+	searchForm.value.fullName = null
+	searchForm.value.gender = null
+	searchForm.value.needLoan = null
+	searchForm.value.intentionProducts = null
+	searchForm.value.sources = null
+	searchForm.value.regions = null
 }
 
 const showCustomerDetails = row => {
